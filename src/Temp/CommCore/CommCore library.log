@@ -1,0 +1,11 @@
+﻿cl : command line  warning D9035: option 'Gm' has been deprecated and will be removed in a future release
+  CommServerList.cpp
+  CommRecv.cpp
+  CommRaw.cpp
+  CommQueue.cpp
+  CommPing.cpp
+  CommPeers.cpp
+  CommInit.cpp
+  CommInet.cpp
+  CommCore.cpp
+  CommCore library.vcxproj -> C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\CommCore.lib
