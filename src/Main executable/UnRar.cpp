@@ -1,5 +1,5 @@
 #define STRICT
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
 #include <stdio.h>
 #include <ctype.h>
 #include "unrar.h"

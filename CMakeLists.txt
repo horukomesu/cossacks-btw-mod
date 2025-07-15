@@ -17,7 +17,7 @@ set(SOURCES
     src/graphics/directdraw_compat.cpp
     src/audio/raylib_audio.cpp
     src/audio/raylib_audio_compat.cpp
-    src/input/raylib_input.cpp
+    src/raylib_system/raylib_window.cpp
     src/utils/raylib_utils.cpp
     src/cross_platform/platform_compat.cpp
     

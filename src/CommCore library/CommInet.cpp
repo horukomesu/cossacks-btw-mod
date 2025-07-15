@@ -8,10 +8,7 @@ BOOL CCommCore::InitNetwork()
 {
 	_log_message("InitNetwork()");
 
-	WSADATA WSAData;
-
-	if(WSAStartup(MAKEWORD(2,2),&WSAData)!=0)
-		return FALSE;
+	InitializeNetworking();
 
 	if(!InitSocket())
 		return FALSE;
@@ -57,8 +54,7 @@ BOOL CCommCore::CloseNetwork()
 	if(!CloseSocket())
 		return FALSE;
 
-	if(WSACleanup()==SOCKET_ERROR)
-		return FALSE;
+	ShutdownNetworking();
 
 	return TRUE;
 }

@@ -360,7 +360,8 @@ if %errorlevel% neq 0 goto :VCEnd</Command>
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.cpp" />
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\directdraw_compat.cpp" />
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\audio\raylib_audio.cpp" />
-    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\input\raylib_input.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\audio\raylib_audio_compat.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\raylib_system\raylib_window.cpp" />
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\utils\raylib_utils.cpp" />
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\cross_platform\platform_compat.cpp" />
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Ddex1.cpp" />

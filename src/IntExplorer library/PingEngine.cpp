@@ -80,12 +80,11 @@ void PingEngine::Setup(){
 	IsInit=0;
 	if(InitFailed||IsInit)return;
 	InitFailed=1;
-	WSADATA wsaData; 
 	int bread; 
 	int timeout = 1; 
- 	if (WSAStartup(MAKEWORD(2,1),&wsaData) != 0)return;
- 	sockRaw = WSASocket (AF_INET,SOCK_RAW,IPPROTO_ICMP,NULL,0,0); 
- 	if (sockRaw == INVALID_SOCKET)return;
+	InitializeNetworking();
+	sockRaw = WSASocket (AF_INET,SOCK_RAW,IPPROTO_ICMP,NULL,0,0); 
+	if (sockRaw == INVALID_SOCKET)return;
 	bread = setsockopt(sockRaw,SOL_SOCKET,SO_RCVTIMEO,(char*)&timeout,sizeof(timeout)); 
 	if(bread == SOCKET_ERROR)return;
 	timeout = 1000; 
@@ -94,92 +93,6 @@ void PingEngine::Setup(){
 	u_long	lArgP=0x01;
 	ioctlsocket(sockRaw,FIONBIO,&lArgP);
 	IsInit=1;
-};
-USHORT checksum(USHORT *buffer, int size);
-int seq_no=0;
-bool PingEngine::SendPingToIP(DWORD IP){
-	sockaddr_in dest;
-	memset(&dest,0,sizeof(dest)); 
- 	dest.sin_addr.s_addr = IP; 
-	dest.sin_family = AF_INET; 
-	int datasize = DEF_PACKET_SIZE; 
- 	datasize += sizeof(IcmpHeader);   
- 	char icmp_data[MAX_PACKET];
-	memset(icmp_data,0,MAX_PACKET); 
-	fill_icmp_data(icmp_data,datasize); 
-	((IcmpHeader*)icmp_data)->i_cksum = 0; 
-	((IcmpHeader*)icmp_data)->timestamp = GetTickCount(); 
-	((IcmpHeader*)icmp_data)->i_seq = (USHORT)seq_no++; 
-	((IcmpHeader*)icmp_data)->i_cksum = checksum((USHORT*)icmp_data,datasize); 
-	DWORD bwrote = sendto(sockRaw,icmp_data,datasize,0,(struct sockaddr*)&dest,sizeof(dest));
-	if (bwrote == SOCKET_ERROR)return false;
-	return true;
-};
-int pcallT=0;
-bool decode_resp(char *buf, int bytes,struct sockaddr_in *from,int* time);
-void PingEngine::Process(){
-	if(!IsInit)return;
-	int T=GetTickCount();
-	if(!pcallT)pcallT=T;
-	if(T-pcallT<10)return;
-	pcallT=T;
-	char recvbuf[MAX_PACKET];
-	sockaddr_in from;
-	int L=sizeof from;
-	DWORD bread = recvfrom(sockRaw,recvbuf,MAX_PACKET,0,(sockaddr*)&from,&L); 
-	if (bread != SOCKET_ERROR){ 
-		int dt;
-		if(decode_resp(recvbuf,bread,&from,&dt)&&dt<4000){
-			DWORD IP=from.sin_addr.s_addr;
-			for(int i=0;i<NRequests;i++){
-				if(Requests[i].IP==IP){
-					if(!Requests[i].Ping)Requests[i].Ping=dt;
-					else Requests[i].Ping=(Requests[i].Ping*3+dt)>>2;
-					if(Requests[i].Ping<1)Requests[i].Ping=1;
-				};
-			};
-		}; 
-	};
-	if(T-LastPingTime>4000){
-		int BestID=-1;
-		int LastT=T;
-		for(int i=0;i<NRequests;i++){
-			if(T-Requests[i].LastRequestTime<1000){
-				int rt=Requests[i].LastPingTime;
-				if(rt==-1&&LastT!=-1){
-					LastT=-1;
-					BestID=i;
-					break;
-				}else
-				if(LastT!=-1&&rt<LastT){
-					LastT=rt;
-					BestID=i;
-				};
-			};
-		};
-		if(BestID!=-1){
-			//pinging
-			if(SendPingToIP(Requests[BestID].IP)){
-				LastPingTime=T;
-				Requests[BestID].LastPingTime=T;
-			}else LastPingTime=T-900;
-		};
-	};
-	
-};
-int PingEngine::GetPing(DWORD IP){
-	if(!IsInit)return false;
-	for(int i=0;i<NRequests;i++)if(Requests[i].IP==IP){
-		Requests[i].LastRequestTime=GetTickCount();
-		return Requests[i].Ping;
-	};
-	Requests=(OneIPAddress*)realloc(Requests,(NRequests+1)*sizeof OneIPAddress);
-	memset(Requests+NRequests,0,sizeof OneIPAddress);
-	Requests[NRequests].LastPingTime=-1;
-	Requests[NRequests].IP=IP;
-	Requests[NRequests].LastRequestTime=GetTickCount();
-	NRequests++;
-	return 0;
 };
 USHORT checksum(USHORT *buffer, int size){ 
  

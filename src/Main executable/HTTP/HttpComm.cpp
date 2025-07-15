@@ -4,7 +4,8 @@
 //	int i=0;
 //	while( (*(LPDWORD)(lpbBuffer+(i++))!=0x0A0D0A0D) && (i<dwRecvSize) );
 
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
+#include "../utils/raylib_utils.h"
 #pragma pack(1)
 #include "HttpComm.h"
 
@@ -16,13 +17,9 @@ CHttpComm::CHttpComm()
 {
 	m_bInitialized = FALSE;
 
-	WSADATA WSAData;
-
-	// -- WSAStartup --------------------------------------------------------
-	if (WSAStartup( MAKEWORD( 2, 2 ), &WSAData ) != 0)
-	{
-		return;
-	}
+	// -- Initialize networking (cross-platform) --------------------------------------------------------
+	InitializeNetworking();
+	
 	// -- creating query list -----------------------------------------------
 	m_dwHandleAuto = 1;
 	m_dwRequestCount = 0;
@@ -32,41 +29,24 @@ CHttpComm::CHttpComm()
 	m_szProxyAddr[0] = '\0';
 	m_dwProxyPort = 0;
 
-	DWORD	dwSiz;
-
-	HKEY hGscKey;
-
-	if (RegOpenKeyEx( HKEY_CURRENT_USER,
-		"Software\\GSC Game World",
-		0x00,
-		KEY_READ,
-		&hGscKey ) == ERROR_SUCCESS)
-	{
-
-		dwSiz = 4;
-		RegQueryValueEx( hGscKey,
-			"httpcUseProxy",
-			NULL,
-			NULL,
-			(LPBYTE) &m_bUseProxy,
-			(LPDWORD) &dwSiz );
-		dwSiz = 4;
-		RegQueryValueEx( hGscKey,
-			"httpcProxyPort",
-			NULL,
-			NULL,
-			(LPBYTE) &m_dwProxyPort,
-			(LPDWORD) &dwSiz );
-		dwSiz = 256;
-		RegQueryValueEx( hGscKey,
-			"httpcProxyAddr",
-			NULL,
-			NULL,
-			(LPBYTE) m_szProxyAddr,
-			(LPDWORD) &dwSiz );
-
-		RegCloseKey( hGscKey );
-	};
+	// Use cross-platform settings system instead of Windows Registry
+	// Read HTTP proxy settings
+	int use_proxy = 0;
+	if (RaylibUtils::ReadSettingInt("httpcUseProxy", use_proxy)) {
+		m_bUseProxy = use_proxy;
+	}
+	
+	int proxy_port = 0;
+	if (RaylibUtils::ReadSettingInt("httpcProxyPort", proxy_port)) {
+		m_dwProxyPort = proxy_port;
+	}
+	
+	std::string proxy_addr;
+	if (RaylibUtils::ReadSettingString("httpcProxyAddr", proxy_addr)) {
+		strncpy(m_szProxyAddr, proxy_addr.c_str(), sizeof(m_szProxyAddr) - 1);
+		m_szProxyAddr[sizeof(m_szProxyAddr) - 1] = '\0';
+	}
+	
 	// -- All Ok ------------------------------------------------------------
 	m_bInitialized = TRUE;
 }
@@ -75,11 +55,8 @@ CHttpComm::~CHttpComm()
 {
 	if (!m_bInitialized)
 		return;
-	// -- WSACleanup --------------------------------------------------------
-	if (WSACleanup() == SOCKET_ERROR)
-	{
-		return;
-	};
+	// -- Shutdown networking (cross-platform) --------------------------------------------------------
+	ShutdownNetworking();
 	// -- All Ok ------------------------------------------------------------
 }
 

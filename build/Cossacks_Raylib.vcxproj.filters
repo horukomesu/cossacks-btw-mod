@@ -13,7 +13,10 @@
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\audio\raylib_audio.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\input\raylib_input.cpp">
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\audio\raylib_audio_compat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\raylib_system\raylib_window.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\utils\raylib_utils.cpp">

@@ -290,6 +290,9 @@ extern tpSendRecBuffer* SendRecBuffer;
 
 __declspec( dllexport ) bool ProcessMessages()
 {
+	// Update raylib input system
+	UpdateRaylibInput();
+	
 	if ( PDIF_Inside )
 	{
 		return false;
@@ -474,20 +477,10 @@ __declspec( dllexport ) bool ProcessMessages()
 			*/
 		}
 
-		BOOL ret = FALSE;
-		MSG msg;
-		while ( FALSE != ( ret = PeekMessage( &msg, nullptr, 0, 0, PM_REMOVE ) ) )
+		// Check for window close using raylib
+		if ( ShouldWindowClose() )
 		{
-			if ( -1 == ret )
-			{
-				continue;
-			}
-			if ( msg.message == WM_QUIT )
-			{
-				return true;
-			}
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
+			return true;
 		}
 
 		if ( GPROG.NWeights )
@@ -533,7 +526,10 @@ void ProcessVotingKeys();
 
 bool ProcessMessagesEx()
 {
-	if ( GetKeyState( VK_CONTROL ) & 0x8000 )
+	// Update raylib input system
+	UpdateRaylibInput();
+	
+	if ( IsKeyDown( KEY_LEFT_CONTROL ) || IsKeyDown( KEY_RIGHT_CONTROL ) )
 	{
 		LastCTRLPressTime = GetTickCount();
 	}
@@ -545,20 +541,13 @@ bool ProcessMessagesEx()
 		ProcessChatKeys();
 	}
 
-	MSG msg;
-
-	bool MSR = 0;
-	while ( PeekMessage( &msg, nullptr, 0, 0, PM_REMOVE ) )
+	// Check for window close using raylib
+	if ( ShouldWindowClose() )
 	{
-		if ( msg.message == WM_QUIT )
-		{
-			return true;
-		}
-		TranslateMessage( &msg );
-		DispatchMessage( &msg );
-		MSR = 1;
+		return true;
 	}
-	return MSR;
+
+	return false;
 }
 
 void normstr( char* str );

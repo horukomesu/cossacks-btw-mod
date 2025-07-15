@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include "../cross_platform/platform_compat.h"
 
 /*
 	Catch division by zero by "overloading" div() via #define

@@ -1,6 +1,6 @@
 #pragma warning (disable : 4035)
 
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
 
 void isiDecryptMem(LPBYTE lpbBuffer, DWORD dwSize, BYTE dbKey)
 {

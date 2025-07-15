@@ -358,15 +358,9 @@ VOID CCommCore::SetCommCoreUID( LPCSTR lpcszCCUID )
 {
 	_log_message( "SetCommCoreUID()" );
 
-	HKEY	hKey;
-
-	RegCreateKeyEx( HKEY_CURRENT_USER,
-		"Software\\GSC Game World",
-		0, NULL, 0, KEY_ALL_ACCESS, NULL, &hKey, NULL );
-
-	RegSetValueEx( hKey, "CCUID", 0, REG_SZ, (unsigned char*) lpcszCCUID, strlen( lpcszCCUID ) + 1 );
-
-	RegCloseKey( hKey );
+	// Use cross-platform settings system instead of Windows Registry
+	#include "../utils/raylib_utils.h"
+	RaylibUtils::WriteSettingString("CCUID", lpcszCCUID);
 }
 
 // ---------------------------------------------------------------------------------------------
@@ -407,35 +401,14 @@ VOID CCommCore::GetCommCoreUID( LPSTR lpszCCUID )
 {
 	_log_message( "GetCommCoreUID()" );
 
-	HKEY	hKey;
-	CHAR	szCCUID[64];
-	DWORD	dwSize = 64;
-
-	if (RegOpenKeyEx( HKEY_CURRENT_USER,
-		"Software\\GSC Game World",
-		0,
-		KEY_ALL_ACCESS,
-		&hKey ) != ERROR_SUCCESS)
-	{
+	// Use cross-platform settings system instead of Windows Registry
+	std::string ccuid;
+	if (RaylibUtils::ReadSettingString("CCUID", ccuid)) {
+		strncpy(lpszCCUID, ccuid.c_str(), 22);
+		lpszCCUID[22] = '\0';
+	} else {
 		NewCommCoreUID( lpszCCUID );
-		return;
-	};
-
-	if (RegQueryValueEx( hKey,
-		"CCUID",
-		0,
-		NULL,
-		(unsigned char*) szCCUID,
-		&dwSize ) != ERROR_SUCCESS)
-	{
-		RegCloseKey( hKey );
-		NewCommCoreUID( lpszCCUID );
-		return;
-	};
-
-	RegCloseKey( hKey );
-
-	strcpy( lpszCCUID, szCCUID );
+	}
 }
 
 // ---------------------------------------------------------------------------------------------

@@ -17,6 +17,9 @@
 // Use the DirectDraw compatibility layer
 #include "../graphics/directdraw_compat.h"
 
+// Use the raylib window system
+#include "../raylib_system/raylib_window.h"
+
 // Memory management (kept from original)
 #define free _ExFree
 #define malloc _ExMalloc

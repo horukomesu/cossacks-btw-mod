@@ -10,12 +10,12 @@
 #define TITLE "Cossacks"
 
 #include "ddini.h"
+#include "../raylib_system/raylib_window.h"
 
 bool window_mode;
 int screen_width;
 int screen_height;
 double screen_ratio;
-DWORD window_style = WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_SYSMENU | WS_MINIMIZEBOX;
 
 #include "ResFile.h"
 #include "FastDraw.h"
@@ -314,7 +314,7 @@ void CloseEventHandler( int i )
 	memset( &Events[i], 0, sizeof Events[i] );
 }
 
-HWND hwnd;
+// hwnd no longer needed - using raylib window system
 
 //fonts
 RLCTable RCross;
@@ -392,69 +392,7 @@ extern bool RUNMAPEDITOR;
 extern bool RUNUSERMISSION;
 extern char USERMISSPATH[128];
 
-//Calculates window coordinates and locks cursor inside client area
-void ClipCursorToWindowArea()
-{
-	if (!window_mode)
-	{//Just in case
-		return;
-	}
-
-	if (!InGame && !InEditor)
-	{//Reset mouse locking in menues
-		ClipCursor( nullptr );
-		return;
-	}
-
-	//Determine absolute coordinates of window client area
-	RECT client_coords;
-	GetClientRect( hwnd, &client_coords );
-	MapWindowPoints( hwnd, nullptr, (LPPOINT) &client_coords, 2 );
-
-	//Necessary for correct cursor capture
-	//Using exact ClientRect causes cursor to freeze short of
-	//right or bottom border when moving fast
-	client_coords.right--;
-	client_coords.bottom--;
-
-	ClipCursor( &client_coords );
-}
-
-void ResizeAndCenterWindow()
-{
-	if (!window_mode)
-	{//Just in case
-		return;
-	}
-
-	RECT window_size;
-	window_size.top = 0;
-	window_size.left = 0;
-	window_size.right = RealLx;
-	window_size.bottom = RealLy;
-	AdjustWindowRect( &window_size, window_style, FALSE );
-
-	int width = window_size.right - window_size.left;
-	int height = window_size.bottom - window_size.top;
-
-	int x = screen_width / 2 - width / 2;
-	int y = screen_height / 2 - height / 2;
-
-	if (x < 0)
-	{
-		x = 0;
-	}
-	if (y < 0)
-	{
-		y = 0;
-	}
-
-	MoveWindow( hwnd, x, y, width, height, TRUE );
-
-	ClipCursorToWindowArea();
-
-	SetCursorPos( screen_width / 2, screen_height / 2 );
-}
+// Window management functions no longer needed - using raylib window system
 
 //Load ids, textures etc
 bool Loading()
@@ -875,225 +813,7 @@ void OnWTPacket( WPARAM wSerial, LPARAM hCtx );
 
 void CmdEndGame( byte NI, byte state, byte cause );
 
-long FAR PASCAL WindowProc( HWND hWnd, UINT message,
-	WPARAM wParam, LPARAM lParam )
-{
-	static BYTE phase = 0;
-
-	switch (message)
-	{
-	case 0xABCD:
-	{
-		GFILE* F = Gopen( "UserMissions\\start.dat", "r" );
-		if (F)
-		{
-			ReadWinString( F, USERMISSPATH, 120 );
-			Gclose( F );
-			if (lParam == 1)
-			{
-				RUNMAPEDITOR = 1;
-			}
-			if (lParam == 0)
-			{
-				RUNUSERMISSION = 1;
-			}
-		}
-	}
-	break;
-
-	case 0x020A://WM_MOUSEWHEEL:
-		WheelDelta = (short) HIWORD( wParam );
-		break;
-
-	case MM_MCINOTIFY:
-		CD_MCINotify( wParam, lParam );
-		break;
-
-	case WM_LBUTTONDOWN:
-		wParam = wParam | MK_LBUTTON;
-		Lpressed = true;
-		realLpressed = true;
-		fixed = false;
-		SetMPtr( LOWORD( lParam ), HIWORD( lParam ), wParam );
-		AddMouseEvent( mouseX, mouseY, Lpressed, Rpressed );
-		break;
-
-	case WM_LBUTTONUP:
-		wParam = wParam & !MK_LBUTTON;
-		if (fixed)
-		{
-			Lpressed = false;
-		}
-		realLpressed = false;
-
-		SetMPtr( LOWORD( lParam ), HIWORD( lParam ), wParam );
-
-		AddMouseEvent( mouseX, mouseY, Lpressed, Rpressed );
-
-		//Double click
-		if (!BuildMode//BUGFIX: Prevent unit selection while placing buildings
-			&& ( abs( mouseX - LastUMX ) + abs( mouseY - LastUMY ) ) < 16
-			&& GetTickCount() - LastUTime < 600)
-		{
-			//Select all units of selected type on screen
-			SpecCmd = 241;
-		}
-
-		LastUMX = mouseX;
-		LastUMY = mouseY;
-		LastUTime = GetTickCount();
-		break;
-
-	case WM_RBUTTONDOWN:
-		wParam = wParam | MK_RBUTTON;
-		Rpressed = true;
-		realRpressed = true;
-		fixed = false;
-		if (ScreenPtr)
-		{
-			SetMPtr( LOWORD( lParam ), HIWORD( lParam ), wParam );
-		}
-		AddMouseEvent( mouseX, mouseY, Lpressed, Rpressed );
-		break;
-
-	case WM_RBUTTONUP:
-		wParam = wParam & !MK_RBUTTON;
-		Rpressed = false;
-		if (fixed)
-		{
-			Rpressed = false;
-		}
-		realRpressed = false;
-		if (ScreenPtr)
-		{
-			SetMPtr( LOWORD( lParam ), HIWORD( lParam ), wParam );
-		}
-		AddMouseEvent( mouseX, mouseY, Lpressed, Rpressed );
-		break;
-
-	case WM_MOUSEMOVE:
-		if (ScreenPtr)
-		{
-			if (LOWORD( lParam ) != mouseX || HIWORD( lParam ) != mouseY)
-			{
-				SetMPtr( LOWORD( lParam ), HIWORD( lParam ), wParam );
-				OnMouseMoveRedraw();
-			}
-		}
-		break;
-
-	case WM_EXITSIZEMOVE:
-		//Adjust cursor zone after window was moved
-		ClipCursorToWindowArea();
-		break;
-
-	case WM_SIZE:
-		if (SIZE_RESTORED == wParam)
-		{//Restore cursor zone after window was minimized
-			ClipCursorToWindowArea();
-		}
-		break;
-
-	case WM_SETFOCUS:
-		//Restore cursor zone after alt-tab
-		ClipCursorToWindowArea();
-		break;
-
-	case WM_ACTIVATEAPP:
-		bActive = wParam;
-		if (bActive)
-		{
-			if (lpDDSPrimary)
-			{
-				CreateDDObjects( hwnd );
-				LockSurface();
-				UnlockSurface();
-				LoadFog( CurPalette );
-				char cc[64];
-				sprintf( cc, "%d\\agew_1.pal", CurPalette );
-				PalDone = 0;
-				LoadPalette( cc );
-			}
-		}
-		break;
-
-	case WM_SETCURSOR:
-		SetCursor( NULL );
-		return TRUE;
-
-	case WM_KEYDOWN:
-		if (wParam < 256)
-		{
-			ScanPressed[wParam] = 1;
-		}
-
-		LastKey = wParam;
-		KeyPressed = true;
-
-		if (LastKey == VK_F11)
-		{
-			SaveScreen();
-		}
-
-		/*
-		//Can't see where it was supposed to work. Cut it out.
-		if (( !GameInProgress ) && LastKey == 'R' &&
-			GetKeyState( VK_CONTROL ) & 0x8000)
-		{
-			//RecordMode = !RecordMode;//BUGFIX: remove switching record mode in real time
-		}
-		*/
-
-		{
-			int nVirtKey = (int) wParam;
-			int lKeyData = lParam;
-			byte PST[256];
-			GetKeyboardState( PST );
-
-			word ascii_key;
-			int result = ToAscii( nVirtKey, lKeyData, PST, &ascii_key, 0 );
-
-			WCHAR u_buf[5] = {};
-			if (1 <= ToUnicode( nVirtKey, lKeyData, PST, u_buf, 4, 0 ))
-			{//Valid UTF character
-				wchar_t unicode_char = u_buf[0];
-				if (1040 <= unicode_char && 1103 >= unicode_char)
-				{//UTF code is in cyrillic range
-					//Adjust ascii code to match sprite index in mainfont.gp file
-					//Sprites 192 to 255 ('А' to 'я')
-					//(taken from russian cossacks version ALL.GSC)
-					ascii_key = unicode_char - 848;
-				}
-			}
-
-			if (1 == result)
-			{
-				LastAsciiKey = ascii_key;
-			}
-			else
-			{
-				LastAsciiKey = 0;
-			}
-
-			AddKey( wParam, LastAsciiKey );
-		}
-		break;
-
-	case WM_CLOSE:
-		//Leave game and assign defeat
-		IAmLeft();
-		LOOSEANDEXITFAST();
-		break;
-
-	case WM_DESTROY:
-		finiObjects();
-		PostQuitMessage( 0 );
-		exit( 0 );
-		break;
-	}
-
-	return DefWindowProc( hWnd, message, wParam, lParam );
-}
+// WindowProc function no longer needed - using raylib input system
 
 /*
  * doInit - do work required for every instance of the application:
@@ -2213,71 +1933,32 @@ extern bool Lpressed;
 void FilesExit();
 
 //Register winapi window class, init DirectDraw, sounds and cursor
+//Initialize raylib window system and game
 static BOOL doInit( HINSTANCE hInstance, int nCmdShow )
 {
-	WNDCLASS wc;
-	char buf[256];
+	// Configure raylib window
+	RaylibWindowConfig config = {0};
+	config.width = window_mode ? RealLx : screen_width;
+	config.height = window_mode ? RealLy : screen_height;
+	config.title = TITLE;
+	config.fullscreen = !window_mode;
+	config.vsync = true;
+	config.resizable = window_mode;
+	config.target_fps = 60;
 
-	//set up and register window class
-	wc.style = CS_HREDRAW | CS_VREDRAW;
-	wc.lpfnWndProc = WindowProc;
-	wc.cbClsExtra = 0;
-	wc.cbWndExtra = 0;
-	wc.hInstance = hInstance;
-	wc.hIcon = LoadIcon( hInstance, IDI_APPLICATION );
-	wc.hCursor = LoadCursor( NULL, IDC_ARROW );
-	wc.hbrBackground = NULL;
-	wc.lpszMenuName = NULL;
-	wc.lpszClassName = NAME;
-	RegisterClass( &wc );
-
-	if (window_mode)
+	// Initialize raylib window system
+	if (!InitRaylibWindow(&config))
 	{
-		hwnd = CreateWindow(
-			NAME,
-			TITLE,
-			window_style,
-			50, 50,
-			RealLx,
-			RealLy,
-			NULL,
-			NULL,
-			hInstance,
-			NULL
-		);
-		ResizeAndCenterWindow();
-	}
-	else
-	{
-		hwnd = CreateWindowEx(
-			WS_EX_APPWINDOW,
-			NAME,
-			TITLE,
-			WS_POPUP,
-			0, 0,
-			screen_width,
-			screen_height,
-			NULL,
-			NULL,
-			hInstance,
-			NULL
-		);
-	}
-	if (!hwnd)
-	{
+		printf("Failed to initialize raylib window\n");
 		return FALSE;
 	}
 
-	ShowWindow( hwnd, SW_SHOWNORMAL );
-
-	UpdateWindow( hwnd );
-
-	CDIRSND.CreateDirSound( hwnd );
-
+	// Initialize audio system (already done in InitRaylibWindow)
+	CDIRSND.CreateDirSound( NULL );  // NULL hwnd since we don't use Windows
 	CDS = &CDIRSND;
-
 	LoadSounds( "SoundList.txt" );
 
+	// Version check
 	ResFile F = RReset( "version.dat" );
 	if (F != INVALID_HANDLE_VALUE)
 	{
@@ -2286,33 +1967,29 @@ static BOOL doInit( HINSTANCE hInstance, int nCmdShow )
 		RClose( F );
 		if (B > 102)
 		{
-			MessageBox( hwnd, "Unable to use this testing version.", "WARNING!", 0 );
+			printf("Unable to use this testing version.\n");
 			FilesExit();
-			PostMessage( hwnd, WM_CLOSE, 0, 0 );
-			return 0;
+			return FALSE;
 		}
 	}
 
+	// Load game resources
 	if (!Loading())
 	{
 		FilesExit();
-		PostMessage( hwnd, WM_CLOSE, 0, 0 );
-		return 0;
+		return FALSE;
 	}
 
+	// Initialize game state
 	CurrentSurface = FALSE;
-
-	//create the main DirectDraw object
 	PalDone = false;
-
 	KeyPressed = false;
 
-	//Fullscreen? Prepare for small not stretched menu
+	// Set screen dimensions
 	if (!window_mode)
-	{//Set initial window resolution to native screen resolution
+	{
 		if (1920 < screen_width)
-		{//Limit max resolution for menu screen to fullhd
-			//Also necessary for correct offsets in stats screen
+		{
 			screen_width = 1920;
 			screen_height = 1080;
 		}
@@ -2320,8 +1997,8 @@ static BOOL doInit( HINSTANCE hInstance, int nCmdShow )
 		RealLy = screen_height;
 	}
 
-	//Create the screen object with RealLx x RealLy resolution
-	CreateDDObjects( hwnd );
+	// Initialize graphics system (raylib-based)
+	CreateDDObjects( NULL );  // NULL hwnd since we don't use Windows
 
 	CHKALL();
 
@@ -2335,20 +2012,15 @@ static BOOL doInit( HINSTANCE hInstance, int nCmdShow )
 
 		if (!RealScreenPtr)
 		{
-			MessageBox( hwnd, "Unable to initialise Direct Draw. It is possible that hardware acceleration is turned off.", "Loading error[2]", MB_ICONSTOP );
-			exit( 0 );
+			printf("Unable to initialise graphics system.\n");
+			return FALSE;
 		}
 
-		if (SetTimer( hwnd, TIMER_ID, 20, nullptr ))
-		{
-			return TRUE;
-		}
+		return TRUE;
 	}
 
-	wsprintf( buf, "Direct Draw Init Failed\n" );
-	MessageBox( hwnd, buf, "ERROR", MB_OK );
+	printf("Graphics initialization failed\n");
 	finiObjects();
-	DestroyWindow( hwnd );
 	return FALSE;
 }
 
@@ -3396,8 +3068,6 @@ int PASCAL WinMain(
 	WindLx = 1024;
 	WindLy = 768;
 
-	MSG msg;
-
 	tima = 0;
 	PlayerMask = 1;
 	Flips = 0;
@@ -3497,20 +3167,9 @@ int PASCAL WinMain(
 		PlayRandomTrack();
 	}
 
-	//Program loop to handle WM_QUIT; everything else handles AllGame()
-	while (true)
+	//Main raylib game loop
+	while (!ShouldWindowClose())
 	{
-		while (PeekMessage( &msg, NULL, 0, 0, PM_REMOVE ))
-		{
-			if (msg.message == WM_QUIT)
-			{
-				PostQuitMessage( msg.wParam );
-				return 1;
-			}
-			TranslateMessage( &msg );
-			DispatchMessage( &msg );
-		}
-
 		//Check if window has focus
 		if (bActive)
 		{
@@ -3525,7 +3184,7 @@ int PASCAL WinMain(
 			CloseExplosions();
 			ShutdownMultiplayer( 1 );
 
-			//Distinguish between last window adn fullscreen resolutions
+			//Distinguish between last window and fullscreen resolutions
 			int ex_window_x, ex_window_y, ex_x, ex_y;
 
 			//Set last 'global resolution' according to current mode
@@ -3564,9 +3223,11 @@ int PASCAL WinMain(
 
 			FilesExit();
 			StopPlayCD();
-			PostMessage( hwnd, WM_CLOSE, 0, 0 );
 			FinExplorer();
 		}
 	}
-	return msg.wParam;
+	
+	// Cleanup raylib window system
+	ShutdownRaylibWindow();
+	return 0;
 }

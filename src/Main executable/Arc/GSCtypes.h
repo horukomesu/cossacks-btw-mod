@@ -1,7 +1,7 @@
 #ifndef _INC_GSC_TYPES
 #define _INC_GSC_TYPES
 
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
 
 #ifndef GFILE_USER
 #define GFILE_API __declspec(dllexport)

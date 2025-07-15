@@ -1,4 +1,4 @@
-#include <Windows.h>
+#include "../cross_platform/platform_compat.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>

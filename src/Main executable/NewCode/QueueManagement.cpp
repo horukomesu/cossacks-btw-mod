@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
 
 /*
 	Determine increment / decrement amount for production queues.

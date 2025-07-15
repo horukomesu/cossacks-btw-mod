@@ -1,5 +1,5 @@
 #include <math.h>
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
 #include <stdlib.h>
 #include <stdio.h>
 #include "ResFile.h"
