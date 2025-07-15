@@ -1,0 +1,42 @@
+cmake_minimum_required(VERSION 3.20)
+project(Cossacks_Graphics_Test)
+
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+
+# Set up raylib paths
+set(RAYLIB_PATH "C:/coding/libraries/raylib64")
+include_directories(${RAYLIB_PATH}/include)
+link_directories(${RAYLIB_PATH}/libs)
+
+# Source files for testing
+set(SOURCES
+    src/raylib_main.cpp
+    src/graphics/raylib_graphics.cpp
+    src/graphics/directdraw_compat.cpp
+    src/audio/raylib_audio.cpp
+    src/input/raylib_input.cpp
+    src/utils/raylib_utils.cpp
+)
+
+# Include directories
+include_directories(
+    src/
+    src/graphics/
+    src/audio/
+    src/input/
+    src/utils/
+)
+
+# Create executable
+add_executable(${PROJECT_NAME} ${SOURCES})
+
+# Link raylib
+target_link_libraries(${PROJECT_NAME} raylib opengl32 gdi32 winmm)
+
+# Compiler definitions
+target_compile_definitions(${PROJECT_NAME} PRIVATE
+    _CRT_SECURE_NO_WARNINGS
+    WIN32_LEAN_AND_MEAN
+    PLATFORM_DESKTOP
+) 

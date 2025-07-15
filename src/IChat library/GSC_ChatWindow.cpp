@@ -2,7 +2,7 @@
 #include "Chat\chat.h"
 #include "cs_chat.h"
 #include "../IntExplorer library/ParseRQ.h"
-#include <stdarg.h>
+#include <cstdarg>
 
 #include <cstring>
 #include <cstdlib>

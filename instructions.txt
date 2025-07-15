@@ -1,0 +1,11 @@
+theres source code of old game Cossacks back to war (2000)
+its engine based on warcraft 2 engine 
+
+We should rewrite all game into raylib 
+rewrite whole game , keeping only old logics
+so it will remove all dependencies from windows api, direct draw etc
+basically we need to completely refactor game
+it builds in x86 now, it should build in x64
+C:\coding\libraries\raylib64\
+C:\coding\libraries\raylib64\include
+C:\coding\libraries\raylib64\libs

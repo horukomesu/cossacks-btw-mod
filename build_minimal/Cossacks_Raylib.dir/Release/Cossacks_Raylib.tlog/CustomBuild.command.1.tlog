@@ -1,0 +1,10 @@
+^C:\CODING\CPP\COSSACKS-REVAMP-2017-MASTER\CMAKELISTS.TXT
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/coding/CPP/cossacks-revamp-2017-master -BC:/coding/CPP/cossacks-revamp-2017-master/build_minimal --check-stamp-file C:/coding/CPP/cossacks-revamp-2017-master/build_minimal/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd

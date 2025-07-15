@@ -6,7 +6,7 @@
 #include "GameOnMap.h"
 #include <sys\utime.h>
 #include <process.h>
-#include <stdarg.h>
+#include <cstdarg>
 __declspec( dllimport ) void SetCurPtr( int v );
 extern __declspec( dllimport ) bool GameInProgress;
 bool LOGMODE = 0;

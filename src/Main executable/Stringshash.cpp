@@ -5,17 +5,12 @@ typedef unsigned char byte;
 #include "StringHash.h"
 
 __forceinline byte CalcHash(char* s){
-	__asm{
-		mov esi,s
-		cld
-		xor bl,bl
-		xor eax,eax
-strlp1: lodsb
-		add bl,al
-		or al,al
-		jnz strlp1
-		mov al,bl	
-	};
+	byte hash = 0;
+	while (*s) {
+		hash += static_cast<byte>(*s);
+		s++;
+	}
+	return hash;
 };
 StrHash::StrHash(){
 	memset(this,0,sizeof StrHash);

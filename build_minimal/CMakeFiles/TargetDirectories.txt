@@ -1,0 +1,3 @@
+C:/coding/CPP/cossacks-revamp-2017-master/build_minimal/CMakeFiles/Cossacks_Raylib.dir
+C:/coding/CPP/cossacks-revamp-2017-master/build_minimal/CMakeFiles/ALL_BUILD.dir
+C:/coding/CPP/cossacks-revamp-2017-master/build_minimal/CMakeFiles/ZERO_CHECK.dir

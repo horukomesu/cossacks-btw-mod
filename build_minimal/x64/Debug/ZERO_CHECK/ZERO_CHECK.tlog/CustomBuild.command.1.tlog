@@ -1,0 +1,10 @@
+^C:\CODING\CPP\COSSACKS-REVAMP-2017-MASTER\BUILD_MINIMAL\CMAKEFILES\56DE894C5EA1D547EAD2A5DCB3D55349\GENERATE.STAMP.RULE
+setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/coding/CPP/cossacks-revamp-2017-master -BC:/coding/CPP/cossacks-revamp-2017-master/build_minimal --check-stamp-list CMakeFiles/generate.stamp.list --vs-solution-file C:/coding/CPP/cossacks-revamp-2017-master/build_minimal/Cossacks_Raylib.sln
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal & call :cmErrorLevel %errorlevel% & goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd
