@@ -1,4 +1,304 @@
-﻿     Creating library ../Temp/dmcr.lib and object ../Temp/dmcr.exp
-  Generating code
-  Finished generating code
-  Cossacks.vcxproj -> C:\coding\CPP\cossacks-revamp-2017-master\src\Testing\dmcr.exe
+﻿  3DBars.cpp
+  3DGraph.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file '3DBars.cpp')
+  
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file '3DGraph.cpp')
+  
+  3DMapEd.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file '3DMapEd.cpp')
+  
+  3DRandMap.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file '3DRandMap.cpp')
+  
+  3DSurf.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file '3DSurf.cpp')
+  
+  ActiveScenary.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'ActiveScenary.cpp')
+  
+  ActiveZone.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'ActiveZone.cpp')
+  
+  AntiBug.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'AntiBug.cpp')
+  
+  Brigade.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Brigade.cpp')
+  
+  Build.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Build.cpp')
+  
+  Chkinet.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Chkinet.cpp')
+  
+  Danger.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Danger.cpp')
+  
+  Ddex1.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Ddex1.cpp')
+  
+  Ddini.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Ddini.cpp')
+  
+  Dialogs.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Dialogs.cpp')
+  
+  DrawForms.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'DrawForms.cpp')
+  
+  Economy.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Economy.cpp')
+  
+  EinfoClass.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'EinfoClass.cpp')
+  
+  Fastdraw.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Fastdraw.cpp')
+  
+  GP_Draw.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'GP_Draw.cpp')
+  
+  Generating Code...
+  Compiling...
+  GVClass.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'GVClass.cpp')
+  
+  GameSound.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'GameSound.cpp')
+  
+  Graphs.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Graphs.cpp')
+  
+  Groups.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Groups.cpp')
+  
+  Hint.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Hint.cpp')
+  
+  IR_Main.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'IR_Main.cpp')
+  
+  Icontool.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Icontool.cpp')
+  
+  Interface.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Interface.cpp')
+  
+  Lines.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Lines.cpp')
+  
+  LoadSave.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'LoadSave.cpp')
+  
+  MPlayer.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'MPlayer.cpp')
+  
+  MapSprites.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'MapSprites.cpp')
+  
+  Masks.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Masks.cpp')
+  
+  Megapolis.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Megapolis.cpp')
+  
+  Mine.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Mine.cpp')
+  
+  Motion.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Motion.cpp')
+  
+  MousZone.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'MousZone.cpp')
+  
+  Mouse_X.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Mouse_X.cpp')
+  
+  Multi.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Multi.cpp')
+  
+  Nation.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Nation.cpp')
+  
+  Generating Code...
+  Compiling...
+  Nature.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Nature.cpp')
+  
+  Navorots.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Navorots.cpp')
+  
+  NewAI.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'NewAI.cpp')
+  
+  NewILogin.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'NewILogin.cpp')
+  
+  NewMon.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'NewMon.cpp')
+  
+  NewUpgrade.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'NewUpgrade.cpp')
+  
+  Nuclear.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Nuclear.cpp')
+  
+  OnWater.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'OnWater.cpp')
+  
+  RealWater.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'RealWater.cpp')
+  
+  Recorder.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Recorder.cpp')
+  
+  Report.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Report.cpp')
+  
+  River.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'River.cpp')
+  
+  SafeNet.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'SafeNet.cpp')
+  
+  SaveNewMap.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'SaveNewMap.cpp')
+  
+  SelProp.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'SelProp.cpp')
+  
+  Select.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Select.cpp')
+  
+  ShipTrace.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'ShipTrace.cpp')
+  
+  StrategyResearch.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'StrategyResearch.cpp')
+  
+  Stringshash.cpp
+  Timing.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Timing.cpp')
+  
+  Generating Code...
+  Compiling...
+  TopoGraf.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'TopoGraf.cpp')
+  
+  Transport.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Transport.cpp')
+  
+  UnSyncro.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'UnSyncro.cpp')
+  
+  Upgrade.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Upgrade.cpp')
+  
+  VirtScr.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'VirtScr.cpp')
+  
+  Waves.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Waves.cpp')
+  
+  Weapon.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'Weapon.cpp')
+  
+  ZBuffer.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'ZBuffer.cpp')
+  
+  fog.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'fog.cpp')
+  
+  mapa.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'mapa.cpp')
+  
+  menu.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'menu.cpp')
+  
+  path.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'path.cpp')
+  
+  stRecog.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'stRecog.cpp')
+  
+  testserver.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'testserver.cpp')
+  
+  walls.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.h(3,10): error C1083: Cannot open include file: 'raylib.h': No such file or directory
+  (compiling source file 'walls.cpp')
+  
+  Generating Code...

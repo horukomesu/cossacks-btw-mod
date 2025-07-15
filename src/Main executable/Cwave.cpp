@@ -1,13 +1,36 @@
 ///////////////////////////////////////////////////////////
-// CWAVE.CPP: Implementation file for the WAVE class.
+// CWAVE.CPP: Cross-platform implementation file for the WAVE class.
 ///////////////////////////////////////////////////////////
 
-//#include <stdafx.h>
-//#include <afx.h>
-#include <windows.h>
-#include "windowsx.h"
-//#include "stdafx.h"
 #include "cwave.h"
+#include "../cross_platform/platform_compat.h"
+#include <stdio.h>
+#include <string.h>
+
+// Wave file chunk structures
+struct WaveChunk
+{
+    char chunkID[4];
+    uint32_t chunkSize;
+};
+
+struct WaveFormatChunk
+{
+    char chunkID[4];      // "fmt "
+    uint32_t chunkSize;   // 16 for PCM
+    uint16_t audioFormat; // 1 for PCM
+    uint16_t numChannels;
+    uint32_t sampleRate;
+    uint32_t byteRate;
+    uint16_t blockAlign;
+    uint16_t bitsPerSample;
+};
+
+struct WaveDataChunk
+{
+    char chunkID[4];      // "data"
+    uint32_t chunkSize;   // Size of the data section
+};
 
 ///////////////////////////////////////////////////////////
 // CWave::CWave()
@@ -17,7 +40,8 @@ CWave::CWave(char* fileName)
     // Initialize the class's members.
     m_waveSize = 0;
     m_waveOK = FALSE;
-    m_pWave= NULL;
+    m_pWave = NULL;
+    memset(&m_waveFormatEx, 0, sizeof(m_waveFormatEx));
 
     // Load the wave file.
     m_waveOK = LoadWaveFile(fileName);
@@ -29,74 +53,110 @@ CWave::CWave(char* fileName)
 CWave::~CWave()
 {
     // Free the memory assigned to the wave data.
-    GlobalFreePtr(m_pWave);
+    if (m_pWave) {
+        free(m_pWave);
+        m_pWave = NULL;
+    }
 }
 
 ///////////////////////////////////////////////////////////
 // CWave::LoadWaveFile()
 //
-// This function loads a wave from disk into memory. It
-// also initializes various class data members.
+// This function loads a wave from disk into memory using
+// cross-platform file operations.
 ///////////////////////////////////////////////////////////
 BOOL CWave::LoadWaveFile(char* fileName)
 {
-    MMCKINFO mmCkInfoRIFF;
-    MMCKINFO mmCkInfoChunk;
-    MMRESULT result;
-    HMMIO hMMIO;
-    long bytesRead;
-
-    // Open the wave file.
-    hMMIO = mmioOpen(fileName, NULL, MMIO_READ | MMIO_ALLOCBUF);
-    if (hMMIO == NULL)
+    FILE* file = fopen(fileName, "rb");
+    if (!file) {
         return FALSE;
+    }
 
-    // Descend into the RIFF chunk.
-    mmCkInfoRIFF.fccType = mmioFOURCC('W', 'A', 'V', 'E');
-    result = mmioDescend(hMMIO, &mmCkInfoRIFF, NULL, MMIO_FINDRIFF);
-    if (result != MMSYSERR_NOERROR)
+    // Read RIFF header
+    WaveChunk riffChunk;
+    if (fread(&riffChunk, sizeof(WaveChunk), 1, file) != 1) {
+        fclose(file);
         return FALSE;
+    }
 
-    // Descend into the format chunk.
-    mmCkInfoChunk.ckid = mmioFOURCC('f', 'm', 't', ' ');
-    result = mmioDescend(hMMIO, &mmCkInfoChunk,
-        &mmCkInfoRIFF, MMIO_FINDCHUNK);
-    if (result != MMSYSERR_NOERROR)
+    // Verify RIFF signature
+    if (strncmp(riffChunk.chunkID, "RIFF", 4) != 0) {
+        fclose(file);
         return FALSE;
+    }
 
-    // Read the format information into the WAVEFORMATEX structure.
-    bytesRead = mmioRead(hMMIO, (char*)&m_waveFormatEx,
-        sizeof(WAVEFORMATEX));
-    if (bytesRead == -1)
+    // Read WAVE signature
+    char waveSignature[4];
+    if (fread(waveSignature, 4, 1, file) != 1) {
+        fclose(file);
         return FALSE;
+    }
 
-    // Ascend out of the format chunk.
-    result = mmioAscend(hMMIO, &mmCkInfoChunk, 0);
-    if (result != MMSYSERR_NOERROR)
+    if (strncmp(waveSignature, "WAVE", 4) != 0) {
+        fclose(file);
         return FALSE;
+    }
 
-    // Descend into the data chunk.
-    mmCkInfoChunk.ckid = mmioFOURCC('d', 'a', 't', 'a');
-    result = mmioDescend(hMMIO, &mmCkInfoChunk,
-        &mmCkInfoRIFF, MMIO_FINDCHUNK);
-    if (result != MMSYSERR_NOERROR)
-        return FALSE;
+    // Find format chunk
+    WaveFormatChunk formatChunk;
+    bool foundFormat = false;
+    bool foundData = false;
+    WaveDataChunk dataChunk;
 
-    // Save the size of the wave data.
-    m_waveSize = mmCkInfoChunk.cksize;
+    while (!foundFormat || !foundData) {
+        WaveChunk chunk;
+        if (fread(&chunk, sizeof(WaveChunk), 1, file) != 1) {
+            fclose(file);
+            return FALSE;
+        }
 
-    // Allocate a buffer for the wave data.
-    m_pWave = (char*)GlobalAllocPtr(GMEM_MOVEABLE, m_waveSize);
-    if (m_pWave == NULL)
-        return FALSE;
+        if (strncmp(chunk.chunkID, "fmt ", 4) == 0) {
+            // Read format chunk
+            if (fread(&formatChunk.audioFormat, chunk.chunkSize, 1, file) != 1) {
+                fclose(file);
+                return FALSE;
+            }
+            
+            // Copy to our format structure
+            m_waveFormatEx.wFormatTag = formatChunk.audioFormat;
+            m_waveFormatEx.nChannels = formatChunk.numChannels;
+            m_waveFormatEx.nSamplesPerSec = formatChunk.sampleRate;
+            m_waveFormatEx.nAvgBytesPerSec = formatChunk.byteRate;
+            m_waveFormatEx.nBlockAlign = formatChunk.blockAlign;
+            m_waveFormatEx.wBitsPerSample = formatChunk.bitsPerSample;
+            m_waveFormatEx.cbSize = 0;
+            
+            foundFormat = true;
+        }
+        else if (strncmp(chunk.chunkID, "data", 4) == 0) {
+            // Found data chunk
+            m_waveSize = chunk.chunkSize;
+            
+            // Allocate buffer for wave data
+            m_pWave = (char*)malloc(m_waveSize);
+            if (!m_pWave) {
+                fclose(file);
+                return FALSE;
+            }
+            
+            // Read wave data
+            if (fread(m_pWave, m_waveSize, 1, file) != 1) {
+                free(m_pWave);
+                m_pWave = NULL;
+                fclose(file);
+                return FALSE;
+            }
+            
+            foundData = true;
+        }
+        else {
+            // Skip unknown chunk
+            fseek(file, chunk.chunkSize, SEEK_CUR);
+        }
+    }
 
-    // Read the wave data into the buffer.
-    bytesRead = mmioRead(hMMIO, (char*)m_pWave, m_waveSize);
-    if (bytesRead == -1)
-        return FALSE;
-    mmioClose(hMMIO, 0);
-
-    return TRUE;
+    fclose(file);
+    return foundFormat && foundData;
 }
 
 ///////////////////////////////////////////////////////////
@@ -104,7 +164,7 @@ BOOL CWave::LoadWaveFile(char* fileName)
 //
 // This returns the size in bytes of the wave data.
 ///////////////////////////////////////////////////////////
-DWORD CWave::GetWaveSize()
+uint32_t CWave::GetWaveSize()
 {
     return m_waveSize;
 }
@@ -115,7 +175,7 @@ DWORD CWave::GetWaveSize()
 // This function returns a pointer to the wave file's
 // WAVEFORMATEX structure.
 ///////////////////////////////////////////////////////////
-LPWAVEFORMATEX CWave::GetWaveFormatPtr()
+WAVEFORMATEX_COMPAT* CWave::GetWaveFormatPtr()
 {
     return &m_waveFormatEx;
 }

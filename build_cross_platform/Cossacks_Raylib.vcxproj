@@ -1,0 +1,463 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <PreferredToolArchitecture>x64</PreferredToolArchitecture>
+  </PropertyGroup>
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="MinSizeRel|x64">
+      <Configuration>MinSizeRel</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="RelWithDebInfo|x64">
+      <Configuration>RelWithDebInfo</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{BF05060C-9D50-3BC8-A584-8A6475FCB8B0}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <WindowsTargetPlatformVersion>10.0.22621.0</WindowsTargetPlatformVersion>
+    <Platform>x64</Platform>
+    <ProjectName>Cossacks_Raylib</ProjectName>
+    <VCProjectUpgraderObjectName>NoUpgrade</VCProjectUpgraderObjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <CharacterSet>MultiByte</CharacterSet>
+    <PlatformToolset>v143</PlatformToolset>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup>
+    <_ProjectFileVersion>10.0.20506.1</_ProjectFileVersion>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\Debug\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Cossacks_Raylib.dir\Debug\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Cossacks_Raylib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\Release\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Cossacks_Raylib.dir\Release\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Cossacks_Raylib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\MinSizeRel\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Cossacks_Raylib.dir\MinSizeRel\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Cossacks_Raylib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">true</GenerateManifest>
+    <OutDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\RelWithDebInfo\</OutDir>
+    <IntDir Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Cossacks_Raylib.dir\RelWithDebInfo\</IntDir>
+    <TargetName Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Cossacks_Raylib</TargetName>
+    <TargetExt Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">.exe</TargetExt>
+    <LinkIncremental Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</LinkIncremental>
+    <GenerateManifest Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">true</GenerateManifest>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>Disabled</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR="Debug"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_DEBUG;_WINDOWS;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR=\"Debug\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>raylib.lib;opengl32.lib;gdi32.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/coding/libraries/raylib64/libs;C:/coding/libraries/raylib64/libs/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/Debug/Cossacks_Raylib.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/Debug/Cossacks_Raylib.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR="Release"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR=\"Release\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>raylib.lib;opengl32.lib;gdi32.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/coding/libraries/raylib64/libs;C:/coding/libraries/raylib64/libs/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/Release/Cossacks_Raylib.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/Release/Cossacks_Raylib.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MinSpace</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR="MinSizeRel"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <DebugInformationFormat>
+      </DebugInformationFormat>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR=\"MinSizeRel\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>raylib.lib;opengl32.lib;gdi32.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/coding/libraries/raylib64/libs;C:/coding/libraries/raylib64/libs/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/MinSizeRel/Cossacks_Raylib.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/MinSizeRel/Cossacks_Raylib.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">
+    <ClCompile>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AssemblerListingLocation>$(IntDir)</AssemblerListingLocation>
+      <BasicRuntimeChecks>Default</BasicRuntimeChecks>
+      <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
+      <ExceptionHandling>Sync</ExceptionHandling>
+      <ForceConformanceInForLoopScope></ForceConformanceInForLoopScope>
+      <InlineFunctionExpansion>OnlyExplicitInline</InlineFunctionExpansion>
+      <LanguageStandard>stdcpp17</LanguageStandard>
+      <MinimalRebuild></MinimalRebuild>
+      <Optimization>MaxSpeed</Optimization>
+      <PrecompiledHeader>NotUsing</PrecompiledHeader>
+      <RemoveUnreferencedCodeData></RemoveUnreferencedCodeData>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <SupportJustMyCode></SupportJustMyCode>
+      <TreatWChar_tAsBuiltInType></TreatWChar_tAsBuiltInType>
+      <UseFullPaths>false</UseFullPaths>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR="RelWithDebInfo"</PreprocessorDefinitions>
+      <ObjectFileName>$(IntDir)</ObjectFileName>
+      <ScanSourceForModuleDependencies>false</ScanSourceForModuleDependencies>
+    </ClCompile>
+    <ResourceCompile>
+      <PreprocessorDefinitions>%(PreprocessorDefinitions);WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;PLATFORM_DESKTOP;PLATFORM_WINDOWS;CMAKE_INTDIR=\"RelWithDebInfo\"</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ResourceCompile>
+    <Midl>
+      <AdditionalIncludeDirectories>C:\coding\libraries\raylib64\include;C:\coding\CPP\cossacks-revamp-2017-master\src;C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable;C:\coding\CPP\cossacks-revamp-2017-master\src\graphics;C:\coding\CPP\cossacks-revamp-2017-master\src\audio;C:\coding\CPP\cossacks-revamp-2017-master\src\input;C:\coding\CPP\cossacks-revamp-2017-master\src\utils;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <OutputDirectory>$(ProjectDir)/$(IntDir)</OutputDirectory>
+      <HeaderFileName>%(Filename).h</HeaderFileName>
+      <TypeLibraryName>%(Filename).tlb</TypeLibraryName>
+      <InterfaceIdentifierFileName>%(Filename)_i.c</InterfaceIdentifierFileName>
+      <ProxyFileName>%(Filename)_p.c</ProxyFileName>
+    </Midl>
+    <Link>
+      <AdditionalDependencies>raylib.lib;opengl32.lib;gdi32.lib;ws2_32.lib;kernel32.lib;user32.lib;gdi32.lib;winspool.lib;shell32.lib;ole32.lib;oleaut32.lib;uuid.lib;comdlg32.lib;advapi32.lib</AdditionalDependencies>
+      <AdditionalLibraryDirectories>C:/coding/libraries/raylib64/libs;C:/coding/libraries/raylib64/libs/$(Configuration);%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+      <AdditionalOptions>%(AdditionalOptions) /machine:x64</AdditionalOptions>
+      <DataExecutionPrevention></DataExecutionPrevention>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <IgnoreSpecificDefaultLibraries>%(IgnoreSpecificDefaultLibraries)</IgnoreSpecificDefaultLibraries>
+      <ImageHasSafeExceptionHandlers></ImageHasSafeExceptionHandlers>
+      <ImportLibrary>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/RelWithDebInfo/Cossacks_Raylib.lib</ImportLibrary>
+      <LinkErrorReporting></LinkErrorReporting>
+      <ProgramDataBaseFile>C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/RelWithDebInfo/Cossacks_Raylib.pdb</ProgramDataBaseFile>
+      <RandomizedBaseAddress></RandomizedBaseAddress>
+      <SubSystem>Console</SubSystem>
+    </Link>
+    <ProjectReference>
+      <LinkLibraryDependencies>false</LinkLibraryDependencies>
+    </ProjectReference>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\coding\CPP\cossacks-revamp-2017-master\CMakeLists.txt">
+      <UseUtf8Encoding>Always</UseUtf8Encoding>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Building Custom Rule C:/coding/CPP/cossacks-revamp-2017-master/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/coding/CPP/cossacks-revamp-2017-master -BC:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform --check-stamp-file C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCXXCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeRCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Building Custom Rule C:/coding/CPP/cossacks-revamp-2017-master/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/coding/CPP/cossacks-revamp-2017-master -BC:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform --check-stamp-file C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCXXCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeRCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='Release|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">Building Custom Rule C:/coding/CPP/cossacks-revamp-2017-master/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/coding/CPP/cossacks-revamp-2017-master -BC:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform --check-stamp-file C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCXXCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeRCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='MinSizeRel|x64'">false</LinkObjects>
+      <Message Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">Building Custom Rule C:/coding/CPP/cossacks-revamp-2017-master/CMakeLists.txt</Message>
+      <Command Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">setlocal
+"C:\Program Files\CMake\bin\cmake.exe" -SC:/coding/CPP/cossacks-revamp-2017-master -BC:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform --check-stamp-file C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/CMakeFiles/generate.stamp
+if %errorlevel% neq 0 goto :cmEnd
+:cmEnd
+endlocal &amp; call :cmErrorLevel %errorlevel% &amp; goto :cmDone
+:cmErrorLevel
+exit /b %1
+:cmDone
+if %errorlevel% neq 0 goto :VCEnd</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCXXInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeCommonLanguageInclude.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeGenericSystem.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeInitializeConfigs.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeLanguageInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeRCInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\CMakeSystemSpecificInitialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\CMakeCommonCompilerMacros.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Compiler\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCXXLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Internal\CMakeCommonLinkerInformation.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Linker\MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Linker\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-Initialize.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-C.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC-CXX.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows-MSVC.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\Windows.cmake;C:\Program Files\CMake\share\cmake-4.1\Modules\Platform\WindowsPaths.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeCXXCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeRCCompiler.cmake;C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\4.1.0-rc1\CMakeSystem.cmake;%(AdditionalInputs)</AdditionalInputs>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\CMakeFiles\generate.stamp</Outputs>
+      <LinkObjects Condition="'$(Configuration)|$(Platform)'=='RelWithDebInfo|x64'">false</LinkObjects>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\raylib_main.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\directdraw_compat.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\audio\raylib_audio.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\input\raylib_input.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\utils\raylib_utils.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\cross_platform\platform_compat.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Ddex1.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DBars.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DGraph.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DMapEd.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DRandMap.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DSurf.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ActiveScenary.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ActiveZone.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\AntiBug.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ArchTool.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\bmptool.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Brigade.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Build.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Cdirsnd.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Chkinet.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ConstStr.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Cwave.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Danger.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Ddini.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\DeviceCD.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\DrawForms.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Economy.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\EinfoClass.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ExConst.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Fastdraw.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\fog.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Fractal.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\GameSound.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\GP_Draw.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Graphs.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Groups.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\gText.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\GVClass.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Hint.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Icontool.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Interface.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\IR_Main.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Lines.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\LoadSave.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\mapa.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\MapSprites.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Masks.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Megapolis.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\menu.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Mine.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Motion.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Mouse_X.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\MousZone.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\MPlayer.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Multi.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Nation.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Nature.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Navorots.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewAI.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewILogin.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewMon.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewUpgrade.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Nuclear.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\OnWater.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\path.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\RealWater.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Recorder.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Report.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Resfile.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\River.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\SafeNet.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\SaveNewMap.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Select.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\SelProp.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ShipTrace.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\StrategyResearch.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\stRecog.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Stringshash.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\testserver.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Timing.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Tmixer.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\TopoGraf.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Transport.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\UdpHolePuncher.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\UnRar.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\UnSyncro.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Upgrade.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\VirtScr.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\walls.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Waves.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Weapon.cpp" />
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ZBuffer.cpp" />
+  </ItemGroup>
+  <ItemGroup />
+  <ItemGroup>
+    <ProjectReference Include="C:\coding\CPP\cossacks-revamp-2017-master\build_cross_platform\ZERO_CHECK.vcxproj">
+      <Project>{86A033CE-9C0D-33CD-9552-182B268DF09B}</Project>
+      <Name>ZERO_CHECK</Name>
+      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
+      <CopyToOutputDirectory>Never</CopyToOutputDirectory>
+    </ProjectReference>
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

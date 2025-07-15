@@ -1,4 +1,4 @@
-#include <windows.h>
+#include "../cross_platform/platform_compat.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <memory.h>

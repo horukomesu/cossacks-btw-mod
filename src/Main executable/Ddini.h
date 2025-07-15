@@ -8,9 +8,7 @@
 #ifndef __DDINI_H_
 #define __DDINI_H_
 
-#include <windows.h>
-#include <windowsx.h>
-#include <ddraw.h>
+#include "../cross_platform/platform_compat.h"
 #include <stdlib.h>
 #include <cstdarg>
 #include "resource.h"

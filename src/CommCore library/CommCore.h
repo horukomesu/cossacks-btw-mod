@@ -27,9 +27,7 @@
 #pragma once
 #endif // _MSC_VER > 1000
 
-#include <Winsock2.h>
-#include <WS2tcpip.h>
-#include <Windows.h>
+#include "../cross_platform/platform_compat.h"
 #include <assert.h>
 #ifdef CC_DEBUG
 #include <stdio.h>

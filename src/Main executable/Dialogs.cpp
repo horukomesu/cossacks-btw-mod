@@ -2879,26 +2879,25 @@ __declspec( dllexport ) void CBar( int x0, int y0, int Lx0, int Ly0, byte c )
 	int adds = ScrWidth - Lx;
 	int Lx4 = Lx >> 2;
 	int Lx1 = Lx & 3;
-	__asm
-	{
-		push	edi
-		mov		edi, ofst
-		mov		edx, Ly
-		cld
-		mov		al, c
-		mov		ah, al
-		shl		eax, 16
-		mov		al, c
-		mov		ah, al
-		mov		ebx, Lx1
-		qwr : mov		ecx, Lx4
-			  rep		stosd
-			  mov		ecx, ebx
-			  rep		stosb
-			  add		edi, adds
-			  dec		edx
-			  jnz		qwr
-			  pop		edi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Fill rectangle with color c, optimized for 4-byte chunks
+	byte* screen = (byte*)ofst;
+	uint32_t color32 = (c << 24) | (c << 16) | (c << 8) | c;  // 4 bytes of color
+	
+	for(int row = 0; row < Ly; row++) {
+		byte* rowPtr = screen + row * ScrWidth;
+		
+		// Fill 4 bytes at a time
+		uint32_t* ptr32 = (uint32_t*)rowPtr;
+		for(int i = 0; i < Lx4; i++) {
+			ptr32[i] = color32;
+		}
+		
+		// Fill remaining bytes
+		byte* remainingPtr = rowPtr + (Lx4 * 4);
+		for(int i = 0; i < Lx1; i++) {
+			remainingPtr[i] = c;
+		}
 	}
 }
 
@@ -3465,25 +3464,21 @@ bool BPXView_OnDraw( SimpleDialog* SD )
 				ps = int( BV->Ptr ) + ( BV->PosY + iy )*( BV->OneLx + BV->DECLX )*BV->Nx*( BV->OneLy + BV->DECLX ) + ix*( BV->OneLx + BV->DECLX );
 				int addB = ( BV->DECLX + BV->OneLx )*BV->Nx - BV->OneLx;
 				int sofst = int( ScreenPtr ) + BV->x + BV->OneLx*ix + ( BV->y + BV->OneLy*iy )*SCRSizeX;
-				__asm
-				{
-					push	esi
-					push	edi
-					pushf
-					cld
-					mov		esi, ps
-					mov		edi, sofst
-					mov		edx, Ly
-					ppp1 : mov		ecx, Lx
-						   rep		movsd
-						   add		edi, addof
-						   add     esi, addB
-						   dec		edx
-						   jnz		ppp1
-						   popf
-						   pop		edi
-						   pop		esi
-
+				// REFACTORED: Replaced x86 assembly with C++ equivalent
+				// Copy bitmap data using 4-byte chunks (movsd equivalent)
+				uint32_t* src = (uint32_t*)ps;
+				uint32_t* dst = (uint32_t*)sofst;
+				int srcStride = addB / 4;  // Convert byte stride to 4-byte stride
+				int dstStride = addof / 4;  // Convert byte stride to 4-byte stride
+				
+				for(int row = 0; row < Ly; row++) {
+					// Copy Lx 4-byte chunks
+					for(int col = 0; col < Lx; col++) {
+						dst[col] = src[col];
+					}
+					// Move to next row
+					dst += Lx + dstStride;
+					src += Lx + srcStride;
 				}
 			}
 		}
@@ -3491,23 +3486,20 @@ bool BPXView_OnDraw( SimpleDialog* SD )
 	else
 	{
 		int addof = SCRSizeX - ( Lx << 2 );
-		__asm
-		{
-			push	esi
-			push	edi
-			pushf
-			cld
-			mov		esi, ps
-			mov		edi, sofst
-			mov		edx, Ly
-			ppp : mov		ecx, Lx
-				  rep		movsd
-				  add		edi, addof
-				  dec		edx
-				  jnz		ppp
-				  popf
-				  pop		edi
-				  pop		esi
+		// REFACTORED: Replaced x86 assembly with C++ equivalent
+		// Copy bitmap data using 4-byte chunks (movsd equivalent)
+		uint32_t* src = (uint32_t*)ps;
+		uint32_t* dst = (uint32_t*)sofst;
+		int dstStride = addof / 4;  // Convert byte stride to 4-byte stride
+		
+		for(int row = 0; row < Ly; row++) {
+			// Copy Lx 4-byte chunks
+			for(int col = 0; col < Lx; col++) {
+				dst[col] = src[col];
+			}
+			// Move to next row
+			dst += Lx + dstStride;
+			src += Lx;  // Source has no additional stride
 		}
 	}
 	bool SSTAT = ( GetKeyState( VK_SHIFT ) & 0x8000 ) != 0;
@@ -4906,30 +4898,31 @@ void CopyToScreen( int zx, int zy, int zLx, int zLy )
 	int radd = RSCRSizeX - Lx;
 	int Lx4 = Lx >> 2;
 	int Lx1 = Lx & 3;
-	__asm
-	{
-		push	esi
-		push	edi
-		mov		edx, Ly
-		or edx, edx
-		jz		lpp4
-		mov		esi, scof
-		mov		edi, reof
-		cld
-		lpp1 : mov		ecx, Lx4
-			   jcxz	lpp2
-			   //		cli
-			   rep		movsd
-			   lpp2 : mov		ecx, Lx1
-					  jcxz	lpp3
-					  rep		movsb
-					  lpp3 :	//sti
-		add		esi, sadd
-			add		edi, radd
-			dec		edx
-			jnz		lpp1
-			lpp4 : pop		edi
-			pop		esi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Copy from ScreenPtr to RealScreenPtr using 4-byte chunks + remaining bytes
+	if (Ly > 0) {
+		byte* src = (byte*)scof;
+		byte* dst = (byte*)reof;
+		
+		for(int row = 0; row < Ly; row++) {
+			// Copy 4-byte chunks
+			uint32_t* src32 = (uint32_t*)src;
+			uint32_t* dst32 = (uint32_t*)dst;
+			for(int i = 0; i < Lx4; i++) {
+				dst32[i] = src32[i];
+			}
+			
+			// Copy remaining bytes
+			byte* srcRem = src + (Lx4 * 4);
+			byte* dstRem = dst + (Lx4 * 4);
+			for(int i = 0; i < Lx1; i++) {
+				dstRem[i] = srcRem[i];
+			}
+			
+			// Move to next row
+			src += SCRSizeX;
+			dst += RSCRSizeX;
+		}
 	}
 }
 
@@ -4964,29 +4957,31 @@ void CopyToOffScreen( int zx, int zy,
 	int radd = SCRSizeX - Lx;
 	int Lx4 = Lx >> 2;
 	int Lx1 = Lx & 3;
-	__asm {
-		push	esi
-		push	edi
-		mov		edx, Ly
-		or edx, edx
-		jz		lpp4
-		mov		esi, scof
-		mov		edi, reof
-		cld
-		lpp1 : mov		ecx, Lx4
-			   jcxz	lpp2
-			   //		cli
-			   rep		movsd
-			   lpp2 : mov		ecx, Lx1
-					  jcxz	lpp3
-					  rep		movsb
-					  lpp3 :	//sti
-		add		esi, sadd
-			add		edi, radd
-			dec		edx
-			jnz		lpp1
-			lpp4 : pop		edi
-			pop		esi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Copy from data buffer to ScreenPtr using 4-byte chunks + remaining bytes
+	if (Ly > 0) {
+		byte* src = (byte*)scof;
+		byte* dst = (byte*)reof;
+		
+		for(int row = 0; row < Ly; row++) {
+			// Copy 4-byte chunks
+			uint32_t* src32 = (uint32_t*)src;
+			uint32_t* dst32 = (uint32_t*)dst;
+			for(int i = 0; i < Lx4; i++) {
+				dst32[i] = src32[i];
+			}
+			
+			// Copy remaining bytes
+			byte* srcRem = src + (Lx4 * 4);
+			byte* dstRem = dst + (Lx4 * 4);
+			for(int i = 0; i < Lx1; i++) {
+				dstRem[i] = srcRem[i];
+			}
+			
+			// Move to next row
+			src += srLx;
+			dst += SCRSizeX;
+		}
 	};
 };
 void CopyToRealScreenMMX( int zx, int zy,

@@ -3691,19 +3691,16 @@ void HandleGeology()
 				if ( x > 0 && x < MiniLx&&y>0 && y < MiniLy )
 				{
 					int ofst = int( ScreenPtr ) + x + minix + ( miniy + y )*ScrWidth;
-					__asm {
-						push	edi
-						mov		edi, ofst
-						mov		edx, ScrWidth
-						mov		al, 0xFB
-						mov[edi], al
-						mov[edi + 1], al
-						mov[edi - 1], al
-						mov[edi + edx], al
-						neg     edx
-						mov[edi + edx], al
-						pop		edi
-					};
+					// REFACTORED: Replaced x86 assembly with C++ equivalent
+					// Draw a cross pattern (5 pixels in + shape) with color 0xFB
+					byte* screen = (byte*)ofst;
+					byte color = 0xFB;
+					
+					screen[0] = color;           // center
+					screen[1] = color;           // right
+					screen[-1] = color;          // left
+					screen[ScrWidth] = color;    // down
+					screen[-ScrWidth] = color;   // up
 				};
 			};
 		};

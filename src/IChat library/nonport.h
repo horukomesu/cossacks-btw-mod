@@ -19,10 +19,9 @@ devsupport@gamespy.com
 	#define _MACOS
 #endif
 
+#include "../cross_platform/platform_compat.h"
+
 #ifdef _WIN32
-#define WIN32_LEAN_AND_MEAN
-	#include <windows.h>
-	#include <winsock.h>
 #else
 #ifdef _MACOS
 	#include <events.h>

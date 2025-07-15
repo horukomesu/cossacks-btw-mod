@@ -1,0 +1,7 @@
+{
+	"InstallScripts" : 
+	[
+		"C:/coding/CPP/cossacks-revamp-2017-master/build_cross_platform/cmake_install.cmake"
+	],
+	"Parallel" : false
+}

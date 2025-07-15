@@ -82,20 +82,16 @@ static int dd=0;
 int CheckSum;
 void AddCS(void* Src,int sz){
     int cc=int(Src);
-    __asm{
-        push    esi
-        xor     eax,eax
-        mov     ecx,sz
-        shr     ecx,2
-        jcxz    kpp
-        mov     esi,cc
-kpp0:   add     eax,[esi]
-        add     esi,4
-        dec     ecx
-        jnz     kpp0
-kpp:    add     CheckSum,eax
-        pop     esi
-    };
+    // REFACTORED: Replaced x86 assembly with C++ equivalent
+    uint32_t* ptr = (uint32_t*)Src;
+    uint32_t checksum = 0;
+    int count = sz / 4;  // Number of 4-byte chunks
+    
+    for(int i = 0; i < count; i++) {
+        checksum += ptr[i];
+    }
+    
+    CheckSum += checksum;
 };
 /*
 void CreateProtection(){

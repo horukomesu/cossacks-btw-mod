@@ -1,0 +1,298 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\raylib_main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\raylib_graphics.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\graphics\directdraw_compat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\audio\raylib_audio.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\input\raylib_input.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\utils\raylib_utils.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\cross_platform\platform_compat.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Ddex1.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DBars.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DGraph.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DMapEd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DRandMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\3DSurf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ActiveScenary.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ActiveZone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\AntiBug.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ArchTool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\bmptool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Brigade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Build.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Cdirsnd.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Chkinet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ConstStr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Cwave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Danger.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Ddini.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\DeviceCD.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\DrawForms.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Economy.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\EinfoClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ExConst.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Fastdraw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\fog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Fractal.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\GameSound.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\GP_Draw.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Graphs.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Groups.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\gText.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\GVClass.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Hint.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Icontool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Interface.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\IR_Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Lines.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\LoadSave.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\mapa.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\MapSprites.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Masks.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Megapolis.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\menu.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Mine.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Motion.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Mouse_X.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\MousZone.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\MPlayer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Multi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Nation.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Nature.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Navorots.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewAI.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewILogin.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewMon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewUpgrade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Nuclear.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\OnWater.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\path.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\RealWater.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Recorder.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Report.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Resfile.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\River.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\SafeNet.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\SaveNewMap.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Select.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\SelProp.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ShipTrace.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\StrategyResearch.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\stRecog.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Stringshash.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\testserver.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Timing.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Tmixer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\TopoGraf.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Transport.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\UdpHolePuncher.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\UnRar.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\UnSyncro.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Upgrade.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\VirtScr.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\walls.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Waves.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Weapon.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ZBuffer.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="C:\coding\CPP\cossacks-revamp-2017-master\CMakeLists.txt" />
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{70A82ACC-2E1C-3535-B153-53523E49605F}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

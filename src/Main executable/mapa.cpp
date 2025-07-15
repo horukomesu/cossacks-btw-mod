@@ -414,20 +414,15 @@ void RedSquare( int x, int y )
 		( ( ( y - mapy ) << 5 ) + smapy )*SCRSizeX;
 
 	int ddx = SCRSizeX + SCRSizeX - 32;
-	__asm
-	{
-		push	edi
-		mov		edi, sco
-		mov		eax, 16
-		uyu:	mov		ecx, 16
-				uuu : mov		byte ptr[edi], clrRed
-					  add		edi, 2
-					  loop	uuu
-					  add		edi, ddx
-					  dec		al
-					  jnz		uyu
-
-					  pop		edi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Draw a 16x16 red square using 2-byte pixels
+	byte* screen = (byte*)sco;
+	int stride = SCRSizeX;
+	
+	for(int row = 0; row < 16; row++) {
+		for(int col = 0; col < 16; col++) {
+			screen[row * stride + col * 2] = clrRed;
+		}
 	}
 }
 
@@ -442,20 +437,15 @@ void RedMiniSquare( int x, int y )
 		( ( ( y - mapy ) << 4 ) + smapy )*SCRSizeX;
 
 	int ddx = SCRSizeX + SCRSizeX - 16;
-	__asm
-	{
-		push	edi
-		mov		edi, sco
-		mov		eax, 8
-		uyu:	mov		ecx, 8
-				uuu : mov		byte ptr[edi], clrRed
-					  add		edi, 2
-					  loop	uuu
-					  add		edi, ddx
-					  dec		al
-					  jnz		uyu
-
-					  pop		edi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Draw an 8x8 red square using 2-byte pixels
+	byte* screen = (byte*)sco;
+	int stride = SCRSizeX;
+	
+	for(int row = 0; row < 8; row++) {
+		for(int col = 0; col < 8; col++) {
+			screen[row * stride + col * 2] = clrRed;
+		}
 	}
 }
 
@@ -479,19 +469,15 @@ void WhiteSquare( int x, int y )
 	int sco = int( ScreenPtr ) + smapx + ( ( x - mapx ) << 5 ) +
 		( ( ( y - mapy ) << 5 ) + smapy )*SCRSizeX;
 	int ddx = SCRSizeX + SCRSizeX - 32;
-	__asm {
-		push	edi
-		mov		edi, sco
-		mov		eax, 16
-		uyu:	mov		ecx, 16
-				uuu : mov		byte ptr[edi], 255
-					  add		edi, 2
-					  loop	uuu
-					  add		edi, ddx
-					  dec		al
-					  jnz		uyu
-
-					  pop		edi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Draw a 16x16 white square using 2-byte pixels
+	byte* screen = (byte*)sco;
+	int stride = SCRSizeX;
+	
+	for(int row = 0; row < 16; row++) {
+		for(int col = 0; col < 16; col++) {
+			screen[row * stride + col * 2] = 255;
+		}
 	}
 }
 
@@ -501,19 +487,15 @@ void WhiteMiniSquare( int x, int y )
 	int sco = int( ScreenPtr ) + smapx + ( ( x - mapx ) << 4 ) +
 		( ( ( y - mapy ) << 4 ) + smapy )*SCRSizeX;
 	int ddx = SCRSizeX + SCRSizeX - 16;
-	__asm {
-		push	edi
-		mov		edi, sco
-		mov		eax, 8
-		uyu:	mov		ecx, 8
-				uuu : mov		byte ptr[edi], 255
-					  add		edi, 2
-					  loop	uuu
-					  add		edi, ddx
-					  dec		al
-					  jnz		uyu
-
-					  pop		edi
+	// REFACTORED: Replaced x86 assembly with C++ equivalent
+	// Draw an 8x8 white square using 2-byte pixels
+	byte* screen = (byte*)sco;
+	int stride = SCRSizeX;
+	
+	for(int row = 0; row < 8; row++) {
+		for(int col = 0; col < 8; col++) {
+			screen[row * stride + col * 2] = 255;
+		}
 	};
 };
 void WhiteBar( int x, int y, int lx, int ly )

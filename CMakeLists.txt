@@ -16,8 +16,10 @@ set(SOURCES
     src/graphics/raylib_graphics.cpp
     src/graphics/directdraw_compat.cpp
     src/audio/raylib_audio.cpp
+    src/audio/raylib_audio_compat.cpp
     src/input/raylib_input.cpp
     src/utils/raylib_utils.cpp
+    src/cross_platform/platform_compat.cpp
     
     # Main executable files that actually exist
     "src/Main executable/Ddex1.cpp"
@@ -123,12 +125,32 @@ include_directories(
 # Create executable
 add_executable(${PROJECT_NAME} ${SOURCES})
 
-# Link raylib
-target_link_libraries(${PROJECT_NAME} raylib opengl32 gdi32 winmm)
+# Link libraries (cross-platform)
+target_link_libraries(${PROJECT_NAME} raylib)
 
-# Compiler definitions
+# Add platform-specific libraries only if needed
+if(WIN32)
+    # Only add Windows-specific libraries if absolutely necessary
+    target_link_libraries(${PROJECT_NAME} opengl32 gdi32 ws2_32)
+elseif(UNIX AND NOT APPLE)
+    # Linux-specific libraries
+    target_link_libraries(${PROJECT_NAME} pthread dl)
+elseif(APPLE)
+    # macOS-specific libraries
+    target_link_libraries(${PROJECT_NAME} pthread dl)
+endif()
+
+# Compiler definitions (cross-platform)
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     _CRT_SECURE_NO_WARNINGS
-    WIN32_LEAN_AND_MEAN
     PLATFORM_DESKTOP
 )
+
+# Add platform-specific definitions
+if(WIN32)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_WINDOWS)
+elseif(UNIX AND NOT APPLE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_LINUX)
+elseif(APPLE)
+    target_compile_definitions(${PROJECT_NAME} PRIVATE PLATFORM_MACOS)
+endif()

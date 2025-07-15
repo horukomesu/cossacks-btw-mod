@@ -5,11 +5,18 @@
 #ifndef DIRECTDRAW_COMPAT_H
 #define DIRECTDRAW_COMPAT_H
 
-#include <windows.h>
-#include <ddraw.h>
+#include "../cross_platform/platform_compat.h"
 #include <stdlib.h>
 #include <cstdarg>
 #include "raylib_graphics.h"
+
+// DirectDraw compatibility types
+struct IDirectDraw;
+struct IDirectDrawSurface;
+struct IDirectDrawPalette;
+typedef IDirectDraw* LPDIRECTDRAW;
+typedef IDirectDrawSurface* LPDIRECTDRAWSURFACE;
+typedef IDirectDrawPalette* LPDIRECTDRAWPALETTE;
 
 // DirectDraw compatibility structures and globals
 extern LPDIRECTDRAW            lpDD;           // DirectDraw object (null, for compatibility)

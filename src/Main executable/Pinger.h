@@ -5,7 +5,7 @@
 /*
 #include <Winsock2.h>
 #include <WS2tcpip.h>
-#include <Windows.h>
+#include "../cross_platform/platform_compat.h"
 #include <assert.h>
 */
 #if _MSC_VER > 1000
