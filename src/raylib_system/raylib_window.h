@@ -105,7 +105,7 @@ extern RaylibInputState g_input_state;
 void UpdateRaylibInput(void);
 
 // Get current input state
-const RaylibInputState* GetInputState(void);
+const RaylibInputState* GetRaylibInputState();
 
 // =============================================================================
 // GAME-SPECIFIC GLOBALS (replacing Windows globals)
@@ -141,7 +141,7 @@ extern short WheelDelta;
 // =============================================================================
 
 // Get time in milliseconds (replaces GetTickCount)
-unsigned long GetTickCount(void);
+unsigned long GetRaylibTickCount(void);
 
 // Get real time (replaces GetRealTime)
 unsigned long GetRealTime(void);
@@ -153,7 +153,7 @@ void SaveScreen(void);
 void SetCursorPosition(int x, int y);
 
 // Show/hide cursor
-void ShowCursor(bool show);
+int ShowRaylibCursor(int show);
 
 // Get system metrics equivalent
 int GetSystemMetrics(int metric);

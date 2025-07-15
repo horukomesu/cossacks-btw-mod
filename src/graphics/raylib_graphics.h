@@ -11,6 +11,9 @@ struct RaylibTexture;
 struct RaylibSurface;
 struct RaylibPalette;
 
+// Use raylib's Rectangle type with namespace to avoid Windows conflicts
+using RaylibRectangle = ::Rectangle;
+
 // Raylib Graphics System
 class RaylibGraphics
 {
@@ -33,7 +36,7 @@ private:
     std::unordered_map<std::string, std::vector<Color>> palettes;
     
     // Sprite batching
-    std::vector<Rectangle> sprite_batch;
+    std::vector<RaylibRectangle> sprite_batch;
     
 public:
     RaylibGraphics();
@@ -66,12 +69,12 @@ public:
     
     // Sprite drawing
     void DrawSprite(const std::string& texture_name, int x, int y);
-    void DrawSprite(const std::string& texture_name, int x, int y, Rectangle src);
-    void DrawSprite(const std::string& texture_name, int x, int y, Rectangle src, Color tint);
-    void DrawSprite(const std::string& texture_name, int x, int y, Rectangle src, Color tint, float rotation, Vector2 origin, float scale);
+    void DrawSprite(const std::string& texture_name, int x, int y, RaylibRectangle src);
+    void DrawSprite(const std::string& texture_name, int x, int y, RaylibRectangle src, Color tint);
+    void DrawSprite(const std::string& texture_name, int x, int y, RaylibRectangle src, Color tint, float rotation, Vector2 origin, float scale);
     
     // Primitive drawing
-    void DrawRectangle(int x, int y, int width, int height, Color color);
+    void DrawRectangle(RaylibRectangle rect, Color color);
     void DrawRectangleLines(int x, int y, int width, int height, Color color);
     void DrawCircle(int x, int y, float radius, Color color);
     void DrawLine(int x1, int y1, int x2, int y2, Color color);
@@ -111,7 +114,7 @@ public:
     // Batch operations
     void BeginSpriteBatch();
     void EndSpriteBatch();
-    void AddToBatch(const std::string& texture_name, Rectangle src, Rectangle dest);
+    void AddToBatch(const std::string& texture_name, RaylibRectangle src, RaylibRectangle dest);
     void DrawBatch();
     
     // Error handling

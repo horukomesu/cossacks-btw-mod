@@ -1,0 +1,13 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="17.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <CustomBuild Include="C:\coding\CPP\cossacks-revamp-2017-master\build_singleplayer\CMakeFiles\dc81633134e58966762a22a4604dae84\generate.stamp.rule">
+      <Filter>CMake Rules</Filter>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <Filter Include="CMake Rules">
+      <UniqueIdentifier>{8FB6D0F0-5E4D-339E-A380-05A6A0FA5F7A}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+</Project>

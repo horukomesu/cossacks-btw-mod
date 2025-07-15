@@ -21,7 +21,10 @@ set(SOURCES
     src/utils/raylib_utils.cpp
     src/cross_platform/platform_compat.cpp
     
-    # Main executable files that actually exist
+    # Stub implementations for singleplayer mode
+    "src/Main executable/stubs.cpp"
+    
+    # Main executable files that actually exist (SINGLEPLAYER ONLY)
     "src/Main executable/Ddex1.cpp"
     "src/Main executable/3DBars.cpp"
     "src/Main executable/3DGraph.cpp"
@@ -71,8 +74,6 @@ set(SOURCES
     "src/Main executable/Motion.cpp"
     "src/Main executable/Mouse_X.cpp"
     "src/Main executable/MousZone.cpp"
-    "src/Main executable/MPlayer.cpp"
-    "src/Main executable/Multi.cpp"
     "src/Main executable/Nation.cpp"
     "src/Main executable/Nature.cpp"
     "src/Main executable/Navorots.cpp"
@@ -96,12 +97,10 @@ set(SOURCES
     "src/Main executable/StrategyResearch.cpp"
     "src/Main executable/stRecog.cpp"
     "src/Main executable/Stringshash.cpp"
-    "src/Main executable/testserver.cpp"
     "src/Main executable/Timing.cpp"
     "src/Main executable/Tmixer.cpp"
     "src/Main executable/TopoGraf.cpp"
     "src/Main executable/Transport.cpp"
-    "src/Main executable/UdpHolePuncher.cpp"
     "src/Main executable/UnRar.cpp"
     "src/Main executable/UnSyncro.cpp"
     "src/Main executable/Upgrade.cpp"
@@ -144,6 +143,7 @@ endif()
 target_compile_definitions(${PROJECT_NAME} PRIVATE
     _CRT_SECURE_NO_WARNINGS
     PLATFORM_DESKTOP
+    SINGLEPLAYER_ONLY
 )
 
 # Add platform-specific definitions

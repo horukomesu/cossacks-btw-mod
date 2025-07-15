@@ -46,10 +46,15 @@
 #include "IR.H"
 #include "bmptool.h"
 
-void StartExplorer();
-void FinExplorer();
-void RunExplorer( int Index, char* ref, int x, int y, int x1, int y1 );
-void ProcessExplorer( int Index );
+#ifdef SINGLEPLAYER_ONLY
+// Stub explorer functions
+void StartExplorer() { }
+void FinExplorer() { }
+void RunExplorer(int, char*, int, int, int, int) { }
+void ProcessExplorer(int) { }
+void ExplorerOpenRef(int, char*) { }
+#endif
+
 extern int ItemChoose;
 
 typedef char* fnGetAccessKey( int );
@@ -65,7 +70,6 @@ bool MCHOOSE( SimpleDialog* SD )
 
 char ACCESS[16] = "";
 void SlowLoadPalette( LPCSTR lpFileName );
-void ExplorerOpenRef( int Index, char* ref );
 void ShowCentralMessage( char* Message, int GPIDX );
 void DarkScreen();
 

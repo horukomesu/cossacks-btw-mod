@@ -627,6 +627,11 @@ __declspec( dllexport ) void GoHomeAnyway()
 
 bool WasHere = 0;
 
+// STUB VERSION - SINGLEPLAYER ONLY
+#ifdef SINGLEPLAYER_ONLY
+extern "C" int Process_GSC_ChatWindow(bool, RoomInfo*) { return 0; }
+#endif
+
 __declspec( dllexport ) int Process_GSC_ChatWindow( bool Active, RoomInfo* RIF )
 {
 	GRIF = RIF;
