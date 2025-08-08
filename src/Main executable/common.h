@@ -1,3 +1,9 @@
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef WINDOWS_IGNORE_PACKING_MISMATCH
+#define WINDOWS_IGNORE_PACKING_MISMATCH
+#endif
 #include <windows.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -52,7 +58,13 @@ extern __declspec(dllimport) bool KeyPressed;
 extern __declspec(dllimport) int NameChoose;
 extern __declspec(dllimport) int ItemChoose;
 extern __declspec(dllimport) char IPADDR[128];
+#ifdef NO_MULTIPLAYER
+extern __declspec(dllexport) int selected_network_protocol;
+extern __declspec(dllexport) bool use_gsc_network_protocol;
+#else
 extern __declspec(dllimport) int selected_network_protocol;
+extern __declspec(dllimport) bool use_gsc_network_protocol;
+#endif
 extern __declspec(dllimport) bool TOTALEXIT;
 extern __declspec(dllimport) int LastKey;
 

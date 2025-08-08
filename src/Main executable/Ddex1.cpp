@@ -37,7 +37,11 @@ DWORD window_style = WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_SYSMENU | WS_MI
 #include "3DSurf.h"
 #include "CDirSnd.h"
 #include "GSound.h"
+#ifndef NO_MULTIPLAYER
 #include "dplay.h"
+#else
+typedef unsigned long DPID;
+#endif
 #include "MapSprites.h"
 #include "VirtScreen.h"
 #include <crtdbg.h>
@@ -54,7 +58,9 @@ DWORD window_style = WS_OVERLAPPED | WS_BORDER | WS_CAPTION | WS_SYSMENU | WS_MI
 #include "GP_Draw.h"
 #include "Sort.h"
 #include "Recorder.h"
+#ifndef NO_MULTIPLAYER
 #include "MPlayer.h"
+#endif
 #include "EinfoClass.h"
 #include "3DmapEd.h"
 #include "ActiveScenary.h"
@@ -236,8 +242,13 @@ extern word rpos;
 extern BlockBars LockBars;
 extern BlockBars UnLockBars;
 extern CDirSound* CDS;
+#ifndef NO_MULTIPLAYER
 extern DPID MyDPID;
 extern DPID ServerDPID;
+#else
+extern DPID MyDPID;
+extern DPID ServerDPID;
+#endif
 
 __declspec( dllexport ) bool KeyPressed;
 __declspec( dllexport ) int LastKey;
@@ -2771,7 +2782,15 @@ void WaitToTime( int Time )
 
 int NeedCurrentTime = 0;
 extern bool PreNoPause;
+// Multiplayer disabled: provide minimal stubs when NO_MULTIPLAYER is defined
+#ifdef NO_MULTIPLAYER
+struct EXBUFFER { unsigned long Size; bool Enabled; unsigned long Sign; unsigned long RealTime; unsigned long RandIndex; unsigned char Data[4096]; };
+const int MaxPL = 8;
 extern EXBUFFER EBufs[MaxPL];
+extern DPID MyDPID;
+#else
+extern EXBUFFER EBufs[MaxPL];
+#endif
 void StopPlayCD();
 void ProcessUpdate();
 extern byte CaptState;
@@ -2921,6 +2940,7 @@ void PostDrawGameProcess()
 
 	if (difTime > MaxDT && !( PlayGameMode || SaveState == 6 ))
 	{
+		#ifndef NO_MULTIPLAYER
 		if (NPlayers > 1)
 		{
 			for (int i = 0; i < NPlayers; i++)
@@ -2946,6 +2966,9 @@ void PostDrawGameProcess()
 			}
 			//SaveGame("AUTO.sav",SaveFileName,0);
 		}
+		#else
+		if (false) {}
+		#endif
 		else
 		{
 			if (!EditMapMode)
@@ -3058,11 +3081,13 @@ void PrepareToGame()
 {
 	if (!PlayGameMode)
 	{
+		#ifndef NO_MULTIPLAYER
 		if (NPlayers > 1 && ( IsGameActive() || use_gsc_network_protocol ) && !RecordMode)
 		{
 			RecordMode = true;
 			sprintf( RECFILE, "Autorecord\\%s", CurrentMap );
 		}
+		#endif
 	}
 
 	RecordMode = true;//BUGFIX: always turn on recording
@@ -3278,11 +3303,9 @@ int PASCAL WinMain(
 		window_style = WS_POPUP;
 	}
 
-	//Init DirectDraw and find possible resolutions
-	EnumModesOnly();
-
-	//Create "Cossacks.reg" with Microsoft DirectPlay key
-	CreateReg();
+    //Init DirectDraw and find possible resolutions
+    EnumModesOnly();
+    // DirectPlay removed: do not create registry entries
 
 	//Load unrar.dll, call CGSCset::gOpen() to load archives
 	if (!FilesInit())
@@ -3514,8 +3537,7 @@ int PASCAL WinMain(
 		//Check if window has focus
 		if (bActive)
 		{
-			//Load IntExplorer.dll
-			StartExplorer();
+            // IntExplorer disabled
 
 			//Main game loop (runs until Exit button is clicked)
 			AllGame();
@@ -3523,7 +3545,7 @@ int PASCAL WinMain(
 			ClearScreen();
 			UnLoading();
 			CloseExplosions();
-			ShutdownMultiplayer( 1 );
+            // multiplayer removed
 
 			//Distinguish between last window adn fullscreen resolutions
 			int ex_window_x, ex_window_y, ex_x, ex_y;
@@ -3564,8 +3586,7 @@ int PASCAL WinMain(
 
 			FilesExit();
 			StopPlayCD();
-			PostMessage( hwnd, WM_CLOSE, 0, 0 );
-			FinExplorer();
+            PostMessage( hwnd, WM_CLOSE, 0, 0 );
 		}
 	}
 	return msg.wParam;

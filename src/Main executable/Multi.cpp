@@ -908,7 +908,7 @@ void CmdSelAllShips( byte NI )
 
 extern word NPlayers;
 
-__declspec( dllimport ) void SendVictoryState( int ID, byte State );
+extern "C" void SendVictoryState( int ID, byte State );
 
 bool ProcessMessages();
 

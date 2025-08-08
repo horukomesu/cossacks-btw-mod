@@ -74,6 +74,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NO_MULTIPLAYER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <OutputFile>$(OutDir)$(TargetName)$(TargetExt)</OutputFile>
@@ -115,6 +116,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <AdditionalIncludeDirectories>
       </AdditionalIncludeDirectories>
+      <PreprocessorDefinitions>NO_MULTIPLAYER;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <FavorSizeOrSpeed>Neither</FavorSizeOrSpeed>
       <WholeProgramOptimization>false</WholeProgramOptimization>
     </ClCompile>
@@ -164,7 +166,7 @@
     <ClCompile Include="Brigade.cpp" />
     <ClCompile Include="Build.cpp" />
     <ClCompile Include="Cdirsnd.cpp" />
-    <ClCompile Include="Chkinet.cpp" />
+    <!-- <ClCompile Include="Chkinet.cpp" /> -->
     <ClCompile Include="ConstStr.cpp" />
     <ClCompile Include="Cwave.cpp" />
     <ClCompile Include="Danger.cpp" />
@@ -201,6 +203,7 @@
     <ClCompile Include="Motion.cpp" />
     <ClCompile Include="Mouse_X.cpp" />
     <ClCompile Include="MousZone.cpp" />
+    <!-- Multiplayer kept for required globals even in NO_MULTIPLAYER build -->
     <ClCompile Include="MPlayer.cpp" />
     <ClCompile Include="Multi.cpp" />
     <ClCompile Include="Nation.cpp" />
@@ -210,7 +213,7 @@
     <ClCompile Include="NewCode\MapOptionsEncoder.cpp" />
     <ClCompile Include="NewCode\QueueManagement.cpp" />
     <ClCompile Include="NewCode\SecureDivision.cpp" />
-    <ClCompile Include="NewCode\UdpHolePuncher.cpp" />
+    <!-- <ClCompile Include="NewCode\UdpHolePuncher.cpp" /> -->
     <ClCompile Include="NewILogin.cpp" />
     <ClCompile Include="NewMon.cpp" />
     <ClCompile Include="NewUpgrade.cpp" />
@@ -243,6 +246,9 @@
     <ClCompile Include="Waves.cpp" />
     <ClCompile Include="Weapon.cpp" />
     <ClCompile Include="ZBuffer.cpp" />
+      <ClCompile Include="NetworkStubs.cpp" />
+      <ClCompile Include="CommCoreStubs.cpp" />
+      <ClCompile Include="PingerStubs.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="3DBars.h" />
@@ -263,7 +269,7 @@
     <ClInclude Include="Cdirsnd.h" />
     <ClInclude Include="CEngine\Goaceng.h" />
     <ClInclude Include="Chat\Chat.h" />
-    <ClInclude Include="CommCore.h" />
+    <!-- <ClInclude Include="CommCore.h" /> -->
     <ClInclude Include="common.h" />
     <ClInclude Include="Conststr.h" />
     <ClInclude Include="Ctables.h" />
@@ -275,9 +281,9 @@
     <ClInclude Include="Devicecd.h" />
     <ClInclude Include="Dialogs.h" />
     <ClInclude Include="Dialogs\InitFonts.h" />
-    <ClInclude Include="Dpchat.h" />
-    <ClInclude Include="Dplay.h" />
-    <ClInclude Include="Dplobby.h" />
+    <!-- <ClInclude Include="Dpchat.h" /> -->
+    <!-- <ClInclude Include="Dplay.h" /> -->
+    <!-- <ClInclude Include="Dplobby.h" /> -->
     <ClInclude Include="Drawform.h" />
     <ClInclude Include="Dsound.h" />
     <ClInclude Include="EinfoClass.h" />
@@ -306,11 +312,11 @@
     <ClInclude Include="Mgraph.h" />
     <ClInclude Include="Mode.h" />
     <ClInclude Include="Mouse.h" />
-    <ClInclude Include="Mplayer.h" />
-    <ClInclude Include="Multipl.h" />
+    <!-- <ClInclude Include="Mplayer.h" /> -->
+    <!-- <ClInclude Include="Multipl.h" /> -->
     <ClInclude Include="Nature.h" />
     <ClInclude Include="Newai.h" />
-    <ClInclude Include="NewCode\UdpHolePuncher.h" />
+    <!-- <ClInclude Include="NewCode\UdpHolePuncher.h" /> -->
     <ClInclude Include="NewMon.h" />
     <ClInclude Include="Newupgrade.h" />
     <ClInclude Include="Nonport.h" />
@@ -344,12 +350,13 @@
     <ClInclude Include="Zbuffer.h" />
   </ItemGroup>
   <ItemGroup>
-    <Library Include="..\Temp\CommCore.lib" />
-    <Library Include="..\Temp\IChat.lib" />
+    <!-- Remove deprecated multiplayer libs -->
+    <!-- <Library Include="..\Temp\CommCore.lib" /> -->
+    <!-- <Library Include="..\Temp\IChat.lib" /> -->
     <Library Include="libraries\Ddraw.lib" />
-    <Library Include="libraries\dplayx.lib" />
+    <!-- <Library Include="libraries\dplayx.lib" /> -->
     <Library Include="libraries\dsound.lib" />
-    <Library Include="libraries\Pinger.lib" />
+    <!-- <Library Include="libraries\Pinger.lib" /> -->
     <Library Include="libraries\ProTest.lib" />
     <Library Include="libraries\tntFileIO.lib" />
     <Library Include="libraries\Winmm.lib" />

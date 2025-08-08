@@ -1,3 +1,4 @@
+#include "ddini.h"
 #define MaxPL 8
 
 struct EXBUFFER
@@ -104,21 +105,21 @@ extern RoomInfo GlobalRIF;
 
 extern bool use_gsc_network_protocol;
 
-__declspec( dllimport ) int Process_GSC_ChatWindow( bool Active, RoomInfo* RIF );
-__declspec( dllimport ) void LeaveGSCRoom();
-__declspec( dllimport ) void StartGSCGame( char* Options, char* Map,
-	int NPlayers, int* Profiles, char** Nations, int* Teams, int* Colors );
+extern "C" int Process_GSC_ChatWindow( bool Active, RoomInfo* RIF );
+extern "C" void LeaveGSCRoom();
+extern "C" void StartGSCGame( char* Options, char* Map,
+    int NPlayers, int* Profiles, char** Nations, int* Teams, int* Colors );
 
 struct OnePlayerReport
 {
 	DWORD Profile;
 	byte State;
-	word Score;
-	word Population;
+    WORD Score;
+    WORD Population;
 	DWORD ReachRes[6];
-	word NBornP;
-	word NBornUnits;
+    WORD NBornP;
+    WORD NBornUnits;
 };
 
-__declspec( dllimport ) void ReportGSCGame( int time, int NPlayers, OnePlayerReport* OPR );
-__declspec( dllimport ) void ReportAliveState( int NPlayers, int* Profiles );
+extern "C" void ReportGSCGame( int time, int NPlayers, OnePlayerReport* OPR );
+extern "C" void ReportAliveState( int NPlayers, int* Profiles );

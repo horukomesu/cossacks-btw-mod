@@ -1,7 +1,4 @@
 #include "UdpHolePuncher.h"
-#include "../CommCore.h"
-
-extern CCommCore IPCORE;
 
 //Assigns host address and fills udp packet contents
 void UdpHolePuncher::Init( const char *server_addr, const unsigned short port,
@@ -59,9 +56,5 @@ void UdpHolePuncher::KeepAlive()
 	}
 
 	unsigned long current_time = GetTickCount();
-	if (interval_ < current_time - last_send_time_)
-	{
-		IPCORE.SendUdpHolePunch( (sockaddr *) &server_addr_, packet_.data(), packet_size_ );
-		last_send_time_ = current_time;
-	}
+    // networking removed
 }

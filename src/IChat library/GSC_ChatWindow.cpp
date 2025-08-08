@@ -614,7 +614,7 @@ void RunHTTPC()
 		&ProcessInformation );
 }
 
-__declspec( dllimport ) void ClearGChat();
+extern void ClearGChat();
 
 __declspec( dllimport ) void SetCurPtr( int v );
 

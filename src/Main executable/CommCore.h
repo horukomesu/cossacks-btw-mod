@@ -23,6 +23,74 @@
 #ifndef _COMM_CORE_H_INCLUDED_
 #define _COMM_CORE_H_INCLUDED_
 
+#if defined(NO_MULTIPLAYER)
+
+typedef unsigned short PEER_ID;
+typedef unsigned short* LPPEER_ID;
+typedef unsigned char BYTE;
+typedef BYTE* LPBYTE;
+typedef const char* LPCSTR;
+typedef char* LPSTR;
+typedef unsigned short u_short;
+typedef unsigned long DWORD;
+typedef int BOOL;
+struct sockaddr;
+struct sockaddr_in;
+
+class CCommCore
+{
+public:
+    typedef int (*LP_CC_IDLE_PROC)();
+    typedef int (*LP_CC_ENUM_PROC)( const PEER_ID, LPCSTR );
+    LP_CC_IDLE_PROC lpIdleProc;
+    LP_CC_ENUM_PROC lpEnumProc;
+
+    BOOL SendToPeer( PEER_ID, LPBYTE, u_short, BOOL = 0 ) { return 0; }
+    BOOL SendToAll( LPBYTE, u_short, BOOL = 0 ) { return 0; }
+    u_short ReceiveData( LPBYTE, LPPEER_ID = 0 ) { return 0; }
+    BOOL SendDropClient( PEER_ID ) { return 0; }
+    BOOL InitClient( LPCSTR, LPCSTR, unsigned short ) { return 0; }
+    BOOL DoneClient() { return 0; }
+    BOOL DoneServer() { return 0; }
+    BOOL DeletePeer( PEER_ID ) { return 0; }
+    BOOL InitServer( LPCSTR, LPCSTR ) { return 0; }
+    BOOL QueueProcess() { return 0; }
+    BOOL SendServerList() { return 0; }
+    BOOL IsOverNAT( PEER_ID ) { return 0; }
+    LPCSTR GetUserName( PEER_ID ) { return ""; }
+    BOOL SetUserName( LPCSTR ) { return 0; }
+    BOOL SendUserName() { return 0; }
+    BOOL SetSessionName( LPCSTR ) { return 0; }
+    BOOL GetUserData( PEER_ID, LPBYTE, u_short* ) { return 0; }
+    BOOL SetUserData( const LPBYTE, u_short ) { return 0; }
+    BOOL SendUserData() { return 0; }
+    BOOL SendUdpHolePunch( struct sockaddr*, char*, const int ) { return 0; }
+    void GetServerAddress( LPSTR ) {}
+    BOOL EnumPeers() { return 0; }
+    BOOL InitNetwork() { return 0; }
+    BOOL CloseNetwork() { return 0; }
+    BOOL IsClient() { return 0; }
+    BOOL IsServer() { return 0; }
+
+    CCommCore();
+    virtual ~CCommCore();
+
+    PEER_ID GetPeerID() { return 0; }
+    u_short GetPeersCount() { return 0; }
+    LPCSTR GetSessionName() { return ""; }
+    u_short GetMaxPeers() { return 0; }
+    void SetMaxPeers( u_short ) {}
+    void CloseSession() {}
+    void SetOptions( DWORD ) {}
+    DWORD GetOptions() { return 0; }
+    DWORD GetRxBytes() { return 0; }
+    DWORD GetTxBytes() { return 0; }
+    DWORD GetNxBytes() { return 0; }
+    DWORD GetRecvTimeOut() { return 0; }
+};
+
+#else
+
 #if _MSC_VER > 1000
 #pragma once
 #endif // _MSC_VER > 1000
@@ -499,5 +567,7 @@ protected:
 };
 
 #pragma warning (default : 4200)
+
+#endif // NO_MULTIPLAYER
 
 #endif // _COMM_CORE_H_INCLUDED_

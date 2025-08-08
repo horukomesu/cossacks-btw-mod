@@ -2,6 +2,19 @@
 #define _ICMP_PINGER_H_INCLUDED_
 
 #define _COOL_
+#ifdef NO_MULTIPLAYER
+class CPinger  {
+ public:
+     CPinger() {}
+     virtual ~CPinger() {}
+     int InitNetwork() { return 0; }
+     int DoneNetwork() { return 0; }
+     int SetTargetName(const char*) { return 0; }
+     int GetStatistic(unsigned char*, unsigned char*) { return 0; }
+     int SendEcho() { return 0; }
+     int RecvEcho() { return 0; }
+ };
+#else
 /*
 #include <Winsock2.h>
 #include <WS2tcpip.h>
@@ -66,5 +79,7 @@ protected:
 	BYTE			cTotal;
 
 };
+
+#endif // NO_MULTIPLAYER
 
 #endif // #ifndef _ICMP_PINGER_H_INCLUDED_

@@ -2875,8 +2875,7 @@ extern int MaxPeaceTime;
 
 extern int PeaceTimeStage;
 
-__declspec( dllimport )
-void GetGameID( char* s );
+extern "C" void GetGameID( char* s );
 
 void PreSaveGame( SaveBuf* SB, char* Messtr, int ID )
 {

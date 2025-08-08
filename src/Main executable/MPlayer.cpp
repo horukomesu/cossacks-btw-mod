@@ -433,6 +433,14 @@ BOOL __stdcall IPCORE_EnumProc( const PEER_ID PeerID, LPCSTR lpcszPeerName )
 	return true;
 }
 
+#if defined(NO_MULTIPLAYER)
+// Wrapper to match CCommCore::LP_CC_ENUM_PROC in NO_MULTIPLAYER builds
+static int __cdecl IPCORE_EnumProc_CDECL( const PEER_ID PeerID, LPCSTR lpcszPeerName )
+{
+    return IPCORE_EnumProc( PeerID, lpcszPeerName );
+}
+#endif
+
 int GetLastAnswerT( DWORD ID );
 void ShowCentralMessage( char* Message, int GPIDX );
 void DelBADPL();
@@ -488,7 +496,11 @@ bool PIEnumeratePlayers( PlayerInfo* PIN, bool DoMsg )
 
 	if (DoNewInet)
 	{
+#if defined(NO_MULTIPLAYER)
+		IPCORE.lpEnumProc = &IPCORE_EnumProc_CDECL;
+#else
 		IPCORE.lpEnumProc = &IPCORE_EnumProc;
+#endif
 		IPCORE.EnumPeers();
 	}
 	else

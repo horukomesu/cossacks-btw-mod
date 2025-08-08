@@ -15,8 +15,10 @@
 #include "Megapolis.h"
 #include "Dialogs.h"
 #include "fonts.h"
+#ifndef NO_MULTIPLAYER
 #include "dpchat.h"
 #include "dplobby.h"
+#endif
 #include "GSound.h"
 #include "3DGraph.h"
 #include "3DMapEd.h"
@@ -32,7 +34,9 @@
 #include "DrawForm.h"
 #include "Conststr.h"
 #include <Process.h>
+#ifndef NO_MULTIPLAYER
 #include "MPlayer.h"
+#endif
 #include "Recorder.h"
 #include "GSINC.H"
 #define NOGRAF

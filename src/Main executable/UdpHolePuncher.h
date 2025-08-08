@@ -3,9 +3,12 @@
 #include <vector>
 #include <string>
 #include <cstring>
-#include <Winsock2.h>
-#include <WS2tcpip.h>
-#include <Windows.h>
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#include <winsock2.h>
+#include <ws2tcpip.h>
+#include <windows.h>
 
 /*
 	Helper class for setting up and keeping alive a dummy udp connection to server.
@@ -28,4 +31,4 @@ private:
 };
 
 //IntExplorer.dll
-__declspec( dllimport ) char* GetAccessKey( int Index );
+extern "C" char* GetAccessKey( int Index );

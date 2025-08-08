@@ -36,11 +36,12 @@
 #include "Dialogs.h"
 #include "Path.h"
 #include "Sort.h"
-#include "MPlayer.h"
+#include "Mplayer.h"
 #include "Graphs.h"
 
 #include "PlayerInfo.h"
 extern PlayerInfo PINFO[8];
+// PSUMM is provided by multiplayer subsystem (declared in Mplayer.h)
 
 extern const int kMinorMessageDisplayTime;
 

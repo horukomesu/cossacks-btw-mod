@@ -1,4 +1,179 @@
-﻿     Creating library ../Temp/dmcr.lib and object ../Temp/dmcr.exp
-  Generating code
-  Finished generating code
+﻿  3DBars.cpp
+  3DGraph.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file '3DGraph.cpp')
+  
+  3DMapEd.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file '3DMapEd.cpp')
+  
+  3DRandMap.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file '3DRandMap.cpp')
+  
+  3DSurf.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file '3DSurf.cpp')
+  
+  ActiveScenary.cpp
+  ActiveZone.cpp
+  AntiBug.cpp
+  ArchTool.cpp
+  GSCarch.cpp
+  GSCset.cpp
+  isiMasks.cpp
+  bmptool.cpp
+  Brigade.cpp
+  Build.cpp
+  Cdirsnd.cpp
+  ConstStr.cpp
+  Cwave.cpp
+  Danger.cpp
+  Ddex1.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Ddex1.cpp')
+  
+  Generating Code...
+  Compiling...
+  Ddini.cpp
+  DeviceCD.cpp
+  Dialogs.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Dialogs.cpp')
+  
+  DrawForms.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'DrawForms.cpp')
+  
+  Economy.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Economy.cpp')
+  
+  EinfoClass.cpp
+  ExConst.cpp
+  Fastdraw.cpp
+  fog.cpp
+  Fractal.cpp
+  GameSound.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'GameSound.cpp')
+  
+  GP_Draw.cpp
+  Graphs.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Graphs.cpp')
+  
+  Groups.cpp
+  gText.cpp
+  GVClass.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'GVClass.cpp')
+  
+  Hint.cpp
+  HttpComm.cpp
+  Icontool.cpp
+  Interface.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Interface.cpp')
+  
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Interface.cpp(11177,50): warning C4211: nonstandard extension used: redefined extern to static
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Interface.cpp(11178,50): warning C4211: nonstandard extension used: redefined extern to static
+  Generating Code...
+  Compiling...
+  IR_Main.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'IR_Main.cpp')
+  
+  Lines.cpp
+  LoadSave.cpp
+  mapa.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'mapa.cpp')
+  
+  MapSprites.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'MapSprites.cpp')
+  
+  Masks.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Masks.cpp')
+  
+  Megapolis.cpp
+  menu.cpp
+  Mine.cpp
+  Motion.cpp
+  Mouse_X.cpp
+  MousZone.cpp
+  MPlayer.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'MPlayer.cpp')
+  
+  Multi.cpp
+  Nation.cpp
+  Nature.cpp
+  Navorots.cpp
+  NewAI.cpp
+  MapOptionsEncoder.cpp
+  QueueManagement.cpp
+  Generating Code...
+  Compiling...
+  SecureDivision.cpp
+  NewILogin.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'NewILogin.cpp')
+  
+  NewMon.cpp
+  NewUpgrade.cpp
+  Nuclear.cpp
+  OnWater.cpp
+  path.cpp
+  RealWater.cpp
+  Recorder.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Recorder.cpp')
+  
+  Report.cpp
+  Resfile.cpp
+  River.cpp
+  SafeNet.cpp
+  SaveNewMap.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'SaveNewMap.cpp')
+  
+  Select.cpp
+  SelProp.cpp
+  ShipTrace.cpp
+  StrategyResearch.cpp
+  stRecog.cpp
+  Stringshash.cpp
+  Generating Code...
+  Compiling...
+  testserver.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'testserver.cpp')
+  
+  Timing.cpp
+  Tmixer.cpp
+  TopoGraf.cpp
+  Transport.cpp
+  UnRar.cpp
+  UnSyncro.cpp
+  Upgrade.cpp
+  VirtScr.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'VirtScr.cpp')
+  
+  walls.cpp
+  Waves.cpp
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
+  (compiling source file 'Waves.cpp')
+  
+  Weapon.cpp
+  ZBuffer.cpp
+  NetworkStubs.cpp
+  CommCoreStubs.cpp
+  PingerStubs.cpp
+  Generating Code...
+     Creating library ../Temp/dmcr.lib and object ../Temp/dmcr.exp
+  LINK : /LTCG specified but no code generation required; remove /LTCG from the link command line to improve linker performance
   Cossacks.vcxproj -> C:\coding\CPP\cossacks-revamp-2017-master\src\Testing\dmcr.exe

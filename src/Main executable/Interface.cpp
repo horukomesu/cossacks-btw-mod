@@ -1,6 +1,4 @@
-//If you don't include UdpHolePuncher.h first,
-//it's winsock includes will mess up the project >_<
-#include "NewCode/UdpHolePuncher.h"
+// Multiplayer/networking retained only for headers; external libs removed
 
 #include "ddini.h"
 #include "ResFile.h"
@@ -19,8 +17,10 @@
 #include "Megapolis.h"
 #include "Dialogs.h"
 #include "fonts.h"
+#ifndef NO_MULTIPLAYER
 #include "dpchat.h"
 #include "dplobby.h"
+#endif
 #include "GSound.h"
 #include "3DGraph.h"
 #include "3DMapEd.h"
@@ -35,7 +35,9 @@
 #include "DrawForm.h"
 #include "Conststr.h"
 #include <Process.h>
+#ifndef NO_MULTIPLAYER
 #include "MPlayer.h"
+#endif
 #include "Recorder.h"
 #include "GSINC.H"
 #include "TopoGraf.h"
@@ -47,10 +49,60 @@
 #include "IR.H"
 #include "bmptool.h"
 
+#ifdef NO_MULTIPLAYER
+// Minimal dummies to compile without DirectPlay headers/symbols
+typedef unsigned long DPID;
+struct DPNAME {
+    unsigned long dwSize;
+    unsigned long dwFlags;
+    char* lpszShortNameA;
+    char* lpszLongNameA;
+};
+typedef void* LPDIRECTPLAY3A;
+typedef void* LPDIRECTPLAYLOBBYA;
+typedef void* LPDIRECTPLAYLOBBY2A;
+typedef DPNAME* LPDPNAME;
+
+// Flags/macros referenced by UI sync code
+#ifndef DPSET_REMOTE
+#define DPSET_REMOTE 0x00000000
+#endif
+#ifndef DP_OK
+#define DP_OK 0
+#endif
+
+// Minimal RoomInfo used by UI helpers
+struct RoomInfo
+{
+    char Name[128];
+    char Nick[64];
+    char RoomIP[32];
+    unsigned long Profile;
+    char GameID[64];
+    int MaxPlayers;
+    long player_id;
+    unsigned short port;
+    unsigned udp_interval;
+    char udp_server[16];
+};
+
+// Stats report structure used in UI/game reporting
+struct OnePlayerReport
+{
+    unsigned long Profile;
+    unsigned char State;
+    unsigned short Score;
+    unsigned short Population;
+    unsigned long ReachRes[6];
+    unsigned short NBornP;
+    unsigned short NBornUnits;
+};
+#endif
+
 #include "PlayerInfo.h"
 extern PlayerInfo PINFO[8];
 
-UdpHolePuncher udp_hole_puncher;
+// IChat/CommCore symbols are provided by local stubs to decouple from external DLLs
 
 extern const int kChatMessageDisplayTime;
 extern const int kSystemMessageDisplayTime;
@@ -62,11 +114,17 @@ extern word dwVersion;
 
 extern int exFMode;
 
-//Was used to distinguish between GameSpy and GSC-Game.Net
-//Probably obsolete, but could also be some sort of "game active" indicator
+#ifdef NO_MULTIPLAYER
+__declspec(dllexport) bool use_gsc_network_protocol = false;
+#else
 bool use_gsc_network_protocol = false;
+#endif
 
+#ifdef NO_MULTIPLAYER
+__declspec(dllexport) RoomInfo GlobalRIF{};
+#else
 RoomInfo GlobalRIF;
+#endif
 
 int GetGSC_Profile()
 {
@@ -90,14 +148,22 @@ char* GetLString( DWORD DPID );
 
 void ShowLoading();
 
-//Selected network protocol for multiplayer
-//0 = IPX Network
-//1 = TCP/IP LAN Connection
-//2 = Direct TCP/IP
-//3 = GSC-Game.Net Internet Game
-//Set in MPL_ChooseConnection()
-//When (3): use_gsc_network_protocol = true
+#ifdef NO_MULTIPLAYER
+__declspec(dllexport) int selected_network_protocol = 0;
+#else
 int selected_network_protocol = 0;
+#endif
+
+#ifdef NO_MULTIPLAYER
+// Stub external multiplayer APIs so linking succeeds
+struct OnePlayerReport;
+extern "C" __declspec(dllexport) void ReportGSCGame( int, int, OnePlayerReport* ) {}
+extern "C" __declspec(dllexport) void ReportAliveState( int, int* ) {}
+extern "C" __declspec(dllexport) int Process_GSC_ChatWindow( bool, RoomInfo* ) { return 0; }
+extern "C" __declspec(dllexport) void LeaveGSCRoom() {}
+extern "C" __declspec(dllexport) void StartGSCGame( char*, char*, int, int*, char**, int*, int* ) {}
+extern "C" __declspec(dllexport) void ChatProcess() {}
+#endif
 
 extern char CHATSTRING[256];
 extern DWORD CHATDPID;
@@ -269,7 +335,7 @@ void EndGSC_Reporting()
 {
 	NeedToReportInGameStats = 0;
 	NeedToPerformGSC_Report = 0;
-	LeaveGSCRoom();
+    // networking removed
 }
 
 void ProcessExplorer( int Index );
@@ -317,6 +383,7 @@ __declspec( dllexport ) bool ProcessMessages()
 	if ( NeedToPerformGSC_Report )
 	{
 		int T = GetTickCount();
+    #ifndef NO_MULTIPLAYER
 		if ( !PrevReportTime )
 		{
 			PrevReportTime = T;
@@ -339,8 +406,10 @@ __declspec( dllexport ) bool ProcessMessages()
 				PrevReportTime = T;
 			}
 		}
+    #endif
 	}
 
+    #ifndef NO_MULTIPLAYER
 	if ( NeedToReportInGameStats && use_gsc_network_protocol )
 	{
 		if ( tmtmt - LastTimeReport_tmtmt >= 256 )
@@ -400,6 +469,7 @@ __declspec( dllexport ) bool ProcessMessages()
 			LastTimeReport_tmtmt = tmtmt;
 		}
 	}
+    #endif
 
 	try
 	{
@@ -986,369 +1056,18 @@ extern char ACCESS[16];
 
 //Prepares multiplayer Deathmatch lobby
 //Also handles lobbies for Historical Battles over GSC network
-bool processMultiplayer()
-{
-	byte AddrBuf[128];
-	memset( AddrBuf, 0, 128 );
-
-	int connection_menu_result = 0;
-
-RetryConn:
-	if ( historical_battle_over_gsc_network )
-	{
-		//Skip network protocol selection
-		goto REC3;
-	}
-
-	connection_menu_result = MPL_ChooseConnection();
-
-	if ( TOTALEXIT )
-	{
-		return 0;
-	}
-
-	if ( connection_menu_result == mcmCancel )
-	{
-		return 0;
-	}
-
-	if ( selected_network_protocol == 3 )
-	{
-		//GSC-Game.Net Network Game
-	REC3:
-		//Show login menu
-		if ( !ProcessNewInternetLogin() )
-		{
-			return false;
-		}
-
-	REINCONN:
-		int r = ProcessInternetConnection( 1 );
-		if ( !r )
-		{
-			return 0;
-		}
-		if ( r == 2 )
-			connection_menu_result = 10;//Join
-		if ( r == 1 )
-			connection_menu_result = 11;//Host Deathmatch
-		if ( r == 3 )
-			connection_menu_result = 13;//Host Historical Battle
-	}
-	else
-	{
-		if ( !EnterName() )
-		{
-			return 0;
-		}
-	}
-
-	DoNewInet = 0;
-	if ( selected_network_protocol > 2 )//Not TCP/IP
-	{
-		DoNewInet = 1;
-	}
-
-	if ( !DoNewInet )
-	{
-		if ( !lpDirectPlay3A )
-		{
-			CreateMultiplaterInterface();
-			if ( !lpDirectPlay3A )
-			{
-				return 0;
-			}
-		}
-
-		LPDIRECTPLAYLOBBYA	lpDPlayLobbyA = nullptr;
-		LPDIRECTPLAYLOBBY2A	lpDPlayLobby2A = nullptr;
-
-		if FAILED( DirectPlayLobbyCreate( nullptr, &lpDPlayLobbyA, nullptr, nullptr, 0 ) )
-		{
-			return 0;
-		}
-
-		// get ANSI DirectPlayLobby2 interface
-		HRESULT hr = lpDPlayLobbyA->QueryInterface( IID_IDirectPlayLobby2A, (LPVOID *) &lpDPlayLobby2A );
-		if FAILED( hr )
-		{
-			return 0;
-		}
-
-		// don't need DirectPlayLobby interface anymore
-		lpDPlayLobbyA->Release();
-		lpDPlayLobbyA = nullptr;
-
-		DPCOMPOUNDADDRESSELEMENT	addressElements[3];
-		DWORD sz = 128;
-		char* cc = "";
-
-		if ( selected_network_protocol == 1 )
-		{
-			//TCP/IP LAN Connection
-			IPADDR[0] = 0;
-		}
-
-		addressElements[0].guidDataType = DPAID_ServiceProvider;
-		addressElements[0].dwDataSize = sizeof( GUID );
-		addressElements[0].lpData = (LPVOID) &DPSPGUID_TCPIP;
-		addressElements[1].guidDataType = DPAID_INet;
-		addressElements[1].dwDataSize = strlen( IPADDR ) + 1;
-		addressElements[1].lpData = (LPVOID) IPADDR;
-
-		lpDPlayLobby2A->CreateCompoundAddress( addressElements, 2, AddrBuf, &sz );
-		lpDPlayLobby2A->Release();
-
-		CloseMPL();
-		CreateMultiplaterInterface();
-
-		HRESULT HR = lpDirectPlay3A->InitializeConnection( AddrBuf, 0 );
-		if ( FAILED( HR ) )
-		{
-			goto RetryConn;
-		}
-	}
-	else
-	{
-		CloseMPL();
-		CreateMultiplaterInterface();
-	}
-
-	switch ( connection_menu_result )
-	{
-	case mcmHost:
-		if ( CreateNamedSession( PlName, 0, GMMAXPL ) )
-		{
-			WaitingHostGame( 0 );
-		}
-		break;
-
-	case mcmJoin:
-		MPL_JoinGame( 0 );
-		break;
-
-	case 11://Inet Host(Deathmatch)
-		PlayerMenuMode = 1;
-		if ( CreateSession( GlobalRIF.Name, GlobalRIF.Nick, 0, DoNewInet, GlobalRIF.MaxPlayers ) )
-		{
-			NeedToPerformGSC_Report = 1;
-
-			//Pass all necessary data and prepare UdpHolePuncher
-			udp_hole_puncher.Init( GlobalRIF.udp_server, GlobalRIF.port, GlobalRIF.udp_interval,
-				GlobalRIF.player_id, ACCESS );
-
-			WaitingHostGame( 0 );
-			NeedToPerformGSC_Report = 0;
-			if ( PlayerMenuMode == 1 )
-			{
-				//need to leave the room there
-				LeaveGSCRoom();
-				goto REINCONN;
-			}
-			else
-			{
-				char* PLAYERS[8];
-				int Profiles[8];
-				char NAT[8][32];
-				char* Nations[8];
-				int Teams[8];
-				int Colors[8];
-				for ( int i = 0; i < NPlayers; i++ )
-				{
-					PLAYERS[i] = PINFO[i].name;
-					sprintf( NAT[i], "%d", PINFO[i].NationID );
-					Nations[i] = NAT[i];
-					Profiles[i] = PINFO[i].ProfileID;
-					Teams[i] = PINFO[i].GroupID;
-					Colors[i] = PINFO[i].ColorID;
-				}
-				StartGSCGame( "", PINFO[0].MapName, NPlayers, Profiles, Nations, Teams, Colors );
-				NeedToReportInGameStats = 1;
-				LastTimeReport_tmtmt = 0;
-			}
-		}
-		else
-		{
-			LeaveGSCRoom();
-			goto REINCONN;
-		}
-		break;
-
-	case 13:
-		PlayerMenuMode = 1;
-		goto REINCONN;
-		break;
-
-	case 10://Inet Join(Deathmatch)
-		PlayerMenuMode = 1;
-		strcpy( IPADDR, GlobalRIF.RoomIP );
-		if ( !FindSessionAndJoin( ROOMNAMETOCONNECT, GlobalRIF.Nick, DoNewInet, GlobalRIF.port ) )
-		{
-			LeaveGSCRoom();
-			WaitWithMessage( GetTextByID( "ICUNJ" ) );
-		}
-		else
-		{
-			WaitingJoinGame( GMTYPE );
-		}
-
-		if ( PlayerMenuMode == 1 )
-		{
-			LeaveGSCRoom();
-			goto REINCONN;
-		}
-		else
-		{
-			char* PLAYERS[8];
-			int Profiles[8];
-			char NAT[8][32];
-			char* Nations[8];
-			int Teams[8];
-			int Colors[8];
-			for ( int i = 0; i < NPlayers; i++ )
-			{
-				PLAYERS[i] = PINFO[i].name;
-				sprintf( NAT[i], "%d", PINFO[i].NationID );
-				Nations[i] = NAT[i];
-				Profiles[i] = PINFO[i].ProfileID;
-				Teams[i] = PINFO[i].GroupID;
-				Colors[i] = PINFO[i].ColorID;
-			}
-			StartGSCGame( "", PINFO[0].MapName, NPlayers, Profiles, Nations, Teams, Colors );
-			NeedToReportInGameStats = 1;
-			LastTimeReport_tmtmt = 0;
-		}
-		break;
-	}
-
-	return 1;
-}
+#ifdef NO_MULTIPLAYER
+bool processMultiplayer() { return false; }
+#endif
 
 bool ProcessOneBattle( int BtlID );
 
 int ProcessWars();
 
 //Prepares multiplayer lobby for historical battles
-void processBattleMultiplayer()
-{
-
-TryConnection:
-
-	byte AddrBuf[128];
-	memset( AddrBuf, 0, 128 );
-
-	int connection_menu_result = MPL_ChooseConnection();
-
-	if ( TOTALEXIT )
-	{
-		return;
-	}
-
-	if ( connection_menu_result == mcmCancel )
-	{
-		return;
-	}
-
-	if ( selected_network_protocol == 3 )//GSC-Game.Net Internet Game
-	{
-		historical_battle_over_gsc_network = true;
-
-		processMultiplayer();
-
-		if ( TOTALEXIT )
-		{
-			return;
-		}
-
-		historical_battle_over_gsc_network = false;
-
-		return;
-	}
-
-	if ( !EnterName() )
-	{
-		return;
-	}
-
-	int BTLID = 1;
-
-	if ( connection_menu_result == mcmHost )
-	{
-		BTLID = ProcessWars();
-	}
-
-	if ( BTLID == -1 )
-	{
-		goto TryConnection;
-	}
-
-	if ( !lpDirectPlay3A )
-	{
-		CreateMultiplaterInterface();
-
-		if ( !lpDirectPlay3A )
-		{
-			return;
-		}
-
-		LPDIRECTPLAYLOBBYA	lpDPlayLobbyA = nullptr;
-		LPDIRECTPLAYLOBBY2A	lpDPlayLobby2A = nullptr;
-
-		if FAILED( DirectPlayLobbyCreate( nullptr, &lpDPlayLobbyA, nullptr, nullptr, 0 ) )
-		{
-			return;
-		}
-
-		// get ANSI DirectPlayLobby2 interface
-		HRESULT hr = lpDPlayLobbyA->QueryInterface( IID_IDirectPlayLobby2A, (LPVOID *) &lpDPlayLobby2A );
-		if FAILED( hr )
-		{
-			return;
-		}
-
-		// don't need DirectPlayLobby interface anymore
-		lpDPlayLobbyA->Release();
-		lpDPlayLobbyA = nullptr;
-		DPCOMPOUNDADDRESSELEMENT addressElements[3];
-		DWORD sz = 128;
-		char* cc = "";
-
-		switch ( selected_network_protocol )
-		{
-		case 1://TCP/IP LAN Connection
-		case 2://Direct TCP/IP
-			addressElements[0].guidDataType = DPAID_ServiceProvider;
-			addressElements[0].dwDataSize = sizeof( GUID );
-			addressElements[0].lpData = (LPVOID) &DPSPGUID_TCPIP;
-			addressElements[1].guidDataType = DPAID_INet;
-			addressElements[1].dwDataSize = strlen( IPADDR ) + 1;
-			addressElements[1].lpData = (LPVOID) IPADDR;
-			lpDPlayLobby2A->CreateCompoundAddress( addressElements, 2, AddrBuf, &sz );
-			break;
-		}
-
-		lpDPlayLobby2A->Release();
-
-		if FAILED( lpDirectPlay3A->InitializeConnection( AddrBuf, 0 ) )
-		{
-			return;
-		}
-	}
-
-	switch ( connection_menu_result )
-	{
-	case mcmHost:
-		if ( CreateNamedSession( PlName, BTLID + 1, 2 ) )
-		{
-			WaitingHostGame( BTLID + 1 );
-		}
-		break;
-
-	case mcmJoin:
-		MPL_JoinGame( BTLID + 1 );
-		break;
-	}
-}
+#ifdef NO_MULTIPLAYER
+void processBattleMultiplayer() { }
+#endif
 
 //--------------------MULTIPLAYER GAME---------------------//
 extern char SaveFileName[128];
@@ -1545,7 +1264,7 @@ bool SelectSingleMission();
 
 int MM_ProcessSinglePlayer()
 {
-	use_gsc_network_protocol = false;
+    // networking removed
 	SFLB_LoadPlayerData();
 	LoadFog( 2 );
 	LocalGP BTNS( "Interface\\Single_Player" );
@@ -1962,7 +1681,7 @@ int MPL_ChooseConnection()
 	SlowUnLoadPalette( "2\\agew_1.pal" );
 
 	//No GameSpy option anymore, only GSC-Game.Net
-	use_gsc_network_protocol = false;
+    // networking removed
 	if ( selected_network_protocol == 3 )
 	{
 		use_gsc_network_protocol = true;
@@ -2539,7 +2258,7 @@ extern bool RejectThisPlayer;
 
 bool INSIDE1 = 0;
 
-__declspec( dllimport ) void SendPrivateMessage( char* Nick, char* MESSAGE );
+extern "C" void SendPrivateMessage( char* Nick, char* MESSAGE );
 
 bool CheckForPersonalChat( char* STR )
 {
@@ -2624,10 +2343,8 @@ void SavePersChat()
 };
 
 //Returns Process_GSC_ChatWindow()
-int ProcessInternetConnection( bool Active )
-{
-	return Process_GSC_ChatWindow( Active, &GlobalRIF );
-}
+// Multiplayer removed: stub
+int ProcessInternetConnection( bool ) { return 0; }
 
 __declspec( dllexport ) void SendPings();
 
@@ -2664,6 +2381,10 @@ void SETPLAYERDATA( DWORD ID, void* Data, int size, bool );
 
 void SETPLAYERNAME( DPNAME* lpdpName, bool );
 
+// Forward declarations for multiplayer lobby flows referenced from single-player options
+bool MPL_WaitingGame( bool Host, bool SINGLE );
+bool MPL_WaitingBattleGame( bool Host, int BattleID );
+
 extern DPID ServerDPID;
 
 void ClearLPACK();
@@ -2674,15 +2395,13 @@ void DeepDeletePeer( DWORD ID );
 
 int GetMyProfile();
 
-__declspec( dllimport ) void ChatProcess();
+    // multiplayer removed
 
 //Shows lobby interface for multiplayer deathmatch and single player random map
+#if !defined(NO_MULTIPLAYER)
 bool MPL_WaitingGame( bool Host, bool SINGLE )
 {
-	if ( SINGLE )
-	{
-		use_gsc_network_protocol = false;
-	}
+    // networking removed
 
 	ClearLPACK();
 
@@ -3183,7 +2902,7 @@ ffe2:
 		CancelBtn->Hint = GetTextByID( "MOCANCEL" );
 	}
 
-	if ( use_gsc_network_protocol )
+    if ( false )
 	{
 		GP_Button* ENC = MENU.addGP_Button( nullptr, 862, 468, INCHAT.GPID, 9, 8 );
 		ENC->UserParam = 99;
@@ -3430,12 +3149,13 @@ ffe2:
 
 	do
 	{
-		if ( use_gsc_network_protocol )
+            if ( false )
 		{
+            #ifndef NO_MULTIPLAYER
 			ChatProcess();
+            #endif
 
-			//Call every iteration, UdpHolePuncher keeps track of intervals by itself
-			udp_hole_puncher.KeepAlive();
+            // networking removed
 
 			if ( CheckPersonality( CHATMESSAGE ) )
 			{
@@ -3443,10 +3163,7 @@ ffe2:
 			}
 		}
 
-		if ( Host )
-		{
-			ServerDPID = MyDPID;
-		}
+    // networking removed
 
 		ADD_OPT->Visible = 1;
 		ADD_OPT->Enabled = 1;
@@ -5954,6 +5671,7 @@ bool MPL_WaitingBattleGame( bool Host, int BattleID )
 	}
 	return ( ItemChoose == mcmOk ) || PlayerMenuMode != 1;//ItemChoose==mcmOk;
 }
+#endif // !defined(NO_MULTIPLAYER)
 
 void CreateNationalMaskForRandomMap( char* );
 void CreateMaskForSaveFile( char* );
@@ -5999,85 +5717,10 @@ bool SingleOptions()
 int ProcessWars();
 void processBattleMultiplayer();
 
-__declspec( dllimport ) void GoHomeAnyway();
+    // multiplayer removed
 
-int MM_ProcessMultiPlayer()
-{
-	GoHomeAnyway();
-
-	LocalGP BTNS( "Interface\\Multi_Player" );
-	LocalGP HFONT( "rom10" );
-	RLCFont hfnt( HFONT.GPID );
-	hfnt.SetWhiteColor();
-
-	SQPicture MnPanel( "Interface\\Background_Multi_Player.bmp" );
-	DialogsSystem MMenu( menu_x_off, menu_y_off );
-	MMenu.HintFont = &hfnt;
-	MMenu.HintY = menu_hint_y;
-	MMenu.HintX = menu_hint_x;
-	int Dy = 110;
-	Picture* PIC = MMenu.addPicture( nullptr, 0, 0, &MnPanel, &MnPanel, &MnPanel );
-	GP_Button* DeathM = MMenu.addGP_Button( nullptr, 76, 140 + Dy, BTNS.GPID, 0, 1 );
-	DeathM->UserParam = 1;
-	DeathM->OnUserClick = &MMItemChoose;
-	DeathM->Hint = GetTextByID( "MDEATHM" );
-	DeathM->AssignSound( GETS( "@MOUSESOUND" ), MOUSE_SOUND );
-	GP_Button* HistBatt = MMenu.addGP_Button( nullptr, 76, 140 + 82 + Dy, BTNS.GPID, 2, 3 );
-	HistBatt->UserParam = 2;
-	HistBatt->OnUserClick = &MMItemChoose;
-	HistBatt->Hint = GetTextByID( "MHISTBATT" );
-	HistBatt->AssignSound( GETS( "@MOUSESOUND" ), MOUSE_SOUND );
-	GP_Button* Back = MMenu.addGP_Button( nullptr, 76, 140 + 82 * 2 + Dy, BTNS.GPID, 4, 5 );
-	Back->UserParam = 5;
-	Back->OnUserClick = &MMItemChoose;
-	Back->Hint = GetTextByID( "MBACK" );
-	Back->AssignSound( GETS( "@MOUSESOUND" ), MOUSE_SOUND );
-	ItemChoose = -1;
-	UnPress();
-	Lpressed = 0;
-	LastKey = 0;
-	KeyPressed = 0;
-	int pp = 1;
-	do
-	{
-		ProcessMessages();
-		if ( KeyPressed&&LastKey == 27 )
-		{
-			ItemChoose = 5;
-			KeyPressed = 0;
-		};
-		MMenu.ProcessDialogs();
-		MMenu.RefreshView();
-		if ( pp )
-		{
-			SlowLoadPalette( "2\\agew_1.pal" );
-			pp = 0;
-		};
-
-		if ( ItemChoose == 2 && !WARS.NWars )
-		{
-			ItemChoose = -1;
-		}
-	} while ( ItemChoose == -1 );
-	SlowUnLoadPalette( "2\\agew_1.pal" );
-	if ( ItemChoose == 1 )
-	{
-		processMultiplayer();
-		if ( TOTALEXIT )
-		{
-			return mcmCancel;
-		}
-	}
-
-	if ( ItemChoose == 2 )
-	{
-		if ( WARS.NWars )
-		{
-			processBattleMultiplayer();
-		}
-	}
-	return ItemChoose;
-}
+// Multiplayer menu removed: return Back immediately
+int MM_ProcessMultiPlayer() { return mcmCancel; }
 
 
 /*
@@ -6564,11 +6207,15 @@ int processMainMenu()
 	Single->Hint = GetTextByID( "MMSINGLE" );
 	Single->AssignSound( GETS( "@MOUSESOUND" ), MOUSE_SOUND );
 
+#ifndef NO_MULTIPLAYER
+    #ifndef NO_MULTIPLAYER
 	GP_Button* Multi = MMenu.addGP_Button( nullptr, 76, 140 + 82, BTNS.GPID, 2, 3 );
 	Multi->UserParam = mcmMulti;
 	Multi->OnUserClick = &MMItemChoose;
 	Multi->Hint = GetTextByID( "MMMULTI" );
 	Multi->AssignSound( GETS( "@MOUSESOUND" ), MOUSE_SOUND );
+    #endif
+#endif
 
 	GP_Button* Load = MMenu.addGP_Button( nullptr, 76, 140 + 82 * 2, BTNS.GPID, 4, 5 );
 	Load->UserParam = mcmLoad;
@@ -6706,6 +6353,8 @@ int processMainMenu()
 			}
 		}
 
+#ifndef NO_MULTIPLAYER
+        #ifndef NO_MULTIPLAYER
 		if ( ItemChoose == mcmMulti )
 		{
 			SlowUnLoadPalette( "2\\agew_1.pal" );
@@ -6715,6 +6364,8 @@ int processMainMenu()
 				continue;
 			}
 		}
+        #endif
+#endif
 
 		if ( ItemChoose == mcmVideo )
 		{
@@ -6914,7 +6565,13 @@ void CmdLoadNetworkGame( byte NI, int ID, char* Name );
 
 void SFLB_LoadGame( char* fnm, bool LoadNation );
 
+#ifndef NO_MULTIPLAYER
 extern EXBUFFER EBufs[MaxPL];
+#else
+struct EXBUFFER { int Enabled; };
+static EXBUFFER EBufs_stub[8];
+#define MaxPL 8
+#endif
 DWORD MAPREPL[8];
 
 bool CheckFileIdentity( char* Name )
@@ -6964,6 +6621,7 @@ bool CheckFileIdentity( char* Name )
 
 		for ( int i = 0; i < NPlayers; i++ )
 		{
+            #ifndef NO_MULTIPLAYER
 			if ( EBufs[i].Enabled )
 			{
 				if ( MAPREPL[i] )
@@ -6978,6 +6636,7 @@ bool CheckFileIdentity( char* Name )
 					OK = 0;
 				}
 			}
+            #endif
 		}
 
 		if ( OK )
@@ -8103,7 +7762,7 @@ int ProcessGMainMenu()
 	GP_Button* SaveBtn = GMM.addGP_Button( nullptr, 43, 70 + 31 * 1, BTNS.GPID, 7, 6 );
 	SaveBtn->UserParam = mcmSave;
 	SaveBtn->OnUserClick = &MMItemChoose;
-	if ( !( IsGameActive() || use_gsc_network_protocol ) )
+    if ( !( IsGameActive() ) )
 	{
 		GP_Button* LoadBtn = GMM.addGP_Button( nullptr, 43, 70 + 31 * 2, BTNS.GPID, 5, 4 );
 		LoadBtn->UserParam = mcmLoad;
@@ -9153,6 +8812,7 @@ void EditGame()
 }
 
 //--------------ALL GAME IS IN THIS PROCEDURE!-------------//
+ #ifndef NO_MULTIPLAYER
 BOOL FAR PASCAL EnumAddressCallback1(
 	REFGUID guidDataType,
 	DWORD dwDataSize,
@@ -9234,7 +8894,7 @@ void ShowFailure( int CreateGame )
 void WaitWithMessage( char* Message );
 
 bool DPL_CreatePlayer( LPDIRECTPLAY3A lpDirectPlay3A,
-	LPGUID lpguidSessionInstance, LPDPNAME lpszPlayerName, bool Host );
+    LPGUID lpguidSessionInstance, LPDPNAME lpszPlayerName, bool Host );
 
 //Init DirectPlayLobbies, return result
 int CheckLobby()
@@ -9388,6 +9048,10 @@ int CheckLobby()
 		return false;
 	}
 }
+ #else // NO_MULTIPLAYER
+// Stubs when multiplayer is disabled
+static inline int CheckLobby() { return 0; }
+ #endif // NO_MULTIPLAYER
 
 int prevVid = -1;
 int prevVid1 = -1;
@@ -11237,6 +10901,7 @@ int GetTreeItem()
 
 //-------------Multiplayer settings--------------
 
+#ifndef NO_MULTIPLAYER
 bool WaitingGame( bool Host )
 {
 	char STRI[128];
@@ -11506,6 +11171,12 @@ bool WaitingJoinGame( int ID )
 	}
 	return false;
 }
+#else // NO_MULTIPLAYER
+// Stubs when multiplayer is disabled, to satisfy references
+static inline bool WaitingGame( bool /*Host*/ ) { return true; }
+static inline bool WaitingHostGame( int /*ID*/ ) { return false; }
+static inline bool WaitingJoinGame( int /*ID*/ ) { return false; }
+#endif // NO_MULTIPLAYER
 
 extern bool NotInGame;
 void CenterScreen();
@@ -11819,7 +11490,7 @@ void PrepareGameMedia( byte myid, bool SaveNR )
 					};
 				};
 			};
-	#endif
+    //#endif
 			*/
 	HideFlags();
 	NotInGame = false;
@@ -16882,3 +16553,12 @@ __declspec( dllexport ) bool CheckUsingAI()
 	}
 	return false;
 }
+
+// Close NO_MULTIPLAYER guard opened inside MPL_WaitingGame and provide a stub for NO_MULTIPLAYER
+#if defined(NO_MULTIPLAYER)
+bool MPL_WaitingGame( bool /*Host*/, bool SINGLE );
+bool MPL_WaitingGame( bool /*Host*/, bool SINGLE )
+{
+    return SINGLE ? true : false;
+}
+#endif // NO_MULTIPLAYER

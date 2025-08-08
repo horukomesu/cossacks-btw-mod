@@ -14,7 +14,6 @@ C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\bmptool.cpp;C:\cod
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Brigade.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Brigade.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Build.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Build.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Cdirsnd.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Cdirsnd.obj
-C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Chkinet.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Chkinet.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ConstStr.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\ConstStr.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Cwave.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Cwave.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Danger.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Danger.obj
@@ -60,7 +59,6 @@ C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewAI.cpp;C:\codin
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewCode\MapOptionsEncoder.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\MapOptionsEncoder.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewCode\QueueManagement.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\QueueManagement.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewCode\SecureDivision.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\SecureDivision.obj
-C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewCode\UdpHolePuncher.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\UdpHolePuncher.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewILogin.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\NewILogin.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewMon.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\NewMon.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NewUpgrade.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\NewUpgrade.obj
@@ -93,3 +91,6 @@ C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\walls.cpp;C:\codin
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Waves.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Waves.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Weapon.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\Weapon.obj
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\ZBuffer.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\ZBuffer.obj
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\NetworkStubs.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\NetworkStubs.obj
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\CommCoreStubs.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\CommCoreStubs.obj
+C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\PingerStubs.cpp;C:\coding\CPP\cossacks-revamp-2017-master\src\Temp\dmcr\PingerStubs.obj

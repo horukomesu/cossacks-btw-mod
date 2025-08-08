@@ -86,8 +86,9 @@ void ChangedNickCallback( CHAT chat, CHATBool success, const char * oldNick, con
 	ChatSystem* CC = (ChatSystem*) param;
 	if (CC)CC->LastAccessTime = current_time();
 }
-__declspec( dllimport ) void AddToGChat( char* Nick, char* Message );
-__declspec( dllimport ) void ClearGChat();
+// Resolved inside IChat.dll; declare as regular externs
+extern void AddToGChat( char* Nick, char* Message );
+extern void ClearGChat();
 void PlayStart();
 void PrivateMessage( CHAT chat, const char * user, const char * message, int type, void * param )
 {

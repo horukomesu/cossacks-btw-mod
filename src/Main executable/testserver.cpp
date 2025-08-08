@@ -86,69 +86,33 @@ void InitDipFunctions();
 
 __declspec( dllexport ) void StartExplorer()
 {
-	//attempt to use advanced version
-	ResFile F = RReset( "Internet\\Cash\\IntExplorerNew.dll" );
-	if (F != INVALID_HANDLE_VALUE)
-	{
-		int sz = RFileSize( F );
-		void* buf = malloc( sz );
-		RBlockRead( F, buf, sz );
-		RClose( F );
-		F = RRewrite( "IntExplorer.dll" );
-		if (F != INVALID_HANDLE_VALUE)
-		{
-			RBlockWrite( F, buf, sz );
-			RClose( F );
-		}
-		free( buf );
-		DeleteFile( "Internet\\Cash\\IntExplorerNew.dll" );
-	}
-
-	H_Exp = LoadLibrary( "IntExplorer.dll" );
-
-	if (H_Exp)
-	{
-		InitSXP = (fnInitSXP*) GetProcAddress( H_Exp, "InitSXP" );
-
-		if (InitSXP)
-		{
-			InitSXP();
-		}
-
-		RunSXP = (fnRunSXP*) GetProcAddress( H_Exp, "RunSXP" );
-		ProcessSXP = (fnProcessSXP*) GetProcAddress( H_Exp, "ProcessSXP" );
-		GetAccessKey = (fnGetAccessKey*) GetProcAddress( H_Exp, "?GetAccessKey@@YAPADH@Z" );
-		SetAccessKey = (fnSetAccessKey*) GetProcAddress( H_Exp, "?SetAccessKey@@YAXHPAD@Z" );
-		SXP_StepBack = (fnSXP_Operation*) GetProcAddress( H_Exp, "SXP_StepBack" );
-		SXP_StepForw = (fnSXP_Operation*) GetProcAddress( H_Exp, "SXP_StepForw" );
-		SXP_Refresh = (fnSXP_Operation*) GetProcAddress( H_Exp, "SXP_Refresh" );
-		SXP_SetVar = (tpSXP_SetVar*) GetProcAddress( H_Exp, "SXP_SetVar" );
-		SXP_GetVar = (tpSXP_GetVar*) GetProcAddress( H_Exp, "SXP_GetVar" );
-		OpenRef = (tpOpenRef*) GetProcAddress( H_Exp, "OpenRef" );
-		ResizeSXP = (tpResizeSXP*) GetProcAddress( H_Exp, "ResizeSXP" );
-		StartDownloadInternetFile = (tpStartDownloadInternetFile*) GetProcAddress( H_Exp, "?StartDownloadInternetFile@@YAXPAD00@Z" );
-		ProcessDownloadInternetFiles = (tpProcessDownloadInternetFiles*) GetProcAddress( H_Exp, "?ProcessDownloadInternetFiles@@YAXXZ" );
-		SendRecBuffer = (tpSendRecBuffer*) GetProcAddress( H_Exp, "?SendRecBuffer@@YAXPAEH_N@Z" );
-	}
-	InitDipFunctions();
+    // Disable IntExplorer completely: do not load any DLLs
+    H_Exp = nullptr;
+    InitSXP = nullptr;
+    RunSXP = nullptr;
+    ProcessSXP = nullptr;
+    GetAccessKey = nullptr;
+    SetAccessKey = nullptr;
+    SXP_StepBack = nullptr;
+    SXP_StepForw = nullptr;
+    SXP_Refresh = nullptr;
+    SXP_SetVar = nullptr;
+    SXP_GetVar = nullptr;
+    OpenRef = nullptr;
+    ResizeSXP = nullptr;
+    StartDownloadInternetFile = nullptr;
+    ProcessDownloadInternetFiles = nullptr;
+    SendRecBuffer = nullptr;
+    InitDipFunctions();
 }
 
 __declspec( dllexport ) void FinExplorer()
 {
-	if (H_Exp)
-	{
-		FreeLibrary( H_Exp );
-
-		H_Exp = nullptr;
-		InitSXP = nullptr;
-		RunSXP = nullptr;
-		ProcessSXP = nullptr;
-
-		if (H_ExpOld)
-		{
-			FreeLibrary( H_ExpOld );
-		}
-	}
+    H_Exp = nullptr;
+    InitSXP = nullptr;
+    RunSXP = nullptr;
+    ProcessSXP = nullptr;
+    H_ExpOld = nullptr;
 }
 
 __declspec( dllexport ) void ExplorerBack( int Index )
