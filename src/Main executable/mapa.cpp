@@ -2272,6 +2272,14 @@ void GFieldShow()
 		ShowString( x - 2, y - 4, PAUSETEXT, &BigWhiteFont );
 	}
 
+	// FPS overlay at top-right (replaces previous NULL3)
+	{
+		char fpsText[32];
+		sprintf( fpsText, "FPS: %d", Flips );
+		int Ltr = GetRLCStrWidth( fpsText, &BigWhiteFont );
+		ShowString( RealLx - Ltr - 10, 10, fpsText, &BigWhiteFont );
+	}
+
 	int t0 = GetRealTime();
 	if (!PRVGT)PRVGT = t0;
 	if (t0 - PRVGT > 2000)

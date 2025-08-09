@@ -1,0 +1,92 @@
+План реализации переноса главного меню из оригинальной игры в наш проект
+
+1. Ресурсы GP/RLC и отображение спрайтов [ПОЛНОСТЬЮ СДЕЛАНО]
+   1.1. [СДЕЛАНО] Реализовать полноценный GP/RLC пайплайн:
+       - [СДЕЛАНО] В legacy_adapter добавлена загрузка по строковым именам через `LocalGP` → `GPID`
+       - [СДЕЛАНО] Реализованы методы `GPS.ShowGP(...)`, `GPS.GetGPWidth/Height(...)`
+       - [СДЕЛАНО] Отрисовка через кэш спрайтов (`SpriteCache`) поверх OpenGL
+   
+   1.2. Декодер RLC:
+       - [СДЕЛАНО] Базовая декодировка RLC-линий со скипами/ран‑длинами и прозрачностью (index==0 → alpha=0)
+       - [СДЕЛАНО] Добавлены API: `decode_subimage_indexed(...)` и `decode_subimage_rgba_with_palette(...)` для палитризации
+       - [СДЕЛАНО] Заглушечные якоря для RLC (`get_subimage_anchor` → (0,0)); реальные смещения будут из GP-метаданных
+   
+   1.3. Палитры и нац. перекраска:
+       - [СДЕЛАНО] Загрузка файлов pal*.dat в новый IO (resource_io::palettes)
+       - [СДЕЛАНО] Загрузка основной цветовой палитры `agew_1.pal` (resource_io::color_palette)
+       - [СДЕЛАНО] ShowGPPal/ShowGP: палитровая отрисовка; выбор палитры по nation (циклически 1..7)
+       - [СДЕЛАНО] Поддержка базы `NatPal` (16 базовых индексов 4-стрипов) доступна из IO
+   
+   1.4. Смещения/размеры кадров GP и выравнивание по якорю (для корректной компоновки кнопок и курсора)
+       - [СДЕЛАНО] Размеры кадров реализованы через GetGPWidth/Height
+       - [СДЕЛАНО] Добавлены `ShowGPLayers` и `GetGPShift` (пока 0); якоря RLC — (0,0); для GP будут подключены позже
+
+2. Загрузка одиночных картинок [СДЕЛАНО]
+   2.1. [СДЕЛАНО] SQPicture для .bmp/.bpx (фон главного меню — BMP; многие экраны — BPX)
+   2.2. [СДЕЛАНО] Интеграция BMP/BPX в новый IO (resource_io::bpximg), с отрисовкой через OpenGL
+
+3. UI-фреймворк (DialogsSystem)
+   3.1. [СДЕЛАНО] Подключить/портировать DialogsSystem и виджеты из оригинала:
+       - Реализованы совместимые: `Picture`, `GPPicture`, `GP_Button`, `TextButton`, `ListBox`, `VScrollBar (GP)`
+       - Обработаны: hover, клик, прокрутка колесом, drag-маркер скроллбара, синхронизация с ListBox
+       - Файл(ы) src/Main executable/Dialogs.cpp/.h, которые используются в Interface.cpp::processMainMenu()
+   
+   3.2. [СДЕЛАНО] Обновить рисующие части этих классов под новый рендер:
+       - GPS.ShowGP (GP-контент), SQPicture::Draw (BMP/BPX), ShowString (адаптер Text_compat 8x8)
+
+4. Тексты и шрифты
+   4.1. [СДЕЛАНО] Система строк: 
+       - Реализованы `GetTextByID/GETS/GETV` через `legacy_adapter/TextDB_compat` (инициируется из ресурсов)
+       - Поддержка языкового кода (`set_language("eng"/"rus" и т.п.), словарей *.ini через ResourceIO
+       - Меню может получать строки по ID (подписи кнопок, подсказки)
+   
+   4.2. RLC-шрифты: 
+       - Класс RLCFont, рендер ShowString, метрики GetRLCStrWidth, регистрация шрифтов
+       - Сейчас в новом проекте шрифтовый рендер отсутствует
+   
+   4.3. [СДЕЛАНО] Привязка шрифтов к ресурсам ("rom10", "vinBig", и т.д.) через новый IO
+       - Реализован реестр `FontsRegistry`: получение `RLCFont` по логическим именам (поиск .RLC через ResourceIO)
+       - Поддерживаются прямые пути и авто-добавление расширений/поиск по суффиксу
+
+5. Ввод и события (совместимость со старым API)
+   5.1. [СДЕЛАНО] Совместимый слой глобалей/функций:
+       - Реализованы `Lpressed/Rpressed`, `mouseX/mouseY`, `ReadMEvent()/AddMouseEvent()`, `SetMPtr()` и key-state шимы
+       - Поверх `engine_core::input` добавлен адаптер `legacy_adapter/Input_compat` со старыми сигнатурами
+   
+   5.2. [СДЕЛАНО] `ProcessMessages()` как прокси к `glfwPollEvents`
+
+6. Экран/оконные зависимости, математика геометрии
+   6.1. [СДЕЛАНО] Совместимые глобалы: 
+       - Реализованы `RealLx/RealLy/SCRSizeX/RSCRSizeY/COPYSizeX`, `menu_x_off/menu_y_off`, `window_mode`
+       - В `COSSACKS_REMASTER/legacy_adapter/src/Globals_compat.cpp` с обновлением через `set_framebuffer_size(width, height)`
+   
+   6.2. [СДЕЛАНО] Функции SetRLCWindow, CBar (заливка), CopyToScreen (можно no-op)
+        - Реализованы в адаптере: `legacy::gp::SetRLCWindow` → `legacy::fastdraw::SetRLCWindow`, `CBar` (палитровая заливка через Render2D), `CopyToScreen` (no-op; вывод через FlipPages)
+   
+   6.3. [СДЕЛАНО] Утилиты времени: GetTickCount() обёртка на std::chrono (для таймера заставки/кредитов)
+        - Реализованы `legacy::time_compat::GetTickCount()` (uint32 wrap) и `GetRealTime()` (uint64)
+        - Инициализация: `legacy::time_compat::initialize()` из `COSSACKS_REMASTER/src/main.cpp`
+   
+   6.4. Функции палитр/тумана, которые вызываются из меню: --- пока про игнорируем, TODO;
+       - SetDarkPalette/SlowLoadPalette/SlowUnLoadPalette/LoadFog
+
+7. Звук
+   7.1. Привести AssignSound(..., MOUSE_SOUND) к минимально совместимой реализации на audio_core
+   7.2. Загрузка WAV из архива, проигрывание по hover/click
+
+
+8. Поток выполнения/точка входа
+   8.1. [СДЕЛАНО] Подключить реальную «главную петлю» меню вместо демонстрационного кадра в COSSACKS_REMASTER/src/main.cpp:
+        - Реализован адаптер `legacy_adapter/MainMenu_compat` (фон BMP, кнопки из `Interface\Main_Menu`)
+        - В `main.cpp` вызываются `setup_main_menu()` и в каждом кадре `frame_main_menu()`
+   
+   8.2. [СДЕЛАНО] Интеграция рендера-цикла:
+       - Точно как в оригинале: ProcessMessages() → MMenu.ProcessDialogs() → MMenu.RefreshView()
+       - Буфер меняется через FlipPages (делается в движке при swap)
+   
+   8.3. [СДЕЛАНО] Курсор: отрисовка GP-курсора из Mouse_X.cpp
+
+9. Пути к ресурсам и упаковки
+   9.1. Выравнить корень данных:
+       - Сейчас ResourceIO по умолчанию смотрит в MAIN_GAME_DATA, а main.cpp принудительно делает set_data_root(".")
+       - Для запуска из BUILD (как в плане) — выставить set_data_root("BUILD") и гарантировать, что resources.gsc лежит там

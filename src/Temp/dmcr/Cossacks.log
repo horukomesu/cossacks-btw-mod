@@ -2,13 +2,11 @@
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
   (compiling source file 'Ddex1.cpp')
   
-  Ddini.cpp
-  Interface.cpp
+  MousZone.cpp
+  mapa.cpp
 C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Dialogs.h(96,9): warning C4091: '': ignored on left of 'SimpleDialog' when no variable is declared
-  (compiling source file 'Interface.cpp')
+  (compiling source file 'mapa.cpp')
   
-C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Interface.cpp(11164,50): warning C4211: nonstandard extension used: redefined extern to static
-C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable\Interface.cpp(11165,50): warning C4211: nonstandard extension used: redefined extern to static
   Generating Code...
      Creating library ../Temp/dmcr.lib and object ../Temp/dmcr.exp
   LINK : /LTCG specified but no code generation required; remove /LTCG from the link command line to improve linker performance

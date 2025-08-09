@@ -145,12 +145,32 @@ __declspec( dllexport ) void FlipPages( void )
 	}
 
 
-	//TODO: replace asm
+	//Rewritten from asm to C++
 	int ofs = 0;
 	int	lx = COPYSizeX >> 2;
 	int	ly = RealLy;
 	int	addOf = SCRSizeX - ( lx << 2 );
 	int RaddOf = RSCRSizeX - ( lx << 2 );
+	
+	// Copy screen buffer using pointer arithmetic (equivalent to the asm code)
+	unsigned long* src = (unsigned long*)((unsigned char*)ScreenPtr + ofs);
+	unsigned long* dest = (unsigned long*)((unsigned char*)RealScreenPtr + ofs);
+	
+	for (int y = 0; y < ly; y++)
+	{
+		// Copy lx dwords (4 bytes each)
+		for (int x = 0; x < lx; x++)
+		{
+			*dest++ = *src++;
+		}
+		// Add offset to move to next line
+		src = (unsigned long*)((unsigned char*)src + addOf);
+		dest = (unsigned long*)((unsigned char*)dest + RaddOf);
+	}
+	
+	return;
+
+
 	__asm 
 	{
 		push	esi

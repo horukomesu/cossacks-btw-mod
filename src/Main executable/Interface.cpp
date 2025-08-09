@@ -6447,7 +6447,7 @@ SimpleDialog* AblVPort;
 SimpleDialog* PrpVPort;
 void GSYSDRAW()
 {
-	GSYS.RefreshView();
+    GSYS.RefreshView();
 };
 //Picture* Pan1;
 //Picture* Pan2;
@@ -8242,6 +8242,19 @@ void DrawAllScreen()
 
 	//Draw UI elements?
 	DrawZones();
+
+    // FPS overlay during gameplay only (top-right)
+    {
+        extern int Flips;
+        char fps_text[32];
+        sprintf( fps_text, "FPS: %d", Flips );
+        int tw = GetRLCStrWidth( fps_text, &SmallYellowFont );
+        if (tw < 0) tw = 0;
+        int x = RealLx - tw - 6; if (x < 0) x = 0;
+        int y = 4;
+        ShowString( x + 1, y + 1, fps_text, &SmallBlackFont );
+        ShowString( x, y, fps_text, &SmallYellowFont );
+    }
 
 	CopyToScreen( 0, 0, RealLx, RSCRSizeY );
 

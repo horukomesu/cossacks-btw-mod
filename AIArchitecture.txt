@@ -1,0 +1,141 @@
+AI Architecture Map
+===================
+
+Purpose
+-------
+This document orients an engineer or an AI assistant to the codebase layout, key modules, main entry points, and where to search/implement typical features. It reflects the current remaster architecture and the original legacy sources that we reference/port.
+
+
+Top-Level Layout
+----------------
+- COSSACKS_REMASTER/
+  - src/main.cpp: Entrypoint of the modern app. Initializes window, resource IO, and frame callbacks.
+  - engine_core/: Windowing, frame loop, 2D rendering, textures.
+  - resource_io/: Game-specific file formats and archive access.
+    - ResourceIO: GSC archive opening, data root, unified file reading.
+    - Arc: GSCArchive (resources.gsc).
+    - RLC: RLC table and sprite decoding.
+    - GP: GP header parsing and GPI (anchor) arrays parsing.
+    - Palettes: pal1..pal7 remap tables for palette-based recolor.
+    - ColorPalette: Base 256-color RGBA palette (e.g., agew_1.pal).
+  - legacy_adapter/: Compatibility layer that exposes old-style APIs on top of the modern engine.
+    - GP_Draw_compat: Provides GPS-compatible API (ShowGP/GetGPWidth/GetGPHeight/GetGPShift/ShowGPPal/ShowGPLayers) and LocalGP name→GPID mapping.
+    - SpriteCache: Converts decoded sprites to GL textures with caching; handles palette remap and (RLC) anchors.
+    - Fastdraw_compat: Legacy window rectangle and clear screen shims; ties to Render2D/GL.
+    - gfile_compat: Minimal file API compat used by some legacy helpers.
+  - game_logic/: Placeholder module for gameplay bootstrap (kept minimal for menu integration).
+  - audio_core/: Minimal audio interface (to be expanded).
+
+- src/ (legacy original code)
+  - Main executable/: Original game sources. These files are not compiled into the remaster binary but are referenced for behavior and API compatibility.
+    - GP_Draw.cpp/.h: Original GP system (formats GP/RLC/GPI, palette logic, national masks, composition).
+    - Fastdraw.cpp/.h: Original RLC and drawing routines (ShowRLC, fonts, palettes loading).
+    - Dialogs.cpp/.h, Interface.cpp: Original menus and UI framework (DialogsSystem) used by processMainMenu().
+    - Many other systems (pathfinding, rendering, network) — used for reference/porting when needed.
+
+- MAIN_GAME_DATA/
+  - resources.gsc and asset folders. In remaster, the default data root is configurable; archives are opened from here.
+
+- tools/gsc_archive_manager/: Python utilities for viewing/packing GSC archives.
+
+
+Runtime Flow (Current)
+----------------------
+1) main.cpp
+   - engine_core::initialize_window(width, height, title)
+   - resource_io::initialize(); set_data_root("."); open_default_archives(); initialize_subsystems()
+     - Subsystems initialize pal1..pal7 and base color palette (agew_1.pal if present)
+   - game_logic::initialize();
+   - Optionally draw a test sprite each frame (will be replaced by menu loop per plan)
+   - engine_core::run_main_loop(target_fps)
+
+2) legacy_adapter bridging
+   - legacy::gp::GPSCompat exposes:
+     - LocalGP_Load(name): resolve resources and assign a GPID, attempt to parse .gp/.gpi anchors
+     - ShowGP/ShowGPPal/ShowGPLayers: draw sprites via SpriteCache; applies national palette remap; uses ItDX anchors when available
+     - GetGPWidth/Height/GetGPShift: report dimensions and per-frame X shift (ItDX)
+   - SpriteCache:
+     - Given a resource path and subIndex, loads RLC, decodes to RGBA, builds a GL texture, caches it
+     - If a paletteId is provided, builds a remapped RGBA palette by combining pal1..pal7 with the base color palette before decode
+     - Stores per-sprite (RLC) anchor dx/dy (currently 0,0 — RLC headers don’t contain dx/dy)
+
+3) Rendering
+   - engine_core::render2d::draw_textured_quad(texture, x, y, w, h) used for sprite blitting
+   - engine_core::texture::* for texture creation/destroy
+
+
+Resource IO
+-----------
+- ResourceIO: central access
+  - initialize(), set_data_root(path), open_default_archives()
+  - read_file_anywhere(name, out): search opened archives -> data root -> raw path
+  - try_find_entry_by_suffix(suffix, outName): convenience for searching in GSC
+
+- Arc (GSCArchive)
+  - open(path), is_open(), read_file(name, out)
+  - Handles decryption specifics
+
+- RLC
+  - RLCTableData: raw bytes of an RLC; subImageCount
+  - load_rlc(path, out), get_subimage_size(tbl, idx, w, h)
+  - decode_subimage_indexed(tbl, idx, outIndices) — 8-bit indices with 0 as transparent
+  - decode_subimage_rgba_with_palette(tbl, idx, paletteRGBA256x4, outRGBA)
+  - decode_subimage_rgba(tbl, idx, outRGBA) — convenience (white RGB + alpha for non-zero index)
+  - get_subimage_anchor(...) — for RLC returns (0,0); real anchors come from GP/GPI
+
+- GP
+  - load_gp(baseName, GPFile): reads baseName.gp; exposes number of pictures
+  - get_frame_meta(GPFile, index, GPHeaderMeta): dx, dy, lx, ly, options, nextPict
+  - load_gpi(baseName, expectedCount, outItDX, outItLX): reads per-frame anchor arrays used by original engine
+
+- Palettes
+  - palettes::initialize(); get_table(idx 0..7): 0 = identity, 1..7 = pal1..pal7 (index remap)
+  - palettes::get_ui_nation_palette16(): 16 base indices for UI national colors (NatPal equivalent)
+  - color_palette::initialize(); load_from_path("N\\agew_1.pal"); get_rgba256x4(): 256*4 RGBA base palette
+
+
+Legacy Compatibility Layer (Where to hook legacy calls)
+------------------------------------------------------
+- legacy_adapter/include/legacy/GP_Draw_compat.hpp
+  - class GPSCompat { ShowGP, ShowGPPal, ShowGPLayers, GetGPWidth, GetGPHeight, GetGPShift, LocalGP_Load, SetAnchors }
+  - struct LocalGP { int GPID; explicit LocalGP(const char* name); }
+  - Free shims: ShowGP(...), FlipPages(), SetRLCWindow(...)
+
+- legacy_adapter/src/GP_Draw.cpp
+  - Implements GPSCompat. For GPID→resource mapping, resolves to .RLC first; loads .gp/.gpi metadata when available
+  - Applies ItDX (X shift) before draw
+
+- legacy_adapter/src/SpriteCache.cpp
+  - Caches textures per (path, subIndex, paletteId)
+  - Builds RGBA using RLC decode and optional palette remap (pal1..pal7 + agew_1)
+
+- legacy_adapter/src/Fastdraw.cpp
+  - Implements SetRLCWindow, ClearScreen; stores window rectangle for legacy-style clipping if needed later
+
+
+Rendering and Input
+-------------------
+- engine_core/include/engine_core/Render2D.hpp, Texture.hpp
+  - draw_textured_quad, create_texture_rgba, destroy_texture
+
+- engine_core/src/InputAdapter.cpp
+  - Provides a modern input queue; a shim may be needed to offer legacy ReadMEvent()/AddMouseEvent() signatures when porting DialogsSystem
+
+
+Audio
+-----
+- audio_core: minimal audio placeholder. Plan includes mapping legacy AssignSound/PlayEffect onto this.
+
+
+Conventions & Search Tips
+-------------------------
+- Need to find original behavior? Search under src/Main executable/ for function names; then locate the adapter counterpart under COSSACKS_REMASTER/legacy_adapter or resource_io
+- Extending formats: add to resource_io; expose narrow adapter APIs in legacy_adapter
+- Rendering issues: start in legacy_adapter/SpriteCache.cpp and engine_core/Render2D.cpp
+- Palette issues: resource_io/Palettes.cpp and ColorPalette.cpp, then legacy_adapter/GP_Draw.cpp
+- Anchors and GP layering: resource_io/GP.cpp (metadata), legacy_adapter/GP_Draw.cpp (application)
+
+
+Build & Run
+cmake --build out/build/vs2022-debug --config Debug
+cmake --build out/build/vs2022-release --config Release

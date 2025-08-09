@@ -1,0 +1,40 @@
+# Build artifacts
+/build/
+/out/
+/dist/
+/bin/
+/lib/
+
+# CMake
+/CMakeFiles/
+/CMakeCache.txt
+/CMakeUserPresets.json
+/cmake_install.cmake
+/install_manifest.txt
+/compile_commands.json
+
+# Visual Studio
+/.vs/
+/Debug/
+/Release/
+/x64/
+/ipch/
+*.vcxproj*
+*.sln
+
+# vcpkg local clone and installed tree
+/extern/vcpkg/
+/vcpkg_installed/
+
+# Binaries
+*.exe
+*.dll
+*.lib
+*.pdb
+*.ilk
+*.obj
+*.log
+
+# OS junk
+.DS_Store
+Thumbs.db

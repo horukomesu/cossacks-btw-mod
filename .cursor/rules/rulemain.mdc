@@ -1,0 +1,26 @@
+---
+alwaysApply: true
+---
+# Code Quality Rules
+
+## No Temporary Solutions
+- Always implement final, production-ready solutions
+- If a temporary solution is absolutely necessary, mark it clearly with TODO and explain why
+- Avoid placeholder implementations that will need to be rewritten later
+
+## No Stub Functions
+- Do not create empty function bodies or stub implementations
+- Every function should have complete, working implementation
+- If implementation is complex, break it into smaller, fully-implemented functions
+
+## No Simplified Versions
+- Implement the full feature as specified, not a reduced version
+- Don't omit edge cases or error handling to simplify implementation
+- If the full implementation is too complex for one session, clearly document what remains to be done with TODO comments
+
+## No Fallback Functions
+- Do not create fallback or backup function implementations
+- Each function should have one clear, correct implementation path
+- Avoid creating multiple versions of the same functionality "just in case"
+- If error handling is needed, use proper error codes or exceptions, not alternative implementations
+

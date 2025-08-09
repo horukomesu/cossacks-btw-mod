@@ -375,17 +375,7 @@ void TimerProc( void )
 	}
 	HandleMouse( mouseX, mouseY );
 	MFix();
-    // FPS overlay at top-right corner
-    {
-        char fps_text[32];
-        sprintf( fps_text, "FPS: %d", Flips );
-        int text_width = GetRLCStrWidth( fps_text, &SmallYellowFont );
-        int x = RealLx - text_width - 6;
-        if (x < 0) x = 0;
-        int y = 4;
-        ShowString( x + 1, y + 1, fps_text, &SmallBlackFont );
-        ShowString( x, y, fps_text, &SmallYellowFont );
-    }
+    // FPS overlay (top-right via Draw System — handled in GSYSDRAW)
 	FlipPages();
 }
 
