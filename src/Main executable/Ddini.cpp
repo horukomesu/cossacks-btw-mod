@@ -265,10 +265,7 @@ HRESULT CALLBACK ModeCallback( LPDDSURFACEDESC pdds, LPVOID lParam )
 		return S_FALSE;
 	}
 
-	if (1920 < pdds->dwWidth)
-	{//Also disable all resolutions above ~1920 px wide for fairness reasons
-		return S_FALSE;
-	}
+    // Removed artificial cap at 1920 width to allow 2560x1440 and higher
 
 	if (32 == pdds->ddpfPixelFormat.dwRGBBitCount)
 	{
@@ -333,21 +330,22 @@ bool CreateDDObjects( HWND hwnd )
 		const int screen_width = GetSystemMetrics( SM_CXSCREEN );
 		const int screen_height = GetSystemMetrics( SM_CYSCREEN );
 
-		const int ModeLX_candidates[] = { 1024, 1152, 1280, 1280, 1366, 1600, 1920 };
-		const int ModeLY_candidates[] = { 768,  864,  720, 1024,  768,  900, 1080 };
+        const int ModeLX_candidates[] = { 1024, 1152, 1280, 1280, 1366, 1600, 1920, 2560 };
+        const int ModeLY_candidates[] = {  768,  864,  720, 1024,  768,  900, 1080, 1440 };
 
-		NModes = 0;
-		for (int i = 0; i < 8; i++)
-		{
-			//Only show resolutions up to current screen resolution
-			if (ModeLX_candidates[i] <= screen_width
-				&& ModeLY_candidates[i] <= screen_height)
-			{
-				ModeLX[i] = ModeLX_candidates[i];
-				ModeLY[i] = ModeLY_candidates[i];
-				NModes++;
-			}
-		}
+        NModes = 0;
+        const int num_candidates = sizeof(ModeLX_candidates) / sizeof(ModeLX_candidates[0]);
+        for (int i = 0; i < num_candidates; i++)
+        {
+            //Only show resolutions up to current screen resolution
+            if (ModeLX_candidates[i] <= screen_width
+                && ModeLY_candidates[i] <= screen_height)
+            {
+                ModeLX[NModes] = ModeLX_candidates[i];
+                ModeLY[NModes] = ModeLY_candidates[i];
+                NModes++;
+            }
+        }
 
 		return true;
 	}

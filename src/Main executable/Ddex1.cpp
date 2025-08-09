@@ -375,6 +375,17 @@ void TimerProc( void )
 	}
 	HandleMouse( mouseX, mouseY );
 	MFix();
+    // FPS overlay at top-right corner
+    {
+        char fps_text[32];
+        sprintf( fps_text, "FPS: %d", Flips );
+        int text_width = GetRLCStrWidth( fps_text, &SmallYellowFont );
+        int x = RealLx - text_width - 6;
+        if (x < 0) x = 0;
+        int y = 4;
+        ShowString( x + 1, y + 1, fps_text, &SmallBlackFont );
+        ShowString( x, y, fps_text, &SmallYellowFont );
+    }
 	FlipPages();
 }
 
@@ -2318,18 +2329,12 @@ static BOOL doInit( HINSTANCE hInstance, int nCmdShow )
 
 	KeyPressed = false;
 
-	//Fullscreen? Prepare for small not stretched menu
-	if (!window_mode)
-	{//Set initial window resolution to native screen resolution
-		if (1920 < screen_width)
-		{//Limit max resolution for menu screen to fullhd
-			//Also necessary for correct offsets in stats screen
-			screen_width = 1920;
-			screen_height = 1080;
-		}
-		RealLx = screen_width;
-		RealLy = screen_height;
-	}
+    //Fullscreen? Prepare for menu using native screen resolution without capping
+    if (!window_mode)
+    {
+        RealLx = screen_width;
+        RealLy = screen_height;
+    }
 
 	//Create the screen object with RealLx x RealLy resolution
 	CreateDDObjects( hwnd );

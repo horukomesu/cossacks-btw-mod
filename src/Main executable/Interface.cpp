@@ -839,10 +839,10 @@ void SetGameDisplayModeAnyway( int SizeX, int SizeY )
 	GSSetup800();
 	DrawAllScreen();
 
-	if ( window_mode )
-	{
-		ResizeAndCenterWindow();
-	}
+    if ( window_mode )
+    {
+        ResizeAndCenterWindow();
+    }
 }
 
 //Changes resolution
@@ -859,10 +859,10 @@ bool SetGameDisplayMode( int SizeX, int SizeY )
 	GSSetup800();
 	DrawAllScreen();
 
-	if ( window_mode )
-	{
-		ResizeAndCenterWindow();
-	}
+    if ( window_mode )
+    {
+        ResizeAndCenterWindow();
+    }
 
 	return true;
 }
@@ -6178,13 +6178,13 @@ int processMainMenu()
 	ItemChoose = -1;
 	CBar( 0, 0, RealLx, RSCRSizeY, 0 );
 
-	if ( !window_mode )
-	{//Calculate offsets for centering menu in fullscreen mode
-		menu_x_off = ( screen_width - 1024 ) / 2;
-		menu_y_off = ( screen_height - 768 ) / 2;
-		menu_hint_x = 18 + menu_x_off;
-		menu_hint_y = 701 + menu_y_off;
-	}
+    // Calculate offsets for centering 1024x768-designed menu for any mode
+    menu_x_off = ( RealLx - 1024 ) / 2;
+    menu_y_off = ( RealLy - 768 ) / 2;
+    if (menu_x_off < 0) menu_x_off = 0;
+    if (menu_y_off < 0) menu_y_off = 0;
+    menu_hint_x = 18 + menu_x_off;
+    menu_hint_y = 701 + menu_y_off;
 
 	//Loading resources.
 	LocalGP BTNS( "Interface\\Main_Menu" );
@@ -8648,17 +8648,11 @@ StartPlay://IMPORTANT: Main game loop
 	IgnoreSlow = false;
 
 	//Reset resolution for main menu
-	if ( window_mode )
-	{//Dont't do in fullscreen to prevent menu stretching
-		if ( RealLx != 1024 || RealLy != 768 )
-		{
-			SetGameDisplayModeAnyway( 1024, 768 );
-		}
-	}
-	else
-	{//Always go for native screen resolution when showing menu in fullscreen
-		SetGameDisplayModeAnyway( screen_width, screen_height );
-	}
+    // Keep current resolution in windowed mode; in fullscreen, ensure native resolution
+    if (!window_mode)
+    {
+        SetGameDisplayModeAnyway( screen_width, screen_height );
+    }
 }
 
 void DrawAllEditScreen()
@@ -8796,17 +8790,10 @@ void EditGame()
 	IgnoreSlow = true;
 
 	//Reset resolution for main menu
-	if ( window_mode )
-	{//Dont't do in fullscreen to prevent menu stretching
-		if ( RealLx != 1024 || RealLy != 768 )
-		{
-			SetGameDisplayModeAnyway( 1024, 768 );
-		}
-	}
-	else
-	{//Always go for native screen resolution when showing menu in fullscreen
-		SetGameDisplayModeAnyway( screen_width, screen_height );
-	}
+    if (!window_mode)
+    {
+        SetGameDisplayModeAnyway( screen_width, screen_height );
+    }
 
 	IgnoreSlow = false;
 }
