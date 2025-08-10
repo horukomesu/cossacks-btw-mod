@@ -8,6 +8,7 @@
 #include "legacy/SpriteCache.hpp"
 #include "legacy/Time_compat.hpp"
 #include "legacy/MainMenu_compat.hpp"
+#include "legacy/Sound_compat.hpp"
 #include "audio_core/AudioCore.hpp"
 #if defined(_WIN32)
 #include <windows.h>
@@ -40,8 +41,10 @@ int main() {
 #endif
     resource_io::open_default_archives();
     resource_io::initialize_subsystems();
+    legacy::sound_compat::initialize();
     legacy::time_compat::initialize();
     audio_core::initialize();
+    audio_core::set_max_live_sources(64);
     // Try to load a default color palette used by UI (fallback to grayscale if missing)
     (void)resource_io::color_palette::load_from_path("2\\agew_1.pal");
     game_logic::initialize();
@@ -54,6 +57,7 @@ int main() {
         if (legacy::ui::is_main_menu_active()) {
             legacy::ui::frame_main_menu();
         }
+        audio_core::update();
     });
 
     engine_core::run_main_loop();

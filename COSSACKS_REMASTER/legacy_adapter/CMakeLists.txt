@@ -17,6 +17,7 @@ add_library(legacy_adapter STATIC
     src/MouseCursor_compat.cpp
     src/Palette_compat.cpp
     src/Fog_compat.cpp
+    src/Sound_compat.cpp
 )
 
 target_include_directories(legacy_adapter

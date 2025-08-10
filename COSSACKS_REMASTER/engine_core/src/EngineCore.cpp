@@ -37,9 +37,6 @@ static void glfw_error_callback(int error, const char* description) {
 static void glfw_cursor_pos_callback(GLFWwindow*, double x, double y) {
     input::SetMPtr(static_cast<int>(x), static_cast<int>(y));
     input::AddMouseEvent(input::MouseEventType::Move, static_cast<int>(x), static_cast<int>(y));
-    #ifdef _DEBUG
-    std::cout << "[input] cursor pos (" << static_cast<int>(x) << "," << static_cast<int>(y) << ")\n";
-    #endif
 }
 
 static void glfw_mouse_button_callback(GLFWwindow*, int button, int action, int /*mods*/) {
@@ -52,16 +49,10 @@ static void glfw_mouse_button_callback(GLFWwindow*, int button, int action, int 
         const bool pressed = action == GLFW_PRESS;
         input::SetLeftPressed(pressed);
         input::AddMouseEvent(pressed ? input::MouseEventType::LeftDown : input::MouseEventType::LeftUp, x, y);
-        #ifdef _DEBUG
-        std::cout << "[input] mouse left " << (pressed?"down":"up") << " at (" << x << "," << y << ")\n";
-        #endif
     } else if (button == GLFW_MOUSE_BUTTON_RIGHT) {
         const bool pressed = action == GLFW_PRESS;
         input::SetRightPressed(pressed);
         input::AddMouseEvent(pressed ? input::MouseEventType::RightDown : input::MouseEventType::RightUp, x, y);
-        #ifdef _DEBUG
-        std::cout << "[input] mouse right " << (pressed?"down":"up") << " at (" << x << "," << y << ")\n";
-        #endif
     }
 }
 
@@ -69,9 +60,6 @@ static void glfw_scroll_callback(GLFWwindow*, double /*xoffset*/, double yoffset
     double xd = 0.0, yd = 0.0;
     glfwGetCursorPos(gWindow, &xd, &yd);
     input::AddMouseEvent(input::MouseEventType::Wheel, static_cast<int>(xd), static_cast<int>(yd), static_cast<int>(yoffset));
-    #ifdef _DEBUG
-    std::cout << "[input] wheel yoffset=" << yoffset << " at (" << static_cast<int>(xd) << "," << static_cast<int>(yd) << ")\n";
-    #endif
 }
 
 static void glfw_key_callback(GLFWwindow*, int key, int /*scancode*/, int action, int /*mods*/) {

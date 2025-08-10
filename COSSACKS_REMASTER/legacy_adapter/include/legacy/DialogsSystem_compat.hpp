@@ -11,6 +11,10 @@
 
 namespace legacy { namespace ui {
 
+// Legacy usage codes for AssignSound
+constexpr int CLICK_SOUND = 0x1234;
+constexpr int MOUSE_SOUND = 0x4321;
+
 class RLCFont; // forward decl for pointers
 
 class SimpleDialog;
@@ -30,15 +34,15 @@ public:
     int UserParam{0};
     // Optional hint text shown when hovered
     const char* Hint{nullptr};
-    // Sound hooks (wired later to audio_core)
-    short MouseSound{0};
-    short ClickSound{0};
+    // Sound hooks (sound group names from SOUNDLIST.TXT)
+    std::string MouseSoundName;
+    std::string ClickSoundName;
 
     virtual ~SimpleDialog() = default;
     virtual void draw();
     virtual void handleClick(int mx, int my);
-    void AssignSound(int id, int /*USAGE*/) { ClickSound = static_cast<short>(id); }
-    void AssignSound(const char* name, int /*USAGE*/);
+    void AssignSound(int id, int USAGE);
+    void AssignSound(const char* name, int USAGE);
 };
 
 class Picture : public SimpleDialog {

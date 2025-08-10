@@ -19,4 +19,7 @@ unsigned int play_buffer(unsigned int buffer, float gain, float panX);
 // Reclaim finished sources and perform maintenance. Call each frame.
 void update();
 
+// Optional: enforce a maximum number of concurrently playing sources to avoid device limits.
+void set_max_live_sources(unsigned int maxSources);
+
 } // namespace audio_core

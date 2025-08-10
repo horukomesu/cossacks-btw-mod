@@ -1,6 +1,7 @@
 #include "../include/legacy/DialogsSystem_compat.hpp"
 
 #include "engine_core/EngineCore.hpp"
+#include "legacy/Sound_compat.hpp"
 #include "engine_core/Render2D.hpp"
 #include "engine_core/InputAdapter.hpp"
 #include "legacy/RLCFont_compat.hpp"
@@ -34,9 +35,8 @@ void SimpleDialog::draw() {
 void SimpleDialog::handleClick(int mx, int my) {
     if (OnClick && mx >= x && mx <= x1 && my >= y && my <= y1) {
         // Play click sound if assigned
-        if (ClickSound > 0) {
-            // In this simple mapping, ClickSound is a handle to an OpenAL buffer
-            audio_core::play_buffer(static_cast<unsigned int>(ClickSound), 1.0f, 0.0f);
+        if (!ClickSoundName.empty()) {
+            legacy::sound_compat::play_group(ClickSoundName, 1.0f, 0.0f);
         }
         OnClick(this);
     }
@@ -273,9 +273,9 @@ void DialogsSystem::ProcessDialogs() {
                 d->MouseOver = (ev.x >= d->x && ev.x <= d->x1 && ev.y >= d->y && ev.y <= d->y1);
                 if (d->MouseOver != prev) d->NeedToDraw = true;
                 if (d->MouseOver && d->OnMouseOver) d->OnMouseOver(d.get());
-                // Mouse-over sound (one-shot)
-                if (d->MouseOver && d->MouseSound > 0) {
-                    audio_core::play_buffer(static_cast<unsigned int>(d->MouseSound), 0.6f, 0.0f);
+                // Mouse-over sound (play only on enter)
+                if (d->MouseOver && !prev) {
+                    if (!d->MouseSoundName.empty()) legacy::sound_compat::play_group(d->MouseSoundName, 0.6f, 0.0f);
                 }
                 if (kDebugUI && d->MouseOver != prev) {
                     std::cout << "[ui] hover " << (d->MouseOver ? "enter: " : "leave: ")
@@ -384,18 +384,21 @@ void DialogsSystem::ProcessDialogs() {
 }
 
 // Map legacy AssignSound(name, USAGE) to loading a WAV buffer via ResourceIO and AudioCore
-void SimpleDialog::AssignSound(const char* name, int /*USAGE*/) {
+void SimpleDialog::AssignSound(const char* name, int USAGE) {
     if (!name || !*name) return;
-    // Accept either direct filename or logical id; try directly first, then with .wav
-    std::vector<unsigned char> bytes;
-    if (!resource_io::read_file_anywhere(name, bytes)) {
-        std::string withExt = std::string(name) + ".wav";
-        if (!resource_io::read_file_anywhere(withExt, bytes)) return;
+    if (USAGE == CLICK_SOUND) {
+        ClickSoundName = name;
+    } else if (USAGE == MOUSE_SOUND) {
+        MouseSoundName = name;
+    } else {
+        ClickSoundName = name;
     }
-    unsigned int buf = audio_core::create_buffer_from_wav_bytes(bytes.data(), bytes.size());
-    if (buf) {
-        ClickSound = static_cast<short>(buf);
-    }
+}
+
+void SimpleDialog::AssignSound(int id, int USAGE) {
+    // Not used in remaster menu paths; keep for parity
+    (void)id;
+    (void)USAGE;
 }
 
 void DialogsSystem::MarkToDraw() {

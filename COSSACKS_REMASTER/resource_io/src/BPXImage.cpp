@@ -118,6 +118,19 @@ void expand_indices_to_rgba(const uint8_t* indices, int w, int h, const uint8_t*
     }
 }
 
+void expand_indices_to_rgba_opaque(const uint8_t* indices, int w, int h, const uint8_t* rgba256x4, std::vector<uint8_t>& outRGBA) {
+    outRGBA.resize(static_cast<size_t>(w) * static_cast<size_t>(h) * 4);
+    uint8_t* dst = outRGBA.data();
+    for (int i = 0, n = w * h; i < n; ++i) {
+        const uint8_t idx = indices[i];
+        const size_t p = static_cast<size_t>(idx) * 4;
+        dst[i * 4 + 0] = rgba256x4[p + 0];
+        dst[i * 4 + 1] = rgba256x4[p + 1];
+        dst[i * 4 + 2] = rgba256x4[p + 2];
+        dst[i * 4 + 3] = 255; // force opaque
+    }
+}
+
 }} // namespace resource_io::bpximg
 
 

@@ -14,6 +14,9 @@ bool load_bpx_or_bmp_indexed(const std::string& path, int& outW, int& outH, std:
 // Utility: expand 8-bit indices to RGBA using a provided 256x4 RGBA palette; index 0 -> alpha 0.
 void expand_indices_to_rgba(const uint8_t* indices, int w, int h, const uint8_t* rgba256x4, std::vector<uint8_t>& outRGBA);
 
+// Utility: same as above but treats index 0 as opaque (alpha=255). Useful for full-screen BMP backgrounds.
+void expand_indices_to_rgba_opaque(const uint8_t* indices, int w, int h, const uint8_t* rgba256x4, std::vector<uint8_t>& outRGBA);
+
 } } // namespace resource_io::bpximg
 
 

@@ -6,6 +6,7 @@
 #include "resource_io/ColorPalette.hpp"
 
 #include <vector>
+#include <iostream>
 
 namespace legacy {
 
@@ -21,7 +22,10 @@ void SQPictureCompat::LoadPicture(const char* path) {
     int w = 0, h = 0;
     std::vector<uint8_t> idx;
     if (!resource_io::bpximg::load_bpx_or_bmp_indexed(std::string(path), w, h, idx)) {
+        std::cout << "[ui] background load FAILED: " << path << "\n";
         return;
+    } else {
+        std::cout << "[ui] background load OK: " << path << " (" << w << "x" << h << ")\n";
     }
     width = w;
     height = h;
@@ -40,7 +44,8 @@ void SQPictureCompat::Draw(int x, int y) const {
     if (texture == 0 || textureDirty) {
         const uint8_t* baseRGBA = resource_io::color_palette::get_rgba256x4();
         std::vector<uint8_t> rgba;
-        resource_io::bpximg::expand_indices_to_rgba(compatBuffer.data() + 4, width, height, baseRGBA, rgba);
+        // Background BMPs in UI are full-screen and use index 0 as valid color, not transparent.
+        resource_io::bpximg::expand_indices_to_rgba_opaque(compatBuffer.data() + 4, width, height, baseRGBA, rgba);
         if (texture) engine_core::texture::destroy_texture(texture);
         texture = engine_core::texture::create_texture_rgba(width, height, rgba.data());
         textureDirty = false;

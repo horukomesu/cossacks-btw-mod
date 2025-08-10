@@ -12,6 +12,7 @@ namespace {
 ALCdevice* gDevice = nullptr;
 ALCcontext* gContext = nullptr;
 std::vector<ALuint> gLiveSources;
+unsigned int gMaxSources = 64; // conservative default cap
 }
 
 bool initialize() {
@@ -104,6 +105,11 @@ unsigned int create_buffer_from_wav_bytes(const unsigned char* data, size_t size
 
 unsigned int play_buffer(unsigned int buffer, float gain, float panX) {
     if (!gContext || buffer == 0) return 0;
+    // Reclaim and cap sources
+    update();
+    if (gLiveSources.size() >= gMaxSources) {
+        return 0;
+    }
     ALuint src = 0; alGenSources(1, &src);
     if (!src) return 0;
     alSourcei(src, AL_BUFFER, static_cast<ALint>(buffer));
@@ -128,6 +134,10 @@ void update() {
         }
     }
     gLiveSources.swap(keep);
+}
+
+void set_max_live_sources(unsigned int maxSources) {
+    gMaxSources = (maxSources == 0 ? 1u : maxSources);
 }
 
 } // namespace audio_core

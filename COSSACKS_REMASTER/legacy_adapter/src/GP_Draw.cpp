@@ -36,21 +36,14 @@ static bool draw_by_gpid(int gpid, int sprIndex, int x, int y) {
     auto git = gpid_to_gpstem.find(gpid);
     if (git != gpid_to_gpstem.end()) {
         const bool okgp = sprite_cache::draw_gp(git->second, sprIndex, x, y);
-        #ifdef _DEBUG
-        if (!okgp) {
-            std::cout << "[gp] draw_gp failed for GPID=" << gpid << " frame=" << sprIndex << " stem=" << git->second << "\n";
-        }
-        #endif
+        // debug suppressed
         if (okgp) return true;
     }
     auto it = gpid_to_path.find(gpid);
     if (it == gpid_to_path.end()) return false;
     const std::string& path = it->second;
     const bool ok = sprite_cache::draw_rlc(path, sprIndex, x, y);
-    #ifdef _DEBUG
-    std::cout << "[gp] draw_rlc GPID=" << gpid << " spr=" << sprIndex
-              << " at (" << x << "," << y << ") path=" << path << (ok?" ok":" fail") << "\n";
-    #endif
+    // debug suppressed
     return ok;
 }
 
@@ -63,21 +56,14 @@ static bool draw_by_gpid_pal(int gpid, int sprIndex, int x, int y, int paletteId
     auto git = gpid_to_gpstem.find(gpid);
     if (git != gpid_to_gpstem.end()) {
         const bool okgp = sprite_cache::draw_gp_pal(git->second, sprIndex, x, y, paletteId);
-        #ifdef _DEBUG
-        if (!okgp) {
-            std::cout << "[gp] draw_gp_pal failed for GPID=" << gpid << " frame=" << sprIndex << " palId=" << paletteId << " stem=" << git->second << "\n";
-        }
-        #endif
+        // debug suppressed
         if (okgp) return true;
     }
     auto it = gpid_to_path.find(gpid);
     if (it == gpid_to_path.end()) return false;
     const std::string& path = it->second;
     const bool ok = sprite_cache::draw_rlc_pal(path, sprIndex, x, y, paletteId);
-    #ifdef _DEBUG
-    std::cout << "[gp] draw_rlc_pal GPID=" << gpid << " spr=" << sprIndex
-              << " palId=" << paletteId << " at (" << x << "," << y << ") path=" << path << (ok?" ok":" fail") << "\n";
-    #endif
+    // debug suppressed
     return ok;
 }
 
@@ -130,9 +116,7 @@ void GPSCompat::ShowGPLayers(int x, int y, int gpid, int sprIndex, uint8_t natio
 int GPSCompat::GetGPWidth(int gpid, int sprIndex) {
     int w = 0, h = 0;
     if (get_size_by_gpid(gpid, sprIndex, w, h)) {
-        #ifdef _DEBUG
-        std::cout << "[gp] GetGPWidth GPID=" << gpid << " spr=" << sprIndex << " -> " << w << "\n";
-        #endif
+        // debug suppressed
         return w;
     }
     return 0;
@@ -141,9 +125,7 @@ int GPSCompat::GetGPWidth(int gpid, int sprIndex) {
 int GPSCompat::GetGPHeight(int gpid, int sprIndex) {
     int w = 0, h = 0;
     if (get_size_by_gpid(gpid, sprIndex, w, h)) {
-        #ifdef _DEBUG
-        std::cout << "[gp] GetGPHeight GPID=" << gpid << " spr=" << sprIndex << " -> " << h << "\n";
-        #endif
+        // debug suppressed
         return h;
     }
     return 0;
@@ -153,9 +135,7 @@ int GPSCompat::GetGPShift(int gpid, int sprIndex) {
     auto it = gpid_to_itdx.find(gpid);
     if (it != gpid_to_itdx.end() && sprIndex >= 0 && sprIndex < static_cast<int>(it->second.size())) {
         int shift = static_cast<int>(it->second[static_cast<size_t>(sprIndex)]);
-        #ifdef _DEBUG
-        std::cout << "[gp] GetGPShift GPID=" << gpid << " spr=" << sprIndex << " -> " << shift << "\n";
-        #endif
+        // debug suppressed
         return shift;
     }
     return 0;
@@ -234,9 +214,7 @@ int GPSCompat::LocalGP_Load(const std::string& name) {
     }
     // If neither GP nor RLC found, fail
     if (!gp_ok && resolved.empty()) {
-        #ifdef _DEBUG
-        std::cout << "[gp] LocalGP_Load failed: name=" << name << "\n";
-        #endif
+        // debug suppressed
         return -1;
     }
 
@@ -252,16 +230,11 @@ int GPSCompat::LocalGP_Load(const std::string& name) {
             SetAnchors(gpid, itdx, itlx);
         }
         #ifdef _DEBUG
-        std::cout << "[gp] LocalGP_Load: name=" << name << " -> GPID=" << gpid << " gp=" << stem;
-        if (!resolved.empty()) std::cout << " rlc=" << resolved;
-        std::cout << "\n";
         #else
         (void)resolved;
         #endif
     } else {
-        #ifdef _DEBUG
-        std::cout << "[gp] LocalGP_Load: name=" << name << " -> GPID=" << gpid << " path=" << resolved << "\n";
-        #endif
+        // debug suppressed
     }
     return gpid;
 }
