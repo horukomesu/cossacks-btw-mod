@@ -36,7 +36,20 @@ void SimpleDialog::handleClick(int mx, int my) {
     if (OnClick && mx >= x && mx <= x1 && my >= y && my <= y1) {
         // Play click sound if assigned
         if (!ClickSoundName.empty()) {
-            legacy::sound_compat::play_group(ClickSoundName, 1.0f, 0.0f);
+            // Allow direct file mapping e.g. "Sound\\MenuSvitok2.wav"
+            if (ClickSoundName.find('.') != std::string::npos ||
+                ClickSoundName.find('/') != std::string::npos ||
+                ClickSoundName.find('\\') != std::string::npos) {
+                legacy::sound_compat::play_file(ClickSoundName, 1.0f, 0.0f);
+            } else if (ClickSoundName == std::string("SCROLL2") || ClickSoundName == std::string("SCROLL")) {
+                // Generic click on menu buttons uses Svitok2
+                legacy::sound_compat::play_file("Sound\\MenuSvitok2.wav", 1.0f, 0.0f);
+            } else if (ClickSoundName == std::string("BACK") || ClickSoundName == std::string("SCROLLCLICK")) {
+                // Back action uses SvitKlik
+                legacy::sound_compat::play_file("Sound\\MenuSvitKlik.wav", 1.0f, 0.0f);
+            } else {
+                legacy::sound_compat::play_group(ClickSoundName, 1.0f, 0.0f);
+            }
         }
         OnClick(this);
     }

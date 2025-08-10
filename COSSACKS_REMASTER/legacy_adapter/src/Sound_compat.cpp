@@ -19,11 +19,18 @@ struct Group {
 
 std::unordered_map<std::string, Group> g_groups; // key: uppercase group name
 std::mt19937 g_rng{std::random_device{}()};
+std::unordered_map<std::string, unsigned int> g_fileCache; // relPath (normalized) -> buffer
 
 static std::string to_upper(const std::string& s) {
     std::string r = s;
     for (char& c : r) c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
     return r;
+}
+
+static std::string normalize_key(const std::string& p) {
+    std::string k = p;
+    for (char& c : k) if (c == '/') c = '\\';
+    return to_upper(k);
 }
 
 bool parse_soundlist_bytes(const std::vector<unsigned char>& bytes) {
@@ -136,6 +143,7 @@ bool initialize() {
 void shutdown() {
     // OpenAL buffers are freed when the process ends; no explicit buffer deletion cache here
     g_groups.clear();
+    g_fileCache.clear();
 }
 
 unsigned int get_random_buffer(const std::string& groupName) {
@@ -152,6 +160,33 @@ unsigned int get_random_buffer(const std::string& groupName) {
 
 bool play_group(const std::string& groupName, float gain, float panX) {
     unsigned int buf = get_random_buffer(groupName);
+    if (!buf) return false;
+    return audio_core::play_buffer(buf, gain, panX) != 0;
+}
+
+unsigned int get_buffer_for_file(const std::string& relPath) {
+    if (relPath.empty()) return 0;
+    const std::string key = normalize_key(relPath);
+    auto it = g_fileCache.find(key);
+    if (it != g_fileCache.end()) return it->second;
+    std::vector<unsigned char> bytes;
+    // Try exact, sounds\, Sound\, with optional .wav
+    auto try_read = [&](const std::string& p) -> bool { return resource_io::read_file_anywhere(p, bytes); };
+    if (!try_read(relPath) &&
+        !try_read(std::string("sounds\\") + relPath) &&
+        !try_read(std::string("Sound\\") + relPath) &&
+        !try_read(relPath + std::string(".wav")) &&
+        !try_read(std::string("sounds\\") + relPath + ".wav") &&
+        !try_read(std::string("Sound\\") + relPath + ".wav")) {
+        return 0;
+    }
+    unsigned int buf = audio_core::create_buffer_from_wav_bytes(bytes.data(), bytes.size());
+    g_fileCache[key] = buf;
+    return buf;
+}
+
+bool play_file(const std::string& relPath, float gain, float panX) {
+    unsigned int buf = get_buffer_for_file(relPath);
     if (!buf) return false;
     return audio_core::play_buffer(buf, gain, panX) != 0;
 }

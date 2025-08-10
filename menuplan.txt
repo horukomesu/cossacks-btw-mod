@@ -75,6 +75,17 @@
    7.1. [СДЕЛАНО] Привести AssignSound(..., MOUSE_SOUND) к реализации на OpenAL (`audio_core`)
    7.2. [СДЕЛАНО] Загрузка WAV через ResourceIO и проигрывание по hover/click
 
+7.3. [СДЕЛАНО] Меню: корректные группы звуков и стабильность проигрывания
+     - Главный экран: hover → `SCROLL`, click → `SCROLLCLICK`
+     - Другие экраны: hover → `SCROLL`, click → `BUTTONCLICK`
+     - Источник звуков: предпочитается папка `BUILD\sounds` (`sounds\SOUNDLIST.TXT`, `sounds\*.wav`); также поддерживаются `Sound\` и архив
+     - Исправлено переполнение источников OpenAL: кап по источникам + one‑shot hover (только на вход)
+
+
+10. Сборочная система и внешние зависимости
+    10.1. [СДЕЛАНО] GLAD подключен напрямую из `COSSACKS_REMASTER/extern/vcpkg/packages/glad_x64-windows` без `find_package`
+          - Обновлены `engine_core/CMakeLists.txt` и `legacy_adapter/CMakeLists.txt`: добавлены include/lib пути GLAD, удалены ссылки на `glad::glad`
+
 
 8. Поток выполнения/точка входа
    8.1. [СДЕЛАНО] Подключить реальную «главную петлю» меню вместо демонстрационного кадра в COSSACKS_REMASTER/src/main.cpp:

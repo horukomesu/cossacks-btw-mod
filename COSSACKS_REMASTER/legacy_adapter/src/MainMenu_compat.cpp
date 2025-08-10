@@ -14,6 +14,7 @@
 #include <iostream>
 #include <filesystem>
 #include <fstream>
+#include "audio_core/Music.hpp"
 
 namespace legacy { namespace ui {
 
@@ -68,6 +69,7 @@ static legacy::ui::VScrollBar* g_opt_sfx = nullptr;
 static bool on_options_ok(legacy::ui::SimpleDialog* /*sd*/) {
     if (g_opt_music) s_midiSound = std::max(0, std::min(100, g_opt_music->SPos));
     if (g_opt_sfx)   s_warSound  = std::max(0, std::min(100, g_opt_sfx->SPos));
+    audio_core::music::set_volume_percent(s_midiSound);
     save_settings();
     g_state = MenuState::Main;
     return true;
@@ -108,19 +110,20 @@ static void build_main_screen() {
     bOptions->OnClick = [](legacy::ui::SimpleDialog* /*sd*/){ on_click_choice(nullptr, MainMenuChoice::Options); return true; };
     bVideo->OnClick   = [](legacy::ui::SimpleDialog* /*sd*/){ on_click_choice(nullptr, MainMenuChoice::Video);   return true; };
     bExit->OnClick    = [](legacy::ui::SimpleDialog* /*sd*/){ on_click_choice(nullptr, MainMenuChoice::Exit);    return true; };
-    // Assign hover and click sounds using SOUNDLIST.TXT group names
-    bSingle->AssignSound("BUTTON", MOUSE_SOUND);
-    bMulti->AssignSound("BUTTON", MOUSE_SOUND);
-    bLoad->AssignSound("BUTTON", MOUSE_SOUND);
-    bOptions->AssignSound("BUTTON", MOUSE_SOUND);
-    bVideo->AssignSound("BUTTON", MOUSE_SOUND);
-    bExit->AssignSound("BUTTON", MOUSE_SOUND);
-    bSingle->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bMulti->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bLoad->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bOptions->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bVideo->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bExit->AssignSound("BUTTONCLICK", CLICK_SOUND);
+    // Main menu should use parchment scroll sounds
+    bSingle->AssignSound("SCROLL", MOUSE_SOUND);
+    bMulti->AssignSound("SCROLL", MOUSE_SOUND);
+    bLoad->AssignSound("SCROLL", MOUSE_SOUND);
+    bOptions->AssignSound("SCROLL", MOUSE_SOUND);
+    bVideo->AssignSound("SCROLL", MOUSE_SOUND);
+    bExit->AssignSound("SCROLL", MOUSE_SOUND);
+    // Assign click mapping: generic buttons -> Svitok2, back -> SvitKlik
+    bSingle->AssignSound("SCROLL2", CLICK_SOUND);
+    bMulti->AssignSound("SCROLL2", CLICK_SOUND);
+    bLoad->AssignSound("SCROLL2", CLICK_SOUND);
+    bOptions->AssignSound("SCROLL2", CLICK_SOUND);
+    bVideo->AssignSound("SCROLL2", CLICK_SOUND);
+    bExit->AssignSound("SCROLL2", CLICK_SOUND);
     g_builtState = MenuState::Main;
 }
 
@@ -148,14 +151,15 @@ static void build_single_screen() {
         g_state = MenuState::Main;
         return true;
     };
-    bCampaign->AssignSound("BUTTON", MOUSE_SOUND);
-    bMission->AssignSound("BUTTON", MOUSE_SOUND);
-    bRandom->AssignSound("BUTTON", MOUSE_SOUND);
-    bBack->AssignSound("BUTTON", MOUSE_SOUND);
-    bCampaign->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bMission->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bRandom->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bBack->AssignSound("BUTTONCLICK", CLICK_SOUND);
+    // Submenu: hover is scroll; clicks are button-style
+    bCampaign->AssignSound("SCROLL", MOUSE_SOUND);
+    bMission->AssignSound("SCROLL", MOUSE_SOUND);
+    bRandom->AssignSound("SCROLL", MOUSE_SOUND);
+    bBack->AssignSound("SCROLL", MOUSE_SOUND);
+    bCampaign->AssignSound("SCROLL2", CLICK_SOUND);
+    bMission->AssignSound("SCROLL2", CLICK_SOUND);
+    bRandom->AssignSound("SCROLL2", CLICK_SOUND);
+    bBack->AssignSound("SCROLLCLICK", CLICK_SOUND); // back -> svitklik
     bMission->OnClick = [](legacy::ui::SimpleDialog* /*sd*/){
         g_choice = MainMenuChoice::Single;
         g_state = MenuState::Main;
@@ -186,16 +190,26 @@ static void build_options_screen() {
     legacy::gp::LocalGP BTNS("INTERFACE\\OPTIONS");
     // Sliders (visual only for now)
     g_opt_music = g_menu->addGP_ScrollBar(nullptr, 244-2, 320 + 10 - 13, 100, s_midiSound, BTNS.GPID, 12, 12, 0, 0); // Music
+    if (g_opt_music) {
+        // live-apply while dragging/adjusting
+        g_opt_music->OnMouseOver = [](legacy::ui::SimpleDialog* /*sd*/){
+            if (g_opt_music) {
+                int v = std::max(0, std::min(100, g_opt_music->SPos));
+                audio_core::music::set_volume_percent(v);
+            }
+            return false;
+        };
+    }
     g_opt_sfx   = g_menu->addGP_ScrollBar(nullptr, 244-2, 346 + 10 - 13, 100, s_warSound,  BTNS.GPID, 12, 12, 0, 0); // SFX
     // OK / Exit buttons
     auto* bOk   = g_menu->addGP_Button(nullptr, 113, 534 + 10 + 13, BTNS.GPID, 8, 9);
     auto* bExit = g_menu->addGP_Button(nullptr, 333, 534 + 10 + 13, BTNS.GPID, 10, 11);
     bOk->OnClick   = &on_options_ok;
     bExit->OnClick = [](legacy::ui::SimpleDialog* /*sd*/){ g_state = MenuState::Main; return true; };
-    bOk->AssignSound("BUTTON", MOUSE_SOUND);
-    bExit->AssignSound("BUTTON", MOUSE_SOUND);
-    bOk->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bExit->AssignSound("BUTTONCLICK", CLICK_SOUND);
+    bOk->AssignSound("SCROLL", MOUSE_SOUND);
+    bExit->AssignSound("SCROLL", MOUSE_SOUND);
+    bOk->AssignSound("SCROLL2", CLICK_SOUND);
+    bExit->AssignSound("SCROLL2", CLICK_SOUND);
     g_builtState = MenuState::Options;
 }
 
@@ -235,10 +249,10 @@ static void build_load_screen() {
     auto* bCan = g_menu->addGP_Button(nullptr, 333, 594, BTNS.GPID, 2, 3);
     bOk->OnClick  = [](legacy::ui::SimpleDialog* /*sd*/){ g_choice = MainMenuChoice::Load; g_state = MenuState::Main; return true; };
     bCan->OnClick = [](legacy::ui::SimpleDialog* /*sd*/){ g_state = MenuState::Main; return true; };
-    bOk->AssignSound("BUTTON", MOUSE_SOUND);
-    bCan->AssignSound("BUTTON", MOUSE_SOUND);
-    bOk->AssignSound("BUTTONCLICK", CLICK_SOUND);
-    bCan->AssignSound("BUTTONCLICK", CLICK_SOUND);
+    bOk->AssignSound("SCROLL", MOUSE_SOUND);
+    bCan->AssignSound("SCROLL", MOUSE_SOUND);
+    bOk->AssignSound("SCROLL2", CLICK_SOUND);
+    bCan->AssignSound("SCROLLCLICK", CLICK_SOUND);
     g_builtState = MenuState::Load;
 }
 }
