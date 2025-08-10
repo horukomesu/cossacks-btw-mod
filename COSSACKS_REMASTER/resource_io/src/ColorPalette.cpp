@@ -53,6 +53,13 @@ const uint8_t* get_rgba256x4() {
     return g_palette.data();
 }
 
+bool set_from_rgba(const uint8_t* rgba256x4) {
+    if (!rgba256x4) return false;
+    std::memcpy(g_palette.data(), rgba256x4, 256 * 4);
+    g_loaded = true;
+    return true;
+}
+
 } // namespace resource_io::color_palette
 
 

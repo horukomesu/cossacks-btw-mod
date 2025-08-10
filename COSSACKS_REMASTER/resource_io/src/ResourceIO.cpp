@@ -45,14 +45,26 @@ void set_data_root(const std::string& path) {
 }
 
 void open_default_archives() {
-    // Only resources.gsc is mandatory per user input
+    // Only resources.gsc (single archive) per original behavior
     try_open_archive(g_data_root / "resources.gsc");
 }
 
 bool read_file_anywhere(const std::string& name, std::vector<unsigned char>& out) {
     // Try archives in order
     for (const auto& arc : g_archives) {
-        if (arc && arc->read_file(name, out)) return true;
+        if (!arc) continue;
+        if (arc->read_file(name, out)) return true;
+        // Try normalized slashes
+        std::string alt1 = name;
+        for (char& c : alt1) if (c == '/') c = '\\';
+        if (alt1 != name && arc->read_file(alt1, out)) return true;
+        std::string alt2 = name;
+        for (char& c : alt2) if (c == '\\') c = '/';
+        if (alt2 != name && arc->read_file(alt2, out)) return true;
+        // Try uppercase name (archives store uppercase entries)
+        std::string up = alt1;
+        for (char& c : up) c = static_cast<char>(std::toupper(static_cast<unsigned char>(c)));
+        if (arc->read_file(up, out)) return true;
     }
     // Try file relative to data root
     {
@@ -83,7 +95,7 @@ bool try_find_entry_by_suffix(const std::string& suffix, std::string& outName) {
             }
         }
     }
-    // Fallback: check on-disk relative to data root
+    // Fallback: check on-disk relative to data root only, then raw path
     std::error_code ec;
     fs::path p = g_data_root / norm;
     if (fs::exists(p, ec)) { outName = p.string(); return true; }

@@ -11,6 +11,9 @@ void set_cursor_frame(int frameIndex);
 // Draw cursor at current mouseX/mouseY each frame
 void draw_cursor();
 
+// Optional: query current cursor GPID (or -1 if not set)
+int get_current_gpid();
+
 } } // namespace legacy::cursor_compat
 
 

@@ -1,0 +1,67 @@
+GP/RLC graphics system — analysis strictly from original src/Main executable
+
+1) File types and roles
+- .GP: Packed multi-frame container with GP_GlobalHeader and per-frame GP_Header chains.
+  Structures (see src/Main executable/GP_Draw.h):
+  - GP_GlobalHeader: Sign, NPictures, VocOffset, VocLength, LGPH[256] (DWORD offsets to frames)
+  - GP_Header: NextPict, dx, dy, Lx, Ly, Pack, Options, CData, NLines
+  LGPH[n] points to first GP_Header for frame n; follow NextPict until -1 to traverse sub-chunks.
+  Aggregated geometry across sub-chunks via methods: GetLx/GetLy (max extents), GetDx/GetDy (min offsets).
+- .GPI: Optional per-frame anchors/widths; NPictures bytes for itdx and NPictures bytes for itlx.
+  Loaded in GP_System::LoadGP into ItDX[i], ItLX[i]. Used by GetGPShift and GetGPWidth.
+- .RLC: Raw indexed sprites table RLCTable loaded with LoadRLC (Fastdraw.cpp). Rendering via ShowRLCItem/ShowRLCItemShadow.
+
+2) GP_System (src/Main executable/GP_Draw.h/.cpp)
+- GPID: integer handle indexing arrays inside GP_System. Created by LocalGP or PreLoadGPImage(Name) and used in all GPS.* calls.
+- PreLoadGPImage(Name):
+  - Finds existing GPID by GPNames; else allocates fidx, probes: Name.gp else Name.rlc else Name + "s".rlc.
+  - Sets ImageType (1 GP, 2 RLC, 3 RLC+shadow), reads GPNFrames from header, stores GPNames[fidx]=Name, increments NGP if new.
+  - If Name has no backslash, also registers L_Mode\Name variant in GP_L_IDXS.
+- LoadGP(i):
+  - For GP: open Name.gp, map or read, set GPH[i]; ImLx/ImLy sized NPictures using LGPH[n]->GetLx/GetLy; load Name.gpi into ItDX/ItLX when present; build CASHREF[i] index over sub-chunks.
+  - For RLC: LoadRLC Name.rlc into RLCImage[i], compute ImLx/ImLy from RLC; for ImageType 3 also load Name + "s".rlc into RLCShadow.
+- Queries:
+  - GetGPWidth(i,n): ItLX[i][n] if present else ImLx[i][n].
+  - GetGPHeight(i,n): ImLy[i][n].
+  - GetGPShift(i,n): ItDX[i][n] if present else 0.
+- Rendering:
+  - ShowGP/ShowGPLayers/ShowGPPal/ShowGPTransparent*/ShowGPRedN/ShowGPDarkN/etc. draw a frame with palette/FX mapping and full clipping via Fastdraw window.
+  - Core routines GP_ShowMaskedPict/GP_ShowMaskedPictInv decode per-line command streams and copy runs into ScreenPtr with ASM, honoring SetRLCWindow window.
+
+3) RLC subsystem (src/Main executable/Fastdraw.h/.cpp)
+- RLCTable from LoadRLC provides subimage counts and sizes; Fastdraw exposes:
+  - GetRLCWidth/Height, ShowRLCItem/Shadow, SetRLCWindow, RegisterRLCFont, ShowString.
+- Global window/clipping: WindX/WindY/WindX1/WindY1 and ScrWidth set by SetRLCWindow; all GP/RLC rasterization respects it.
+- ScreenPtr/RealScreenPtr are software backbuffer and primary; original renders indexed color into backbuffer.
+
+4) UI hover/frame switching (src/Main executable/Dialogs.cpp)
+- DialogsSystem::addGP_Button sets bounds from GPS.GetGPWidth/Height(passive).
+- GP_Button_OnDraw:
+  - if MouseOver → GPS.ShowGP(..., ActiveFrame); else → PassiveFrame.
+  - Some buttons add effects (e.g., checkers for Internet Game button when ActiveFrame==15).
+- Other widgets: GP_TextButton/Std variant compute sprite tri-slices; UniversalButton uses sets of 5-sprite strips per state and hover adds +3*5 offset.
+
+5) LocalGP and naming
+- LocalGP wraps PreLoadGPImage in ctor and holds GPID; used in Interface.cpp and other UI code.
+- Names are logical stems without extension, with backslashes, e.g., "Interface\Main_Menu"; ResFile API resolves to on-disk/archived resources.
+
+6) Nation/palette mapping
+- ShowGPPal/ShowGPRedN/ShowGPDarkN apply remap tables (PAL1..PAL7 etc.). Nation selects palette; intensity N used for red/dark variants.
+
+7) Pipeline summary
+- UI lays out widgets with GPIDs and frame indices → process messages → compute MouseOver → mark NeedToDraw.
+- RefreshView calls each widget draw; GP_Button_OnDraw chooses frame and calls GPS.ShowGP.
+- GPS.ShowGP ensures resource loaded, computes geometry via GP/GPI, decodes and blits with clipping.
+
+References in original tree:
+- GP API/structs: src/Main executable/GP_Draw.h
+- GP loading/rasterization: src/Main executable/GP_Draw.cpp
+- RLC API/windowing: src/Main executable/Fastdraw.h/.cpp
+- UI switching: src/Main executable/Dialogs.cpp (GP_Button_OnDraw, addGP_Button)
+- Usage: src/Main executable/Interface.cpp (buttons from Interface\Main_Menu)
+
+Notes for OpenGL x64 port (no behavior change):
+- Keep GPID mapping and PreLoadGPImage probing order (gp → rlc → rlcs).
+- Implement size/shift exactly: prefer .gpi arrays; fallback to aggregate sub-chunk geometry.
+- Implement ShowGP* by decoding to RGBA with exact original palette tables; honor SetRLCWindow clipping and ItDX-based anchor shift.
+- UI hover must flip frames using same indices; bounds from GPS queries.

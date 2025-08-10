@@ -19,4 +19,12 @@ bool draw_rlc_pal(const std::string& path, int subIndex, int x, int y, int palet
 // Clears caches and releases GL textures
 void clear();
 
+// GP support
+// Draw a GP frame from a resource stem (e.g., "Interface\\Main_Menu") at (x,y).
+// paletteId: -1 = white RGB + alpha, 0 = identity palette, 1..7 = nation remap tables
+bool draw_gp(const std::string& stem, int frameIndex, int x, int y);
+bool draw_gp_pal(const std::string& stem, int frameIndex, int x, int y, int paletteId);
+// Query the size of a decoded GP frame (aggregate over sub-chunks)
+bool query_size_gp(const std::string& stem, int frameIndex, int& outW, int& outH);
+
 } // namespace legacy::sprite_cache

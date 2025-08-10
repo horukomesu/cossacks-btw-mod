@@ -67,12 +67,13 @@
         - Реализованы `legacy::time_compat::GetTickCount()` (uint32 wrap) и `GetRealTime()` (uint64)
         - Инициализация: `legacy::time_compat::initialize()` из `COSSACKS_REMASTER/src/main.cpp`
    
-   6.4. Функции палитр/тумана, которые вызываются из меню: --- пока про игнорируем, TODO;
-       - SetDarkPalette/SlowLoadPalette/SlowUnLoadPalette/LoadFog
+   6.4. [СДЕЛАНО] Функции палитр/тумана, которые вызываются из меню:
+       - SetDarkPalette/SlowLoadPalette/SlowUnLoadPalette реализованы в `legacy_adapter` как `legacy::palette_compat`;
+       - LoadFog реализован как `legacy::fog_compat::LoadFog` (переключение набора курсоров по индексу), вызовы добавлены в `MainMenu_compat`.
 
 7. Звук
-   7.1. Привести AssignSound(..., MOUSE_SOUND) к минимально совместимой реализации на audio_core
-   7.2. Загрузка WAV из архива, проигрывание по hover/click
+   7.1. [СДЕЛАНО] Привести AssignSound(..., MOUSE_SOUND) к реализации на OpenAL (`audio_core`)
+   7.2. [СДЕЛАНО] Загрузка WAV через ResourceIO и проигрывание по hover/click
 
 
 8. Поток выполнения/точка входа
@@ -84,9 +85,26 @@
        - Точно как в оригинале: ProcessMessages() → MMenu.ProcessDialogs() → MMenu.RefreshView()
        - Буфер меняется через FlipPages (делается в движке при swap)
    
-   8.3. [СДЕЛАНО] Курсор: отрисовка GP-курсора из Mouse_X.cpp
+    8.3. [СДЕЛАНО] Курсор: отрисовка GP-курсора из Mouse_X.cpp
 
-9. Пути к ресурсам и упаковки
-   9.1. Выравнить корень данных:
-       - Сейчас ResourceIO по умолчанию смотрит в MAIN_GAME_DATA, а main.cpp принудительно делает set_data_root(".")
-       - Для запуска из BUILD (как в плане) — выставить set_data_root("BUILD") и гарантировать, что resources.gsc лежит там
+9. Полный перенос логики главного меню (как в `@src/Interface.cpp::processMainMenu()`)
+   9.1. [НОВОЕ] Подсказки (Hint) и их позиционирование
+       - Добавить поле `Hint` в `SimpleDialog` и параметры `HintX/HintY/HintFont` в `DialogsSystem` [СДЕЛАНО]
+       - Рендерить подсказку при наведении на кнопку [СДЕЛАНО]
+   9.2. [НОВОЕ] Полное построение главного меню
+       - Фон `Interface\\Background_Main_Menu.bmp` [СДЕЛАНО]
+       - Кнопки `Main_Menu` с кадрами актив/пассив, раскладка, звуки, hover [СДЕЛАНО]
+       - Центровка меню 1024x768 на любом разрешении [СДЕЛАНО]
+   9.3. [НОВОЕ] Навигация по вкладкам
+       - Single Player: загрузка палитры/тумана, вызовы `EnterName()` и `MM_ProcessSinglePlayer()` [ПЛАН]
+       - Load Game: экран загрузки `processMLoadGame()` [ПЛАН]
+       - Options: окно настроек `ProcessMenuOptions()` [ПЛАН]
+       - Editor (Video): загрузка редактора через `ShowLoading()`/`PrepareEditMedia()` [ПЛАН]
+       - Exit: слайд-шоу `SlideShow()` [ПЛАН]
+   9.4. [НОВОЕ] Экран Single Player (ресурсы: `Interface\\Single_Player`, фон `Background_Single_Player.bmp`)
+       - Создать адаптер `SinglePlayer_compat` с основными элементами, как в оригинале [ПЛАН]
+   9.5. [НОВОЕ] Экран Options (ресурсы: `Interface\\Options`)
+       - Ползунки громкости WarSound/MidiSound и т.п., сохранение значений [ПЛАН]
+   9.6. [НОВОЕ] Экран Load Game (ресурсы: `Interface\\Load_Game`)
+       - Листбокс сохранений, предпросмотр, Ok/Cancel, вызовы `PrepareToGame()` [ПЛАН]
+   9.7. [НОВОЕ] Анимация палитры (SlowLoad/UnLoad) при переходах [СДЕЛАНО в точках входа]

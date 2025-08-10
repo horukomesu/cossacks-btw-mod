@@ -28,6 +28,8 @@ public:
     VCall OnMouseOver{nullptr};
     VCall OnUserClick{nullptr};
     int UserParam{0};
+    // Optional hint text shown when hovered
+    const char* Hint{nullptr};
     // Sound hooks (wired later to audio_core)
     short MouseSound{0};
     short ClickSound{0};
@@ -36,7 +38,7 @@ public:
     virtual void draw();
     virtual void handleClick(int mx, int my);
     void AssignSound(int id, int /*USAGE*/) { ClickSound = static_cast<short>(id); }
-    void AssignSound(const char* /*name*/, int /*USAGE*/) { /* TODO: resolve sound by name in step 7 */ }
+    void AssignSound(const char* name, int /*USAGE*/);
 };
 
 class Picture : public SimpleDialog {
@@ -134,6 +136,10 @@ public:
 
     int BaseX{0};
     int BaseY{0};
+    // Hint rendering params (position relative to screen; font optional)
+    int HintX{18};
+    int HintY{701};
+    RLCFont* HintFont{nullptr};
 
 private:
     std::vector<std::unique_ptr<SimpleDialog>> m_dialogs;

@@ -4,10 +4,28 @@
 #include "engine_core/Render2D.hpp"
 #include "engine_core/InputAdapter.hpp"
 #include "legacy/RLCFont_compat.hpp"
+#include "resource_io/ResourceIO.hpp"
+#include "audio_core/AudioCore.hpp"
 #include <algorithm>
 #include <string>
+#include <iostream>
 
 namespace legacy { namespace ui {
+
+namespace {
+    // Toggle verbose UI debug logging
+    constexpr bool kDebugUI = false;
+
+    const char* dialog_type_name(SimpleDialog* d) {
+        if (dynamic_cast<GP_Button*>(d))   return "GP_Button";
+        if (dynamic_cast<GPPicture*>(d))   return "GPPicture";
+        if (dynamic_cast<Picture*>(d))     return "Picture";
+        if (dynamic_cast<TextButton*>(d))  return "TextButton";
+        if (dynamic_cast<VScrollBar*>(d))  return "VScrollBar";
+        if (dynamic_cast<ListBox*>(d))     return "ListBox";
+        return "SimpleDialog";
+    }
+}
 
 void SimpleDialog::draw() {
     if (OnDraw) OnDraw(this);
@@ -15,6 +33,11 @@ void SimpleDialog::draw() {
 
 void SimpleDialog::handleClick(int mx, int my) {
     if (OnClick && mx >= x && mx <= x1 && my >= y && my <= y1) {
+        // Play click sound if assigned
+        if (ClickSound > 0) {
+            // In this simple mapping, ClickSound is a handle to an OpenAL buffer
+            audio_core::play_buffer(static_cast<unsigned int>(ClickSound), 1.0f, 0.0f);
+        }
         OnClick(this);
     }
 }
@@ -23,12 +46,21 @@ void Picture::draw() {
     if (!Visible) return;
     legacy::SQPictureCompat* p = ActivePicture ? ActivePicture : PassivePicture;
     if (p) p->Draw(x, y);
+    if (kDebugUI) {
+        std::cout << "[ui] Picture draw at (" << x << "," << y << ") size ~("
+                  << (x1 - x + 1) << "x" << (y1 - y + 1) << ")\n";
+    }
 }
 
 void GPPicture::draw() {
     if (!Visible) return;
     if (FileID >= 0) {
         legacy::gp::GPS.ShowGP(x, y, FileID, SpriteID, Nation);
+    }
+    if (kDebugUI) {
+        std::cout << "[ui] GPPicture draw: GPID=" << FileID
+                  << " spr=" << SpriteID
+                  << " pos=(" << x << "," << y << ")\n";
     }
 }
 
@@ -37,6 +69,20 @@ void GP_Button::draw() {
     const int frame = (MouseOver ? ActiveFrame : PassiveFrame);
     if (GP_File >= 0) {
         legacy::gp::GPS.ShowGP(x, y, GP_File, frame, Nation);
+        // auto-fix bounds based on actual sprite size (helps precise hover)
+        const int w = legacy::gp::GPS.GetGPWidth(GP_File, frame);
+        const int h = legacy::gp::GPS.GetGPHeight(GP_File, frame);
+        if (w > 0 && h > 0) {
+            x1 = x + w - 1;
+            y1 = y + h - 1;
+        }
+    }
+    if (kDebugUI) {
+        std::cout << "[ui] GP_Button draw: GPID=" << GP_File
+                  << " frame=" << frame
+                  << (MouseOver ? " (hover)" : " (idle)")
+                  << " pos=(" << x << "," << y << ") size=(" << (x1 - x + 1)
+                  << "x" << (y1 - y + 1) << ")\n";
     }
 }
 
@@ -47,6 +93,10 @@ void TextButton::draw() {
         const int h = legacy::ui::GetStringHeight();
         if (x1 <= x || y1 <= y) { x1 = x + w; y1 = y + h; }
         legacy::ui::ShowString(x, y, Message, 0xFFFFFFFF);
+    }
+    if (kDebugUI) {
+        std::cout << "[ui] TextButton draw: \"" << (Message ? Message : "") << "\" pos=("
+                  << x << "," << y << ") size=(" << (x1 - x + 1) << "x" << (y1 - y + 1) << ")\n";
     }
 }
 
@@ -149,6 +199,12 @@ GP_Button* DialogsSystem::addGP_Button(SimpleDialog* /*parent*/, int dx, int dy,
     obj->y1 = obj->y + (h > 0 ? h : 0) - 1;
     GP_Button* ret = obj.get();
     m_dialogs.emplace_back(std::move(obj));
+    if (kDebugUI) {
+        std::cout << "[ui] addGP_Button: GPID=" << gpFile
+                  << " active=" << activeFrame << " passive=" << passiveFrame
+                  << " pos=(" << (BaseX + dx) << "," << (BaseY + dy) << ") size=("
+                  << (w > 0 ? w : 0) << "x" << (h > 0 ? h : 0) << ")\n";
+    }
     return ret;
 }
 
@@ -207,6 +263,9 @@ void DialogsSystem::ProcessDialogs() {
     // Minimal input: consume clicks and dispatch to dialogs
     engine_core::input::MouseEvent ev;
     while (engine_core::input::ReadMEvent(ev)) {
+        if (kDebugUI && ev.type == engine_core::input::MouseEventType::Move) {
+            std::cout << "[ui] mouse move: (" << ev.x << "," << ev.y << ")\n";
+        }
         // Track mouse-over state
         if (ev.type == engine_core::input::MouseEventType::Move) {
             for (auto& d : m_dialogs) {
@@ -214,11 +273,24 @@ void DialogsSystem::ProcessDialogs() {
                 d->MouseOver = (ev.x >= d->x && ev.x <= d->x1 && ev.y >= d->y && ev.y <= d->y1);
                 if (d->MouseOver != prev) d->NeedToDraw = true;
                 if (d->MouseOver && d->OnMouseOver) d->OnMouseOver(d.get());
+                // Mouse-over sound (one-shot)
+                if (d->MouseOver && d->MouseSound > 0) {
+                    audio_core::play_buffer(static_cast<unsigned int>(d->MouseSound), 0.6f, 0.0f);
+                }
+                if (kDebugUI && d->MouseOver != prev) {
+                    std::cout << "[ui] hover " << (d->MouseOver ? "enter: " : "leave: ")
+                              << dialog_type_name(d.get())
+                              << " bounds=(" << d->x << "," << d->y << ".." << d->x1 << "," << d->y1 << ")\n";
+                }
             }
         }
         if (ev.type == engine_core::input::MouseEventType::LeftDown) {
             for (auto& d : m_dialogs) {
                 if (d->MouseOver) {
+                    if (kDebugUI) {
+                        std::cout << "[ui] click: " << dialog_type_name(d.get())
+                                  << " UserParam=" << d->UserParam << " at (" << ev.x << "," << ev.y << ")\n";
+                    }
                     if (d->OnUserClick) d->OnUserClick(d.get());
                     d->handleClick(ev.x, ev.y);
                     // ListBox selection by click
@@ -228,12 +300,18 @@ void DialogsSystem::ProcessDialogs() {
                         if (idx >= 0 && idx < static_cast<int>(lb->Items.size())) {
                             lb->CurItem = idx;
                             lb->NeedToDraw = true;
+                            if (kDebugUI) {
+                                std::cout << "[ui] ListBox select row " << row << " -> index " << idx << " (item count=" << lb->Items.size() << ")\n";
+                            }
                         }
                     }
                     // Scrollbar dragging start
                     if (auto vs = dynamic_cast<VScrollBar*>(d.get())) {
                         vs->Drag = true;
                         vs->NeedToDraw = true;
+                        if (kDebugUI) {
+                            std::cout << "[ui] VScrollBar drag start at pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
+                        }
                     }
                 }
             }
@@ -242,6 +320,9 @@ void DialogsSystem::ProcessDialogs() {
             for (auto& d : m_dialogs) {
                 if (auto vs = dynamic_cast<VScrollBar*>(d.get())) {
                     vs->Drag = false;
+                    if (kDebugUI) {
+                        std::cout << "[ui] VScrollBar drag stop at pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
+                    }
                 }
             }
         }
@@ -251,6 +332,9 @@ void DialogsSystem::ProcessDialogs() {
                     // simple horizontal movement mapping to SPos (no bounds yet)
                     const int newPos = std::max(0, std::min(vs->SMaxPos, ev.x - (vs->x + vs->ScrDx)));
                     if (newPos != vs->SPos) { vs->SPos = newPos; vs->NeedToDraw = true; }
+                    if (kDebugUI) {
+                        std::cout << "[ui] VScrollBar drag move -> pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
+                    }
                 }
             }
         }
@@ -262,8 +346,23 @@ void DialogsSystem::ProcessDialogs() {
                     const int delta = (ev.param > 0) ? -step : step;
                     const int newPos = std::max(0, std::min(vs->SMaxPos, vs->SPos + delta));
                     if (newPos != vs->SPos) { vs->SPos = newPos; vs->NeedToDraw = true; }
+                    if (kDebugUI) {
+                        std::cout << "[ui] Wheel on VScrollBar -> pos=" << vs->SPos << "/" << vs->SMaxPos << " (delta=" << ev.param << ")\n";
+                    }
                 }
             }
+        }
+    }
+
+    // Robust hover update even if no move events were queued this frame
+    int mx = 0, my = 0;
+    engine_core::input::GetPointer(mx, my);
+    for (auto& d : m_dialogs) {
+        const bool prev = d->MouseOver;
+        const bool overNow = (mx >= d->x && mx <= d->x1 && my >= d->y && my <= d->y1);
+        if (overNow != prev) {
+            d->MouseOver = overNow;
+            d->NeedToDraw = true;
         }
     }
 
@@ -284,6 +383,21 @@ void DialogsSystem::ProcessDialogs() {
     }
 }
 
+// Map legacy AssignSound(name, USAGE) to loading a WAV buffer via ResourceIO and AudioCore
+void SimpleDialog::AssignSound(const char* name, int /*USAGE*/) {
+    if (!name || !*name) return;
+    // Accept either direct filename or logical id; try directly first, then with .wav
+    std::vector<unsigned char> bytes;
+    if (!resource_io::read_file_anywhere(name, bytes)) {
+        std::string withExt = std::string(name) + ".wav";
+        if (!resource_io::read_file_anywhere(withExt, bytes)) return;
+    }
+    unsigned int buf = audio_core::create_buffer_from_wav_bytes(bytes.data(), bytes.size());
+    if (buf) {
+        ClickSound = static_cast<short>(buf);
+    }
+}
+
 void DialogsSystem::MarkToDraw() {
     for (auto& d : m_dialogs) d->NeedToDraw = true;
 }
@@ -291,8 +405,20 @@ void DialogsSystem::MarkToDraw() {
 void DialogsSystem::RefreshView() {
     for (auto& d : m_dialogs) {
         if (d->NeedToDraw && d->Visible) {
+            if (kDebugUI) {
+                std::cout << "[ui] draw: " << dialog_type_name(d.get())
+                          << " bounds=(" << d->x << "," << d->y << ".." << d->x1 << "," << d->y1 << ")\n";
+            }
             d->draw();
             d->NeedToDraw = false;
+        }
+    }
+    // Draw hint if any hovered dialog has one
+    for (auto& d : m_dialogs) {
+        if (d->Visible && d->MouseOver && d->Hint && HintFont) {
+            // Simple placement per legacy values
+            legacy::ui::ShowString(HintX, HintY, d->Hint, 0xFFFFFFFF);
+            break;
         }
     }
 }

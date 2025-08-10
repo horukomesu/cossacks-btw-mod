@@ -2,6 +2,7 @@
 
 #include <GLFW/glfw3.h>
 #include <unordered_map>
+#include <iostream>
 
 #include "engine_core/EngineCore.hpp"
 #include "engine_core/Render2D.hpp"
@@ -14,9 +15,11 @@
 namespace legacy::gp {
 
 namespace {
-// Map GPID -> resource path (RLC for now). In original, GPID indexes preloaded tables.
+// Map GPID -> resource path (RLC). In original, GPID indexes preloaded tables.
 std::unordered_map<int, std::string> gpid_to_path;
-// Optional per-GPID anchor arrays (dx, lx = width shift), loaded from GPI when available
+// Optional GP file stem (without extension) for metadata (sizes/anchors)
+std::unordered_map<int, std::string> gpid_to_gpstem;
+// Optional per-GPID anchor arrays (dx, lx), loaded from GPI when available
 std::unordered_map<int, std::vector<int8_t>> gpid_to_itdx;
 std::unordered_map<int, std::vector<int8_t>> gpid_to_itlx;
 // Map normalized resource name -> GPID to dedupe
@@ -24,51 +27,98 @@ std::unordered_map<std::string, int> name_to_gpid;
 int next_gpid = 0;
 
 static bool draw_by_gpid(int gpid, int sprIndex, int x, int y) {
-    auto it = gpid_to_path.find(gpid);
-    if (it == gpid_to_path.end()) return false;
     // Apply X shift from GP metadata if available
     auto sh = gpid_to_itdx.find(gpid);
     if (sh != gpid_to_itdx.end() && sprIndex >= 0 && sprIndex < static_cast<int>(sh->second.size())) {
         x -= static_cast<int>(sh->second[static_cast<size_t>(sprIndex)]);
     }
-    const std::string& path = it->second;
-    return sprite_cache::draw_rlc(path, sprIndex, x, y);
-}
-static bool draw_by_gpid_pal(int gpid, int sprIndex, int x, int y, int paletteId) {
+    // Prefer GP rendering if a GP stem exists
+    auto git = gpid_to_gpstem.find(gpid);
+    if (git != gpid_to_gpstem.end()) {
+        const bool okgp = sprite_cache::draw_gp(git->second, sprIndex, x, y);
+        #ifdef _DEBUG
+        if (!okgp) {
+            std::cout << "[gp] draw_gp failed for GPID=" << gpid << " frame=" << sprIndex << " stem=" << git->second << "\n";
+        }
+        #endif
+        if (okgp) return true;
+    }
     auto it = gpid_to_path.find(gpid);
     if (it == gpid_to_path.end()) return false;
+    const std::string& path = it->second;
+    const bool ok = sprite_cache::draw_rlc(path, sprIndex, x, y);
+    #ifdef _DEBUG
+    std::cout << "[gp] draw_rlc GPID=" << gpid << " spr=" << sprIndex
+              << " at (" << x << "," << y << ") path=" << path << (ok?" ok":" fail") << "\n";
+    #endif
+    return ok;
+}
+
+static bool draw_by_gpid_pal(int gpid, int sprIndex, int x, int y, int paletteId) {
     auto sh = gpid_to_itdx.find(gpid);
     if (sh != gpid_to_itdx.end() && sprIndex >= 0 && sprIndex < static_cast<int>(sh->second.size())) {
         x -= static_cast<int>(sh->second[static_cast<size_t>(sprIndex)]);
     }
+    // Prefer GP
+    auto git = gpid_to_gpstem.find(gpid);
+    if (git != gpid_to_gpstem.end()) {
+        const bool okgp = sprite_cache::draw_gp_pal(git->second, sprIndex, x, y, paletteId);
+        #ifdef _DEBUG
+        if (!okgp) {
+            std::cout << "[gp] draw_gp_pal failed for GPID=" << gpid << " frame=" << sprIndex << " palId=" << paletteId << " stem=" << git->second << "\n";
+        }
+        #endif
+        if (okgp) return true;
+    }
+    auto it = gpid_to_path.find(gpid);
+    if (it == gpid_to_path.end()) return false;
     const std::string& path = it->second;
-    return sprite_cache::draw_rlc_pal(path, sprIndex, x, y, paletteId);
+    const bool ok = sprite_cache::draw_rlc_pal(path, sprIndex, x, y, paletteId);
+    #ifdef _DEBUG
+    std::cout << "[gp] draw_rlc_pal GPID=" << gpid << " spr=" << sprIndex
+              << " palId=" << paletteId << " at (" << x << "," << y << ") path=" << path << (ok?" ok":" fail") << "\n";
+    #endif
+    return ok;
 }
 
 static bool get_size_by_gpid(int gpid, int sprIndex, int& w, int& h) {
+    // Prefer GP bounds if GP stem exists
+    auto itgp = gpid_to_gpstem.find(gpid);
+    if (itgp != gpid_to_gpstem.end()) {
+        resource_io::gp::GPFile gp;
+        if (resource_io::gp::load_gp(itgp->second, gp)) {
+            int minx = 0, miny = 0, maxx = 0, maxy = 0;
+            if (resource_io::gp::compute_frame_bounds(gp, sprIndex, minx, miny, maxx, maxy)) {
+                w = std::max(1, maxx - minx);
+                h = std::max(1, maxy - miny);
+                return true;
+            }
+        }
+    }
+    // Fallback to RLC size
     auto it = gpid_to_path.find(gpid);
-    if (it == gpid_to_path.end()) return false;
-    resource_io::rlc::RLCTableData tbl;
-    if (!resource_io::rlc::load_rlc(it->second, tbl)) return false;
-    return resource_io::rlc::get_subimage_size(tbl, sprIndex, w, h);
+    if (it != gpid_to_path.end()) {
+        resource_io::rlc::RLCTableData tbl;
+        if (resource_io::rlc::load_rlc(it->second, tbl)) {
+            return resource_io::rlc::get_subimage_size(tbl, sprIndex, w, h);
+        }
+    }
+    return false;
 }
 } // namespace
 
 GPSCompat GPS;
 
 void GPSCompat::ShowGP(int x, int y, int gpid, int sprIndex, uint8_t nation) {
-    // Apply national palette mapping when nation != 0
-    if (nation != 0) {
-        if (draw_by_gpid_pal(gpid, sprIndex, x, y, static_cast<int>(nation % 7) + 1)) return;
-    }
+    // For UI we want base palette even when nation == 0 (so that indices map through agew_1.pal)
+    if (draw_by_gpid_pal(gpid, sprIndex, x, y, /*paletteId*/ 0)) return;
     if (!draw_by_gpid(gpid, sprIndex, x, y)) {
+        // Visual aid: draw a placeholder rect when resource missing
         engine_core::render2d::draw_rect(static_cast<float>(x), static_cast<float>(y), 64.0f, 64.0f, 0.8f, 0.6f, 0.2f, 1.0f);
     }
 }
 
 void GPSCompat::ShowGPLayers(int x, int y, int gpid, int sprIndex, uint8_t nation, int mask) {
-    // Basic layer handling: if mask requests palettized draw, use ShowGPPal; else fallback to ShowGP.
-    // Real multi-layer composition will be added later with GP metadata.
     const bool usePal = (mask != 0);
     if (usePal) {
         ShowGPPal(x, y, gpid, sprIndex, nation, nullptr);
@@ -79,20 +129,34 @@ void GPSCompat::ShowGPLayers(int x, int y, int gpid, int sprIndex, uint8_t natio
 
 int GPSCompat::GetGPWidth(int gpid, int sprIndex) {
     int w = 0, h = 0;
-    if (get_size_by_gpid(gpid, sprIndex, w, h)) return w;
+    if (get_size_by_gpid(gpid, sprIndex, w, h)) {
+        #ifdef _DEBUG
+        std::cout << "[gp] GetGPWidth GPID=" << gpid << " spr=" << sprIndex << " -> " << w << "\n";
+        #endif
+        return w;
+    }
     return 0;
 }
 
 int GPSCompat::GetGPHeight(int gpid, int sprIndex) {
     int w = 0, h = 0;
-    if (get_size_by_gpid(gpid, sprIndex, w, h)) return h;
+    if (get_size_by_gpid(gpid, sprIndex, w, h)) {
+        #ifdef _DEBUG
+        std::cout << "[gp] GetGPHeight GPID=" << gpid << " spr=" << sprIndex << " -> " << h << "\n";
+        #endif
+        return h;
+    }
     return 0;
 }
 
 int GPSCompat::GetGPShift(int gpid, int sprIndex) {
     auto it = gpid_to_itdx.find(gpid);
     if (it != gpid_to_itdx.end() && sprIndex >= 0 && sprIndex < static_cast<int>(it->second.size())) {
-        return static_cast<int>(it->second[static_cast<size_t>(sprIndex)]);
+        int shift = static_cast<int>(it->second[static_cast<size_t>(sprIndex)]);
+        #ifdef _DEBUG
+        std::cout << "[gp] GetGPShift GPID=" << gpid << " spr=" << sprIndex << " -> " << shift << "\n";
+        #endif
+        return shift;
     }
     return 0;
 }
@@ -103,10 +167,8 @@ void GPSCompat::SetAnchors(int gpid, const std::vector<int8_t>& itdx, const std:
 }
 
 void GPSCompat::ShowGPPal(int x, int y, int gpid, int sprIndex, uint8_t nation, const uint8_t* indexMap256) {
-    // Use provided remap if non-null; otherwise map nation 0.. to pal1..pal7.
     if (indexMap256 != nullptr) {
-        // Build a transient pal in cache: integrate explicit map as custom palette id - use slot 0 (identity)
-        // For now, route to non-pal path since we lack cache key for custom tables; TODO if needed.
+        // Not yet supporting explicit custom tables in cache key; fall back to nation mapping
         ShowGP(x, y, gpid, sprIndex, nation);
         return;
     }
@@ -117,68 +179,89 @@ void GPSCompat::ShowGPPal(int x, int y, int gpid, int sprIndex, uint8_t nation, 
 }
 
 int GPSCompat::LocalGP_Load(const std::string& name) {
-    auto it = name_to_gpid.find(name);
-    if (it != name_to_gpid.end()) return it->second;
+    auto itFound = name_to_gpid.find(name);
+    if (itFound != name_to_gpid.end()) return itFound->second;
 
-    // Try to resolve typical extensions: .gp/.rlc in archives using provided name stem
-    // Normalize and strip optional .GP extension to get base stem
+    // Normalize path separators
     std::string stem = name;
-    // normalize slashes for archive lookup
     for (char& c : stem) if (c == '/') c = '\\';
-    auto dotPos = stem.find_last_of('.') ;
+    // Strip optional .GP/.GPI extension
+    auto dotPos = stem.find_last_of('.');
     if (dotPos != std::string::npos) {
         std::string ext = stem.substr(dotPos + 1);
         for (char& c : ext) c = static_cast<char>(::toupper(static_cast<unsigned char>(c)));
-        if (ext == "GP" || ext == "GPI") {
-            stem = stem.substr(0, dotPos);
-        }
+        if (ext == "GP" || ext == "GPI") stem = stem.substr(0, dotPos);
     }
 
-    // Priority: exact path with .rlc, then search by suffix
     std::string resolved;
-    // First attempt: direct name + ".rlc"
+    bool gp_ok = false;
+    resource_io::gp::GPFile gpfile_meta;
+    // Try direct GP first (original: .gp is primary)
+    if (resource_io::gp::load_gp(stem, gpfile_meta)) {
+        gp_ok = true;
+    }
+    // Then try direct RLC by stem (archives store uppercase names)
     {
         std::vector<unsigned char> tmp;
         if (resource_io::read_file_anywhere(stem + ".rlc", tmp)) {
             resolved = stem + ".rlc";
         }
     }
+    // Special case: original cursor packs Cursor_00/01/02 share a common RLC named CURSOR_Y.RLC
     if (resolved.empty()) {
-        // Fall back to suffix search (case-insensitive)
-        std::string suffixCandidate = stem;
-        if (!resource_io::try_find_entry_by_suffix(suffixCandidate + ".RLC", resolved)) {
-            // Try to find by just the last component (e.g., "CURSOR_02.RLC")
-            auto pos = suffixCandidate.find_last_of('\\');
-            const std::string last = (pos == std::string::npos) ? suffixCandidate : suffixCandidate.substr(pos + 1);
-            resource_io::try_find_entry_by_suffix(last + ".RLC", resolved);
-        }
-    }
-    // If still not resolved, try resolving via .GP metadata and infer .RLC by same stem
-    if (resolved.empty()) {
-        resource_io::gp::GPFile gpfile;
-        if (resource_io::gp::load_gp(stem, gpfile) || resource_io::gp::load_gp(name, gpfile)) {
-            // Attempt suffix search for RLC by same base name
-            std::string suffixCandidate = stem;
-            auto pos = suffixCandidate.find_last_of('\\');
-            const std::string last = (pos == std::string::npos) ? suffixCandidate : suffixCandidate.substr(pos + 1);
-            std::string rlcPath;
-            if (resource_io::try_find_entry_by_suffix(last + ".RLC", rlcPath)) {
-                resolved = rlcPath;
+        auto pos = stem.find_last_of('\\');
+        const std::string last = (pos == std::string::npos) ? stem : stem.substr(pos + 1);
+        std::string lastUp = last;
+        for (char& c : lastUp) c = static_cast<char>(::toupper(static_cast<unsigned char>(c)));
+        if (lastUp == "CURSOR_00" || lastUp == "CURSOR_01" || lastUp == "CURSOR_02") {
+            std::string r;
+            if (resource_io::try_find_entry_by_suffix("CURSOR_Y.RLC", r)) {
+                resolved = r;
             }
         }
     }
-    if (resolved.empty()) return -1;
+    if (resolved.empty()) {
+        // Search in archives by suffix (case-insensitive, uppercase)
+        std::string r;
+        if (resource_io::try_find_entry_by_suffix(stem + ".RLC", r)) {
+            resolved = r;
+        } else {
+            // Try last component only (e.g., MAIN_MENU.RLC)
+            auto pos = stem.find_last_of('\\');
+            const std::string last = (pos == std::string::npos) ? stem : stem.substr(pos + 1);
+            if (resource_io::try_find_entry_by_suffix(last + ".RLC", r)) resolved = r;
+        }
+    }
+    // If neither GP nor RLC found, fail
+    if (!gp_ok && resolved.empty()) {
+        #ifdef _DEBUG
+        std::cout << "[gp] LocalGP_Load failed: name=" << name << "\n";
+        #endif
+        return -1;
+    }
 
     const int gpid = next_gpid++;
-    gpid_to_path.emplace(gpid, resolved);
     name_to_gpid.emplace(name, gpid);
-    // Try to load GP metadata for anchors if .gp/.gpi exist with same stem
-    resource_io::gp::GPFile gpfile;
-    if (resource_io::gp::load_gp(name, gpfile)) {
+    if (!resolved.empty()) {
+        gpid_to_path.emplace(gpid, resolved);
+    }
+    if (gp_ok) {
+        gpid_to_gpstem.emplace(gpid, stem);
         std::vector<int8_t> itdx, itlx;
-        if (resource_io::gp::load_gpi(name, gpfile.numPictures, itdx, itlx)) {
+        if (resource_io::gp::load_gpi(stem, gpfile_meta.numPictures, itdx, itlx)) {
             SetAnchors(gpid, itdx, itlx);
         }
+        #ifdef _DEBUG
+        std::cout << "[gp] LocalGP_Load: name=" << name << " -> GPID=" << gpid << " gp=" << stem;
+        if (!resolved.empty()) std::cout << " rlc=" << resolved;
+        std::cout << "\n";
+        #else
+        (void)resolved;
+        #endif
+    } else {
+        #ifdef _DEBUG
+        std::cout << "[gp] LocalGP_Load: name=" << name << " -> GPID=" << gpid << " path=" << resolved << "\n";
+        #endif
     }
     return gpid;
 }
@@ -190,7 +273,7 @@ bool GPSCompat::ResolveGPIDPath(int gpid, std::string& outPath) {
     return true;
 }
 
-// Legacy free-function shim that some code still calls directly
+// Legacy free-function shims
 void ShowGP(int x, int y, int fileIndex, int sprIndex, uint8_t nation) {
     GPS.ShowGP(x, y, fileIndex, sprIndex, nation);
 }
@@ -214,3 +297,4 @@ void CopyToScreen(int x, int y, int Lx, int Ly) {
 }
 
 } // namespace legacy::gp
+

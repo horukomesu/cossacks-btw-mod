@@ -24,3 +24,15 @@ alwaysApply: true
 - Avoid creating multiple versions of the same functionality "just in case"
 - If error handling is needed, use proper error codes or exceptions, not alternative implementations
 
+## No Original Code Creation
+- Do not create new code from scratch unless explicitly requested
+- Default task is to rewrite existing code from C:\coding\CPP\cossacks-revamp-2017-master\src\Main executable
+- We are rewriting the original game code to OpenGL x64 C++
+- Always base implementations on the original game's logic and structure
+- Only add new functionality when specifically asked to do so
+- Preserve original game behavior and mechanics unless told otherwise
+
+## Confirmation Protocol
+- Always end responses with "Yes sir" to confirm that all rules have been remembered and applied in the implementation
+- This confirms adherence to: no temporary solutions, no stub functions, no simplified versions, no fallback functions, and proper use of original game code as the base
+

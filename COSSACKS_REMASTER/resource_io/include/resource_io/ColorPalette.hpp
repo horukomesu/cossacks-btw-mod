@@ -15,6 +15,9 @@ bool load_from_path(const std::string& path);
 // Get current RGBA palette (256*4 bytes). If not loaded, returns identity grayscale.
 const uint8_t* get_rgba256x4();
 
+// Set current palette from RGBA bytes (256*4). Returns true on success.
+bool set_from_rgba(const uint8_t* rgba256x4);
+
 } // namespace resource_io::color_palette
 
 
