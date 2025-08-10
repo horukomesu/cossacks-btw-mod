@@ -82,9 +82,6 @@
      - Исправлено переполнение источников OpenAL: кап по источникам + one‑shot hover (только на вход)
 
 
-10. Сборочная система и внешние зависимости
-    10.1. [СДЕЛАНО] GLAD подключен напрямую из `COSSACKS_REMASTER/extern/vcpkg/packages/glad_x64-windows` без `find_package`
-          - Обновлены `engine_core/CMakeLists.txt` и `legacy_adapter/CMakeLists.txt`: добавлены include/lib пути GLAD, удалены ссылки на `glad::glad`
 
 
 8. Поток выполнения/точка входа
@@ -123,3 +120,10 @@
 9.8. Исправление: фоны подэкранов (Single/Options/Load) не отображались после rebuild [СДЕЛАНО]
      - Причина: локальный `SQPictureCompat` уничтожался после сборки экрана, а `Picture` хранил указатель на него
      - Решение: использовать глобальный `g_background` для фонов всех экранов, как в главном меню
+10. Сборочная система и внешние зависимости
+
+
+    10.1. [ОБНОВЛЕНО] GLAD генерируется в процессе сборки через подмодуль `extern/glad` (glad2 cmake)
+          - Добавлен `add_subdirectory(extern/glad/cmake ...)` и `glad_add_library(glad_gl_core_33 API gl:core=3.3)` в `COSSACKS_REMASTER/CMakeLists.txt`
+          - `engine_core` и `legacy_adapter` линкуются с `glad_gl_core_33`; удалены ручные пути/линковка vcpkg GLAD
+          - Источники переведены на `<glad/gl.h>` и `gladLoadGL(glfwGetProcAddress)`

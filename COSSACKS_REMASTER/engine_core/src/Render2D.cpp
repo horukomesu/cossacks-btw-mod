@@ -1,6 +1,6 @@
 #include "engine_core/Render2D.hpp"
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <array>
 #include <string>
 

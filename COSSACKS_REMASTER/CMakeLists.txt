@@ -13,6 +13,14 @@ endif()
 
 option(ENABLE_WARNINGS "Enable compiler warnings" ON)
 
+# GLAD (generate during build)
+# Requires Python on PATH. We vendor glad as a submodule under extern/glad
+set(GLAD_SOURCES_DIR "${CMAKE_CURRENT_SOURCE_DIR}/extern/glad")
+add_subdirectory("${GLAD_SOURCES_DIR}/cmake" glad_cmake)
+
+# Generate a GL 3.3 core glad target
+glad_add_library(glad_gl_core_33 REPRODUCIBLE API gl:core=3.3)
+
 add_subdirectory(engine_core)
 add_subdirectory(resource_io)
 add_subdirectory(game_logic)

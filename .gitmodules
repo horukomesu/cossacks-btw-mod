@@ -1,0 +1,3 @@
+[submodule "COSSACKS_REMASTER/extern/glad"]
+	path = COSSACKS_REMASTER/extern/glad
+	url = https://github.com/Dav1dde/glad

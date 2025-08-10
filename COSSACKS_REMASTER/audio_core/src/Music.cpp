@@ -72,6 +72,10 @@ static bool decode_mp3_file(const std::string& path, std::vector<int16_t>& outPC
     HRESULT hr = MFCreateSourceReaderFromURL(wpath.c_str(), nullptr, &pReader);
     if (FAILED(hr) || !pReader) return false;
 
+    // Ensure only audio stream is selected
+    pReader->SetStreamSelection(MF_SOURCE_READER_ALL_STREAMS, FALSE);
+    pReader->SetStreamSelection(MF_SOURCE_READER_FIRST_AUDIO_STREAM, TRUE);
+
     IMFMediaType* pOutType = nullptr;
     hr = MFCreateMediaType(&pOutType);
     if (SUCCEEDED(hr)) hr = pOutType->SetGUID(MF_MT_MAJOR_TYPE, MFMediaType_Audio);

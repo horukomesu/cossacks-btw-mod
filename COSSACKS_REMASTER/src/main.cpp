@@ -48,7 +48,7 @@ int main() {
     audio_core::set_max_live_sources(64);
     // Music: scan BUILD\Music and start random playback like legacy CD logic
     audio_core::music::initialize();
-    audio_core::music::set_track_directory("BUILD/Music");
+    audio_core::music::set_track_directory("Music");
     audio_core::music::reload_tracks();
     audio_core::music::set_play_mode(2); // default: random
     audio_core::music::set_volume_percent(50);

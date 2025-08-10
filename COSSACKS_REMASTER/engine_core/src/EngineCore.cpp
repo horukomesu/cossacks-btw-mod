@@ -2,7 +2,7 @@
 
 #include <iostream>
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include <GLFW/glfw3.h>
 #if defined(_WIN32)
 #include <windows.h>
@@ -100,7 +100,7 @@ bool initialize_window(int width, int height, const char* title) {
     glfwMakeContextCurrent(gWindow);
     glfwSwapInterval(1); // vsync
 
-    if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress)) {
+    if (!gladLoadGL(glfwGetProcAddress)) {
         std::cerr << "[engine_core] Failed to initialize GLAD" << std::endl;
     #if defined(_WIN32)
         MessageBoxA(nullptr, "Failed to initialize GLAD (OpenGL loader)", "engine_core", MB_OK | MB_ICONERROR);

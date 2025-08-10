@@ -1,6 +1,6 @@
 #include "engine_core/Texture.hpp"
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 
 namespace engine_core::texture {
 

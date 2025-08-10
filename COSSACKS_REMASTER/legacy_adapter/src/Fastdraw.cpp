@@ -1,6 +1,6 @@
 #include "legacy/Fastdraw_compat.hpp"
 
-#include <glad/glad.h>
+#include <glad/gl.h>
 #include "engine_core/Render2D.hpp"
 #include "resource_io/ColorPalette.hpp"
 
