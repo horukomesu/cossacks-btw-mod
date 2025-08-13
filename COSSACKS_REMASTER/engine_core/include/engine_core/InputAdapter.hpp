@@ -43,4 +43,8 @@ bool GetRightPressed();
 // Latest pointer position
 void GetPointer(int32_t& outX, int32_t& outY);
 
+// Text input (UTF-32 codepoints). Engine pushes via platform callbacks.
+void AddChar(uint32_t codepoint);
+bool ReadChar(uint32_t& outCodepoint);
+
 } // namespace engine_core::input

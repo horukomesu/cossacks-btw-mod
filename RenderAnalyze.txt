@@ -1,0 +1,249 @@
+ОРИГИНАЛЬНЫЙ ДВИЖОК (@src/Main executable): РЕНДЕР, ИГРОВОЙ ЦИКЛ, ТЕРРЕЙН
+
+1) Главный цикл кадра и где происходит отрисовка/обновление
+- Центральные точки входа цикла во время игры:
+  - Interface.cpp: FastScreenProcess()/FastEditScreenProcess() →
+    - вызывает GFieldShow() (карта/террейн/юниты/оверлеи)
+    - затем ProcessMessages() (обработка платформенных событий)
+    - затем миникарта GMiniShow() (и пр.)
+  - Ddex1.cpp: PreDrawGameProcess() / PostDrawGameProcess() — код вокруг кадров, автосейвы, сетевой флеш, «пейсинг» (kPostDrawInterval≈16 мс ~60 Гц).
+  - В нескольких местах кадр завершает FlipPages() — показ собранного кадра.
+- Навигация меню копирует паттерн: ProcessMessages() → DialogsSystem.ProcessDialogs() → RefreshView() → FlipPages().
+  Примеры:
+  ```208:Interface.cpp
+  __declspec( dllexport ) bool ProcessMessages()
+  ```
+  ```8505:Interface.cpp
+  PreDrawGameProcess();
+  ...
+  PostDrawGameProcess();
+  ```
+  ```1579:mapa.cpp
+  void GFieldShow()
+  ```
+
+2) 2D-спрайты (RLC/GP) и базовые примитивы
+- Fastdraw.cpp — полный стек RLC-вывода:
+  - SetRLCWindow(x,y,lx,ly,slx): задаёт окно клиппинга в экранных координатах (top-left), задаёт базовый шаг строки.
+  - Большое семейство ShowRLC* и их палитровых вариантов: ShowRLC, ShowRLCi, ShowRLCpal, ShowRLChtpal (полупрозрачный туман), ShowRLCShadow, ShowRLCDark, ShowRLCBlue, ShowRLCFire, …
+  - ShowRLCItem(...) выбирает между прямым RLC и «современным» GPS.ShowGP (GP/RLC-обёртка) в зависимости от индексов.
+  - Таблицы альф/градиентов для тумана/осветления: extern byte fog[], wfog[], yfog[], rfog[], trans8[].
+- CopyToScreen/CBar — прямые заливки/копии экрана (используются для UI/оверлеев, затем FlipPages()).
+
+3) Координаты, окна и смещения экрана
+- Глобали вида smapx/smapy/smaplx/smaply — положение «окна» карты на экране (в пикселях), mapx/mapy — позиция в тайлах.
+  Пример (mapa.cpp):
+  ```166:mapa.cpp
+  int smapx, smapy; // экранные смещения окна карты
+  int smaplx, smaply; // размеры окна карты в тайлах (пересчитанные в пиксели как << 5 / << 4)
+  int mapx, mapy; // координаты окна в тайлах
+  ```
+- Почти везде для экрана используются преобразования:
+  - X-экран = smapx + ((x - mapx) << 5)  (32 px на тайл по X)
+  - Y-экран = smapy + ((y - mapy) << 4)  (16 px на тайл по Y)
+  Иногда используется mul3(mapy)<<3 (т.е. 3*mapy*8 = 24*mapy) — для согласования с треугольной сеткой.
+  Примеры:
+  ```414:mapa.cpp
+  sco = ScreenPtr + smapx + ((x - mapx) << 5) + (((y - mapy) << 5) + smapy)*SCRSizeX;
+  ```
+  ```782:mapa.cpp
+  x += smapx - (int(mapx) << 5);
+  y += smapy - (mul3(int(mapy)) << 3);
+  ```
+
+4) Террейн (THMap/TexMap), геометрия и рендер
+- Данные:
+  - THMap: short[(MaxTH+1)*MaxTH] — высоты в вершинах треугольной сетки.
+  - TexMap: byte[(MaxTH+1)*MaxTH] — индекс текстуры на вершину.
+  - Параметры сетки: MaxSector=128<<ADDSH; MaxTH=MaxSector*2; VertInLine=MaxTH+1.
+  Источники:
+  ```1546:3DGraph.cpp
+  short* THMap; byte* TexMap; byte* SectMap;
+  ```
+  ```3440:LoadSave.cpp
+  void SetupArrays() { ... ADDSH → MaxTH, VertInLine, MAPSX, MaxWX, ... allocate THMap/TexMap ... }
+  ```
+- Рендер (3DGraph.cpp):
+  - Растеризация террейна треугольниками (две разновидности функций DrawTriangle..., с учётом тумана: параметры fog,fogdx,fogdy).
+  - Матчасть: рассчитываются экранные координаты вершин (на базе «изометрии»), затем для каждого треугольника идёт сэмплинг тайлового атласа и смешение с туманом; есть участки на ASM для скорости.
+  - Используется ZBuffer/ZBuffer.cpp (подключён в проекте) и сортировки для юнитов/объектов, чтобы наложение было корректным.
+- Инициализация/сброс террейна: ClearTrianglesSystem/CreateTrianglesSystem, CreateWTopMap и прочие постпроцедуры вызываются после загрузки карт.
+
+5) Туман войны (FoW)
+- Переключатель FogMode (0/1) и обработчики:
+  - ProcessFog1(): обновление карты тумана по видимости.
+  - CreateFogImage(): построение экранной «маски» тумана.
+  - DrawFog(): финальное наложение на кадр.
+  - Для миникарты — DrawMiniFog().
+  Фрагменты:
+  ```1924:mapa.cpp
+  if (SHOWSLIDE && FogMode && ... ) { ProcessFog1(); CreateFogImage(); DrawFog(); }
+  ```
+  ```772:Interface.cpp / 2160:Fastdraw.cpp
+  extern byte fog[8192+1024]; ShowRLCShadow/ShowRLCDark используют fog-палитры
+  ```
+
+6) Вода (RealWater)
+- Данные: WaterDeep/WaterBright (stride MaxWX=MAPSX>>1, размер (msx+2)*(msy+2) / 4 на клетку 32x16).
+- API: InitWater(), SetWaterSpot/EraseWaterSpot/SetBrightSpot, ClearWater(), CreateWaterLocking(...)
+- Влияет на генерацию/рендер берегов, звуки, миникарту.
+  Примеры:
+  ```3476:Ddex1.cpp
+  InitWater();
+  ```
+  ```3689..3706:mapa.cpp
+  SetWaterSpot/EraseWaterSpot/SetBrightSpot в режиме редактирования
+  ```
+  ```419..:RealWater.cpp
+  byte* WaterDeep; byte* WaterBright; и их модификации в окрестности спотов
+  ```
+
+7) Порядок отрисовки и сортировки
+- Sort.h/Groups.cpp — унифицированные сортировки по Y/X/линии/расстоянию для юнитов/списков; ключевой элемент правильного наложения спрайтов.
+  Примеры:
+  ```3178:Ddex1.cpp, 1053:mapa.cpp
+  SORT.Sort(); SC.Sort();
+  ```
+- ZBuffer.cpp — хранение и показ «слоёв» юнитов, альтернатива/дополнение к сортировкам.
+
+8) Миникарта и пост-инициализация сцены
+- CreateMiniMap() вызывается при загрузках/изменениях; для подсветки берутся WaterDeep/WaterBright, TexMap.
+- Параметры ADDSH, MAPSX/MAPSY, VertInLine пересчитываются в SetupArrays().
+
+9) Инициализация DDraw/поверхности/окно и FlipPages
+- Ddex1.cpp: doInit(...) — создание окна/поверхностей, выбор режимов, курсора/звука; ProcessMessages() — помпа сообщений; FlipPages() — вывод кадра.
+
+
+СОВРЕМЕННЫЙ REMASTER: СЛОИ, ТЕРРЕЙН, ИГРОВОЙ ПОТОК
+
+A) Глобальный пайплайн рендера (OpenGL)
+- world_render::begin_frame() → submit_*() → set_clip_rect()/set_camera() → flush().
+  ```WorldRender.cpp
+  begin_frame(); set_framebuffer_size(); set_clip_rect→glScissor; stable_sort по (layer,zOrder); draw_textured_quad_tinted(...)
+  ```
+- Слои (enum Layer) и zOrder формируют порядок отрисовки.
+- Клиппинг: реализован top-left → glScissor(bottom-left) трансляцией (как в menuplan 6.2/12.5).
+
+B) Проекция и координаты
+- world_render::world_to_screen(tileX, tileY, elevHalfPixels): изометрия (X=(x−y)*16, Y=(x+y)*8 − h) реализована внутри WorldRender; есть set_camera(tileOffsetX, tileOffsetY, pixelOffsetX, pixelOffsetY).
+
+C) Террейн (world_render::terrain)
+- Инициализация: загрузка tiles3.bmp (8/24 bpp), создание GL-текстуры атласа.
+- Привязка данных: set_map_data(heights, tex, vertInLine, maxTH) — напрямую из resource_io::map::MapData в legacy_adapter::scene_post_init.
+- Отрисовка (текущее состояние):
+  ```Terrain.cpp
+  for vy in [0..gMaxTH-2], for vx in [0..gVertInLine-2]:
+    t = gTexIdx[v00];
+    hAvg = avg(THMap 4 вершин);
+    worldX= vx; worldY= vy; world_to_screen(worldX,worldY,hAvg); draw textured quad 64x64 с (u0,v0)-(u1,v1) и простым «нормалеподобным» освещением
+  ```
+  Важно: цикл идёт по ВЕРШИНАМ сетки, а не по «ромбам» (тайлам), и рисуются billboard-квадраты 64x64 без сшивок треугольников. Это заметно отличается от оригинала, который растеризует ромбы как два треугольника с межплиточными швами и учётом локальной геометрии. Это ключевой источник несовпадений визуала.
+
+D) Спрайты/декор
+- legacy_adapter::SpriteCache — GP/RLC загрузка и показ поверх OpenGL; world_render::decor::set_from_scene(scene) публикует статику из EERT; decor::submit_frame() размещает их в world_render очереди.
+
+E) Туман войны
+- Заглушка: legacy_adapter::fog_compat::LoadFog(set) — no-op; в WorldRender есть API set_fog_screen_mask(...) и draw_fog_fullscreen(), но генерации маски нет (раздел 12.7/15.2 menuplan — «ЧАСТИЧНО»).
+
+F) Вода
+- Данные читаются (MapData.waterDeep/waterBright), совместимые helper’ы в legacy_adapter::water_compat (см. menuplan 14.4), но видимого рендера воды/берегов пока нет.
+
+G) Игровой цикл
+- game_logic — отдельный поток тиков (Slow=30 Гц/Fast=60 Гц), счётчик тиков, пауза, set_speed_mode(); пока сам игровой мир не обновляется (TODO блоки 15.2..).
+- Главный кадр (src/main.cpp) вызывает: begin_frame → terrain::submit_frame → decor::submit_frame → если меню активно, frame_main_menu → flush → audio update.
+
+H) Глобали/окно/ввод
+- legacy_adapter::Globals_compat публикует RealLx/RealLy/SCRSizeX/menu_x_off/...; ProcessMessages() — прокси на glfwPollEvents.
+
+
+КЛЮЧЕВЫЕ РАСХОЖДЕНИЯ И ПРИЧИНЫ «некорректного» РЕНДЕРА ТЕРРЕЙНА СЕЙЧАС
+
+1) Сетка и адресация: вершины vs «ромб-тайлы»
+- Оригинал растеризует РОМБЫ как 2 треугольника, используя вершины THMap по схеме (StartVertex, StartVertex+1, StartVertex+VertInLine, ...), с интерполяцией и швами между соседями; экранные координаты завязаны на изометрию и локальные смещения окна (smapx/smapy, mapx/mapy).
+- В remaster Terrain.cpp используется простой billboard-«спрайт» 64x64 на каждую «ячейку» (по сути — вершину), worldX/worldY берутся как индексы вершины (vx,vy), что не эквивалентно координатам центрального тайла. Это приводит к:
+  - смещению/рассинхрону ромбов;
+  - отсутствию корректных швов между ромбами;
+  - неверной высотной подрезке (hAvg применён к квадрату, а не к двум треугольникам);
+  - визуальным артефактам на склонах.
+
+2) Освещение
+- В оригинале освещение и затенение завязаны на реальные нормали/градиенты высот в треугольниках; в remaster стоит грубая эвристика compute_light_at_vertex() и среднее по 4 вершинам — это даёт отличия тонов и «плоский» вид.
+
+3) Туман войны
+- Оригинал использует готовые fog-таблицы и пост-рендер оверлей/палитровые операции; remaster пока не генерирует и не накладывает реальную маску (только API-хуки есть) — различия в отрисовке скрытых областей.
+
+4) Вода/берега
+- В оригинале «берега» и вода влияют на рендер (цвет, яркость краёв, спецэффекты и звук), а также на миникарту. Сейчас в remaster вода не участвует в рендере террейна, нет подсветки/сшивок береговых тайлов.
+
+5) Порядок слоёв и Z
+- Оригинал опирается и на сортировки (SortClass) и на ZBuffer для юнитов/объектов. В remaster пока реализованы только terrain+decor; юнитов/теней/проектилов нет — поэтому визуальный «пирог» не собран, а порядок слоёв ограничен.
+
+6) Окна/клип/смещения
+- В оригинале множество вычислений в экранных координатах через smapx/smapy и mapx/mapy, SetRLCWindow для локального клипа.
+- В remaster глобальный клип/скаляр (set_clip_rect + glScissor) реализован, но камера/смещения ещё не используются как в оригинале (set_camera есть, но террейн его не применяет явно при адресации данных/плиток, всё происходит через world_to_screen).
+
+
+ЧЕГО НЕ ХВАТАЕТ В REMASTER, ЧТОБЫ СОВПАСТЬ С ОРИГИНАЛОМ
+
+[Минимальный необходимый объём для корректного «базового» террейна]
+- Перейти с «квадратов 64x64 на вершину» на ромб-тайлы (двойной треугольник на «клетку»), адресуемые по «ячейкам» (не по вершинам). Нужна итерация по «клеткам» секции (MaxTH x MaxSector*6 либо эквивалент по ромбам), а для каждой — 2 draw_textured_triangle_tinted(...) с правильными (u,v) из tiles3.bmp и h-отсечкой через elevHalfPixels.
+- Применить world_to_screen(X=(x−y)*16, Y=(x+y)*8−h) к центру клетки; учесть глобальные смещения камеры (set_camera) и центрирование smapx/smapy.
+- Сшивки тайлов и дорожно-береговые правила (Tiling.txt, TexFlags, RoadTex) — перенос логики из 3DGraph.cpp/TexturesMeta в Terrain.cpp (resource_io::TexturesMeta уже читается; нужно учесть в выборке UV и соседей).
+
+[Следующий уровень паритета]
+- Освещение: заменить эвристику на расчёт нормалей по треугольникам (градиенты высот как в оригинале) с гладкой интерполяцией внутри ромба; возможна реализация через вершинные нормали и умножение на uTint.
+- Туман войны: добавить генерацию экранной маски (на базе видимости тайлов) и world_render::set_fog_screen_mask(...) → draw_fog_fullscreen().
+- Вода: базовый рендер плоскости воды и берегов (подборка тайлов при WaterDeep>128, сияние/яркость WaterBright, «подрезка» берегов).
+- Порядок слоёв: подключить юнитов, их тени, эффекты, сортировку по экранному Y (zOrder) и zBias для высоких объектов, как описано в menuplan (12.1/12.4).
+- Миникарта: вывод миникарты/рамки обзора/событий с учётом FoW.
+
+
+КОНКРЕТНЫЕ ССЫЛКИ ДЛЯ ПОРТА (ОРИГИНАЛ → REMASTER)
+- Геометрия/террейн (обязательно к изучению):
+  - 3DGraph.cpp: функции прорисовки треугольников (DrawTriangle..., параметры fog/bitmap), формулы позиционирования вершин.
+  - mapa.cpp: GFieldShow() — порядок вызовов: сначала террейн/декор, затем юниты/оверлеи; вычисления экранных координат через smapx/smapy, mapx/mapy.
+  - LoadSave.cpp::SetupArrays() — точные размерности и шаги (ADDSH, MaxTH, VertInLine, MAPSX/MAPSY, MaxWX/MaxWY и др.).
+- Туман войны: mapa.cpp (ProcessFog1, CreateFogImage, DrawFog), fog.cpp (генерация/таблицы), Fastdraw.cpp (палитровые операции fog/wfog/...).
+- Вода: RealWater.cpp (WaterDeep/Bright и споты), 3DMapEd.cpp (CreateMiniMap — подсветка воды).
+- Сортировки/слои: Groups.cpp/Sort.h (UNISORT/SortClass), ZBuffer.cpp (наложение юнитов).
+
+
+РИСКИ/ОГРАНИЧЕНИЯ ТЕКУЩЕГО КОДА REMASTER
+- Terrain.cpp намеренно упрощён как «разблокировка world view» (см. комментарии в коде) — для паритета нужен перенос логики из оригинала.
+- Fog_compat — заглушка; без FoW итоговая картинка отличается принципиально (особенно при перемещении войск).
+- Не используются все метаданные тайлов (Tiling.txt/RoadTex) — границы «режут» картинку.
+
+
+ПРИОРИТЕТНЫЙ ПЛАН ДОРАБОТОК (по убыванию влияния на «некорректность»)
+1) Исправить адресацию сетки и примитивы рендера в Terrain.cpp:
+   - перейти на ромб-ячейку (две триангуляции), индексироваться по «клеткам», а не по вершинам;
+   - world_to_screen вызывать на центре ячейки; высоту учитывать по вершинам ромба (не среднее по 4) с правильной интерполяцией;
+   - задействовать draw_textured_triangle_tinted для половинок ромба, u,v из атласа по TexMap и правилам Tiling.
+2) Включить FoW: генерация маски из карты видимости и вызов set_fog_screen_mask/draw_fog_fullscreen в кадре.
+3) Подключить базовый рендер воды/берегов: по WaterDeep/WaterBright и правилам окраски/подсветки.
+4) Слои/юниты: сортировка по экранному Y, тени/оверлеи; это устранит значительную часть визуальных несоответствий.
+
+
+ПРИЛОЖЕНИЕ: ПИНПОИНТ-ЦИТАТЫ (ОРИГИНАЛ)
+- Точки цикла/Flip:
+  - Ddex1.cpp: MiniRenderAllMap()/RenderAllMap() → GFieldShow() → FlipPages().
+  - Interface.cpp: многочисленные do { ProcessMessages(); ... } while(...); кадры меню с FlipPages().
+- Террейн/окна/координаты:
+  - mapa.cpp: DrawGrids()/RedSquare()/GFieldShow() — формулы (<<5, <<4, mul3()<<3).
+- Туман:
+  - mapa.cpp: if(FogMode) { ProcessFog1(); CreateFogImage(); DrawFog(); }
+  - Fastdraw.cpp: ShowRLChtpal/ShowRLCShadow и fog[] таблицы.
+- Вода:
+  - RealWater.cpp: WaterDeep/WaterBright и SetWaterSpot/EraseWaterSpot/SetBrightSpot.
+- Сортировки:
+  - Sort.h/Groups.cpp/Ddex1.cpp: SC.Sort()/UNISORT.Sort().
+
+
+ПРИЛОЖЕНИЕ: ПИНПОИНТ-ЦИТАТЫ (REMASTER)
+- WorldRender: begin_frame/set_clip_rect(glScissor)/flush(sort by layer,zOrder)/world_to_screen/set_camera.
+- Terrain.cpp: цикл по вершинам, отрисовка billboard-квадратов 64x64 — точка для замены на ромбы-треугольники.
+- Fog_compat: LoadFog — no-op; WorldRender — set_fog_screen_mask/draw_fog_fullscreen (готово к подключению).
+- ScenePostInit_compat: set_map_data(...) — привязка THMap/TexMap из MapData.
+- GameLogic: тик-поток 30/60 Гц — готов к связке с миром.
+
+Конец анализа.

@@ -14,6 +14,7 @@ from .gsc_format import GscArchive, BuildItem, build_gsc
 from .gp_parser import parse_gp_summary
 from .gp_render import render_gp_frame
 from .gp_viewer import GpViewer, GpViewerWidget
+from .rlc_viewer import RlcViewerWidget
 from .smp_view import parse_lnk, LnkScene, LnkView
 
 
@@ -244,6 +245,18 @@ class MainWindow(QtWidgets.QMainWindow):
                     self.preview.setText("\n".join(info))
                 except Exception:
                     self.preview.setText(f"GP parse error: {e}")
+                self.right_stack.setCurrentIndex(0)
+        elif name.endswith(".RLC"):
+            try:
+                pal = self.archive.try_read_palette()
+                self._rlc_widget = RlcViewerWidget(self.right_stack, data, it.full_name, palette=pal)
+                pals = self.archive.list_palettes()
+                if pals:
+                    self._rlc_widget.add_palettes_bulk(pals)
+                self.right_stack.addWidget(self._rlc_widget)
+                self.right_stack.setCurrentWidget(self._rlc_widget)
+            except Exception as e:
+                self.preview.setText(f"RLC parse error: {e}")
                 self.right_stack.setCurrentIndex(0)
         elif name.endswith(".SMP") or name.endswith(".LNK"):
             # Попытка форматного предпросмотра .lnk (структуры корней и точек)

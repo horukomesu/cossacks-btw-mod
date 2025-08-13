@@ -20,6 +20,7 @@ struct Group {
 std::unordered_map<std::string, Group> g_groups; // key: uppercase group name
 std::mt19937 g_rng{std::random_device{}()};
 std::unordered_map<std::string, unsigned int> g_fileCache; // relPath (normalized) -> buffer
+static int g_sfxVolume = 100; // percent
 
 static std::string to_upper(const std::string& s) {
     std::string r = s;
@@ -161,7 +162,8 @@ unsigned int get_random_buffer(const std::string& groupName) {
 bool play_group(const std::string& groupName, float gain, float panX) {
     unsigned int buf = get_random_buffer(groupName);
     if (!buf) return false;
-    return audio_core::play_buffer(buf, gain, panX) != 0;
+    const float g = std::clamp(gain * (g_sfxVolume / 100.0f), 0.0f, 1.0f);
+    return audio_core::play_buffer(buf, g, panX) != 0;
 }
 
 unsigned int get_buffer_for_file(const std::string& relPath) {
@@ -188,8 +190,12 @@ unsigned int get_buffer_for_file(const std::string& relPath) {
 bool play_file(const std::string& relPath, float gain, float panX) {
     unsigned int buf = get_buffer_for_file(relPath);
     if (!buf) return false;
-    return audio_core::play_buffer(buf, gain, panX) != 0;
+    const float g = std::clamp(gain * (g_sfxVolume / 100.0f), 0.0f, 1.0f);
+    return audio_core::play_buffer(buf, g, panX) != 0;
 }
+
+void set_sfx_volume_percent(int vol01to100) { g_sfxVolume = std::clamp(vol01to100, 0, 100); }
+int get_sfx_volume_percent() { return g_sfxVolume; }
 
 } } // namespace legacy::sound_compat
 

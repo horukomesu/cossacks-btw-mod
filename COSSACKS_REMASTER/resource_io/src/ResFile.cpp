@@ -1,4 +1,30 @@
 #include "resource_io/ResFile.hpp"
+#include "resource_io/ResourceIO.hpp"
+
+#include <string>
+#include <vector>
+
+namespace resource_io::resfile {
+
+bool read_text_lines(const std::string& path, std::vector<std::string>& outLines) {
+    std::vector<unsigned char> data;
+    if (!resource_io::read_file_anywhere(path, data)) return false;
+    outLines.clear();
+    std::string line;
+    for (unsigned char b : data) {
+        if (b == '\n' || b == '\r') {
+            if (!line.empty()) { outLines.emplace_back(line); line.clear(); }
+            continue;
+        }
+        line.push_back(static_cast<char>(b));
+    }
+    if (!line.empty()) outLines.emplace_back(line);
+    return true;
+}
+
+} // namespace resource_io::resfile
+
+#include "resource_io/ResFile.hpp"
 
 #include <fstream>
 

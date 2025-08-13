@@ -1,0 +1,162 @@
+GP Font и шрифты: подробный анализ
+
+### 1) Что такое «GP Font» в оригинальном коде (Main executable)
+
+- **Формат и инфраструктура**
+  - **GP** — это контейнер со спрайтами/кадрами, который грузится и рисуется через `GP_System` (см. `GP_Draw.h`).
+  - Шрифты могут быть двух типов: классические `RLC` (растровые RLE) и `GP`-базовые (когда глифы лежат в GP-ресурсе).
+  - Ключевая особенность: класс `RLCFont` хранит в поле `RLC` либо реальный указатель на `RLCTable`, либо «магическое» значение — целочисленный `GPID` (< 4096). Это позволяет одним и тем же путём рисовать и RLC, и GP-шрифты.
+
+- **Определяющие структуры (фрагменты)**
+  - `RLCFont` (см. `src/Main executable/Fastdraw.h` и реализацию в `Fastdraw.cpp`):
+    - Поля: `FirstSymbol`, `LastSymbol`, `Options`, `ShadowGP`, `ShadowDx`, `ShadowDy`, `RLCTable RLC`.
+    - Конструктор от `int GP_Index` и метод `SetGPIndex(int)` записывают `RLC = (RLCTable)GP_Index;` и обнуляют диапазон символов — это и есть GP-режим.
+    - Цвет: `SetWhiteColor()`, `SetRedColor()`, `SetBlackColor()`, `SetColorTable(int n)` меняют `Options` (палитровая маска для `GPS.ImageType[GPID]`).
+    - Тень: через `ShadowGP` (+смещение `ShadowDx/Dy`).
+
+- **Инициализация шрифтов (см. `src/Main executable/Dialogs/InitFonts.h`)**
+  - Привязка логических имён к GP-пакетам:
+    - `MainFont` → базовые шрифты `WhiteFont/YellowFont/RedFont/BlackFont`.
+    - `romBig` → `BigWhite/BigYellow/BigRed/BigBlack`.
+    - `rom10` → `Small*` набор.
+    - `serif` → альтернативный `Small*1` набор.
+    - `Special`, `fn8`, `fn10` → специальные шрифты.
+  - Пример: `int GPID = GPS.PreLoadGPImage("MainFont"); WhiteFont.SetGPIndex(GPID); WhiteFont.SetWhiteColor(); ...`
+  - Цвет шрифтов формируется установкой `Options`.
+
+- **Рисование текста**
+  - Точка входа: `ShowString(int x, int y, LPCSTR lps, lpRLCFont lpf)` в `src/Main executable/Fastdraw.cpp`.
+    - Если `GPID = int(lpf->RLC)` меньше 4096 → это GP-шрифт.
+      - Перед каждым символом: `GPS.ImageType[GPID] = (GPS.ImageType[GPID] & 7) | lpf->Options;`
+      - Для каждого символа вызывается `ShowCharUNICODE(...)` и ширина считается через `GetRLCWidthUNICODE(...)`.
+    - Иначе (настоящая RLC-таблица) — используется `ShowRLCItem(...)` с индексом `FirstSymbol + ch`.
+
+- **Рисование символа и поддержка Unicode**
+  - `ShowChar(int x, int y, char c, lpRLCFont lpf)` (GP-ветка): `GPS.ShowGP(x, y, GPID, byte(c), 0);` с учётом цвета через `ImageType`.
+  - `ShowCharUNICODE(int x, int y, byte* strptr, lpRLCFont lpr)`:
+    - Распознаёт «юникодный символ» по сигнатуре: первый байт `SIGNBYTE` (0x7F/DEL), затем 4 шестнадцатеричных цифры кода символа.
+    - Для GP-шрифтов ищет таблицу `UNICODETABLE` в `GPS.UNITBL[GPID]` и по диапазонам `OneUnicodeSet` вычисляет:
+      - Целевой `GPID` подтаблицы (может отличаться от базового),
+      - Смещения `DX/DY`,
+      - Флаг `UseColor` (использовать ли окраску через `ImageType`).
+    - Если у `RLCFont` задана тень (`ShadowGP != -1`) — сначала рисуется тень `GPS.ShowGP(...)` со смещением `ShadowDx/Dy` и упрощённым режимом цвета (`ImageType[...] = 1`), затем основной глиф.
+  - Для обычного ASCII-символа (без сигнатуры) вызывается `ShowChar(...)` и, при наличии тени, сначала рисуется тень.
+
+- **Метрики**
+  - Ширина символа: `GetRLCWidth(RLCTable lpr, byte n)`
+    - GP-ветка: `GPS.GetGPWidth(GPID, n)`; для пробела (`n == 32`) используется хак — берётся ширина `'c'`.
+  - Высота: `GetRLCHeight(RLCTable lpr, byte n)` → GP-ветка: `GPS.GetGPHeight(GPID, n)`.
+  - Ширина строки: `GetRLCStrWidth(char* str, lpRLCFont lpf)` суммирует `GetRLCWidthUNICODE(...)` по символам, учитывая юникод-escape `0x7F + 4HEX`.
+
+- **Цветовые таблицы и тени**
+  - Цвет задаётся через `RLCFont::Options`:
+    - `SetWhiteColor()` → `Options = 16`;
+    - `SetRedColor()` → `Options = 32`;
+    - `SetColorTable(n)` → `Options = (n << 4)`.
+  - Перед отрисовкой символа: `GPS.ImageType[GPID] = (GPS.ImageType[GPID] & 7) | Options;`
+    - Младшие 3 бита `ImageType` зарезервированы под другие флаги; палитровый «цвет» — в старших битах.
+  - Тени: за счёт `ShadowGP` (обычно равен тому же GPID) плюс смещения `ShadowDx/Dy`.
+
+- **Где это в коде**
+  - Инициализация шрифтов: `src/Main executable/Dialogs/InitFonts.h`
+  - Основная логика рисования шрифтов: `src/Main executable/Fastdraw.cpp` (функции `ShowString`, `ShowChar`, `ShowCharUNICODE`, `GetRLCWidthUNICODE`, `GetRLCStrWidth`, `GetRLCWidth`, `GetRLCHeight`).
+  - Описание GP и юникод-таблиц: `src/Main executable/GP_Draw.h` (классы `GP_System`, `UNICODETABLE`, `OneUnicodeSet`, `UNIFONTS`).
+
+
+### 2) Как это используется в игре (типичный путь вызова)
+
+- При старте меню/игры выполняется `InitFonts()` — шрифты получают свои `GPID` через `GPS.PreLoadGPImage(...)` и настраивают цвет (`Options`).
+- Дальше интерфейс и подсказки вызывают `ShowString(x, y, text, &SomeFont)`; для GP-шрифта — идёт GP-ветка с `ShowCharUNICODE(...)`.
+- Для измерения текстовых блоков — `GetRLCStrWidth(text, &SomeFont)`.
+
+
+### 3) Текущие реализации шрифтов в ремастере
+
+- **Главный путь: `legacy_adapter/ui/RLCFont_compat`**
+  - Класс `legacy::ui::RLCFont` (см. `COSSACKS_REMASTER/legacy_adapter/include/legacy/RLCFont_compat.hpp`, `src/RLCFont_compat.cpp`):
+    - Источник — RLC-ресурс (путь задаётся строкой или резолвится из `gpid`).
+    - `ensureGlyphSize(subIndex)`: лениво грузит таблицу RLC, читает размер подспрайта (`get_subimage_size`).
+    - `ensureGlyphTexture(subIndex)`: декодирует индексированные пиксели подспрайта (`decode_subimage_indexed`), собирает RGBA-буфер:
+      - Индекс 0 → прозрачный пиксель; все остальные индексы → окрашиваются единым tint-цветом (`m_colorR/G/B`). Палитра исходника пока не применяется.
+      - Текстура создаётся через `engine_core::texture::create_texture_rgba(...)` (OpenGL), кешируется в `m_texCache` по ключу `(subIndex, color)`.
+    - `ShowString(x, y, text)`: итерирует символы, для каждого рисует `engine_core::render2d::draw_textured_quad(tex, x, y, w, h)`.
+    - Цвет: `SetWhiteColor/SetRedColor/SetBlackColor/SetColorTable` — просто меняют RGB-tint.
+    - База ASCII: `SetBaseChar(32)` по умолчанию — символ 32 («пробел») соответствует подспрайту 0; глиф-индекс = `ch - baseChar`.
+    - Unicode-escape и `UNICODETABLE` пока не поддержаны.
+
+- **Встроенный текстовый адаптер: `legacy_adapter/ui/Text_compat`**
+  - `ShowString(x, y, text, rgba)`: грузит `RF32W.RLC` (широкий белый шрифт) и рисует диапазон ASCII 32..127 через `legacy::rlc_compat::ShowRLCItem(...)`.
+  - Метрики: ширина/высота строки через `GetRLCWidth/Height`.
+  - Это упрощённый, но совместимый по формату RLC путь для базового текста.
+
+- **Реестр шрифтов: `FontsRegistry_compat`**
+  - По логическим именам («rom10», «vinBig») возвращает `RLCFont`, резолвя путь через `ResourceIO` или через заранее настроенный `map_name_to_path`.
+
+- **Рендер-движок**
+  - Весь вывод идёт через OpenGL (`engine_core/render2d`): шейдерный пайплайн, альфа-блендинг, текстурированные квадраты.
+
+
+### 4) Сопоставление оригинала и ремастера: поведение и различия
+
+- **Формат источника**
+  - Оригинал GP-шрифтов: глифы лежат в GP-пакетах и рисуются `GPS.ShowGP(...)`.
+  - Ремастер: глифы читаются из RLC-таблиц и рисуются как RGBA-текстуры (OpenGL). Для совместимости имён используется реестр и резолв путей.
+
+- **Цвет/палитры**
+  - Оригинал: использует палитровые таблицы через `GPS.ImageType[GPID]` и `Options` шрифта; `UNICODETABLE.UseColor` может запрещать перекраску.
+  - Ремастер: применяет единый RGB-тинт ко всем ненулевым индексам глифа. Палитры RLC/GP пока не учитываются, `UseColor` не интерпретируется.
+
+- **Unicode**
+  - Оригинал: поддерживает «escape» кодировку символа: `0x7F` (DEL) + 4 hex-цифры Unicode; ищет нужный набор в `GPS.UNITBL[GPID]`, может переключать `GPID`, применять `DX/DY` и `UseColor`.
+  - Ремастер: `RLCFont_compat` работает по простой ASCII-схеме (`baseChar`), Unicode-escape не реализован.
+
+- **Тени**
+  - Оригинал: `RLCFont` содержит `ShadowGP`, `ShadowDx/Dy`; тень рисуется отдельным проходом `GPS.ShowGP(...)` с палитровой маской `ImageType=1`.
+  - Ремастер: в текущих классах тень не реализована.
+
+- **Метрики**
+  - Оригинал: ширина/высота идут из GP (`GetGPWidth/Height`) с особыми случаями (например, ширина пробела по ширине `'c'`).
+  - Ремастер: ширина/высота — прямые размеры подспрайтов RLC; нет специальных корректировок/кернинга.
+
+
+### 5) Практическое резюме по «GP Font» в оригинале
+
+- GP-шрифт — это `RLCFont`, где поле `RLC` содержит `GPID` (< 4096). Такой шрифт инициализируется через `GPS.PreLoadGPImage(name)` и `SetGPIndex(GPID)`.
+- Рисование каждого символа делегируется `GPS.ShowGP(...)` с палитровым управлением через `ImageType[GPID]` и с опциональной тенью.
+- Юникод-символы кодируются inline в строке (DEL + 4HEX) и мапятся через `GPS.UNITBL[GPID]` на правильные подшрифты/диапазоны с возможными смещениями `DX/DY` и ограничениями `UseColor`.
+
+
+### 6) Куда смотреть в коде (ссылки на ключевые места)
+
+- Инициализация шрифтов: `src/Main executable/Dialogs/InitFonts.h`
+- Рисование текста/символов/метрики: `src/Main executable/Fastdraw.cpp`
+- Определения GP/Unicode-таблиц/сервисов: `src/Main executable/GP_Draw.h`
+- Ремастер, вывод шрифтов OpenGL: `COSSACKS_REMASTER/legacy_adapter/src/RLCFont_compat.cpp` и `include/legacy/RLCFont_compat.hpp`
+- Упрощённый текстовый вывод: `COSSACKS_REMASTER/legacy_adapter/src/Text_compat.cpp`
+- Реестр имён шрифтов: `COSSACKS_REMASTER/legacy_adapter/src/FontsRegistry_compat.cpp`
+- Рендер 2D: `COSSACKS_REMASTER/engine_core/src/Render2D.cpp`, текстуры: `engine_core/src/Texture.cpp`
+
+
+### 7) Рекомендации для полной совместимости с оригиналом (план доработок)
+
+- Реализовать палитровую окраску, совместимую с `GPS.ImageType[...]` и `Options` (`SetColorTable/SetWhite/SetRed`), включая поддержку `UseColor` из `UNICODETABLE`.
+- Добавить поддержку unicode-escape (0x7F + 4HEX) и резолв по `UNICODETABLE` (включая выбор альтернативного `GPID`, смещения `DX/DY`).
+- Добавить тень (`ShadowGP`, `ShadowDx/Dy`) для `RLCFont_compat::ShowString` с отдельным проходом и «тёмной» маской.
+- Синхронизировать метрики пробела/спецсимволов с оригиналом (например, ширина пробела как у `'c'` для конкретных шрифтов), чтобы совпадали разметка и переносы.
+- Предусмотреть кэширование и жизненный цикл текстур глифов (сброс при смене палитры/цвета) на уровне движка/сцены.
+
+
+Приложение: характерные фрагменты кода
+
+- Оригинал, ветка GP в `ShowString`:
+  `src/Main executable/Fastdraw.cpp:2607-2649`
+- Оригинал, Unicode-ветка `ShowCharUNICODE` (тень, UseColor, DX/DY):
+  `src/Main executable/Fastdraw.cpp:2552-2605`
+- Оригинал, вычисление ширины с Unicode-escape:
+  `src/Main executable/Fastdraw.cpp:2469-2510`
+- Инициализация шрифтов (привязка имён к GPID и цветам):
+  `src/Main executable/Dialogs/InitFonts.h:24-75`
+- Ремастер, создание текстуры глифа и рендер квадрата:
+  `COSSACKS_REMASTER/legacy_adapter/src/RLCFont_compat.cpp:59-118`
+- Ремастер, упрощённый ASCII-вывод:
+  `COSSACKS_REMASTER/legacy_adapter/src/Text_compat.cpp:22-36`

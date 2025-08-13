@@ -7,6 +7,8 @@ add_library(resource_io STATIC
     src/ColorPalette.cpp
     src/GP.cpp
     src/BPXImage.cpp
+    src/Map.cpp
+    src/TexturesMeta.cpp
 )
 
 target_include_directories(resource_io

@@ -77,7 +77,18 @@ public:
 class TextButton : public SimpleDialog {
 public:
     const char* Message{nullptr};
-    // TODO(step 4): hook RLCFont for text drawing
+    // Optional font; if null fallback to 8x8 bitmap text
+    RLCFont* Font{nullptr};
+    void draw() override;
+};
+
+class InputBox : public SimpleDialog {
+public:
+    std::string Text;
+    int MaxLen{256};
+    RLCFont* AFont{nullptr};
+    RLCFont* PFont{nullptr};
+    bool Active{false};
     void draw() override;
 };
 
@@ -94,6 +105,18 @@ public:
     int ScrDy{0};
     // dragging state
     bool Drag{false};
+    // legacy geometry (for L and V types)
+    int LineLx{0};
+    int LineLy{0};
+    int ScrLx{0};
+    int ScrLy{0};
+    int ScrollIndex{0};
+    int StartGP_Spr{0};
+    int LastTime{0};
+    int OnesDy{1};
+    bool Zaxvat{false};
+    int btnly{0};
+    int sbx{0}, sby{0}, sblx{0};
 
     void draw() override;
 };
@@ -116,6 +139,39 @@ public:
     void draw() override;
 };
 
+class ComboBox : public SimpleDialog {
+public:
+    // Appearance from GP file (like legacy addGP_ComboBox)
+    int GP_File{-1};
+    int UpPart{0};
+    int Center{0};
+    int DownPart{0};
+    // Fonts
+    RLCFont* ActiveFont{nullptr};
+    RLCFont* PassiveFont{nullptr};
+    // State
+    bool IsActive{false};
+    int CurLine{0};
+    int LightIndex{-1};
+    // Geometry
+    int OneLx{0};
+    int OneLy{0};
+    int UpLy{0};
+    int FontDx{2};
+    int FontDy{0};
+    int OneDx{1};
+    int OneDy{1};
+    int DropX{0};
+    int DropY{0};
+    int MaxVisible{10};
+    int FirstItem{0};
+    // Data
+    std::vector<std::string> Lines;
+
+    void AddLine(const char* s) { if (s) Lines.emplace_back(s); }
+    void draw() override;
+};
+
 class DialogsSystem {
 public:
     explicit DialogsSystem(int baseX = 0, int baseY = 0);
@@ -128,11 +184,21 @@ public:
     GPPicture* addGPPicture(SimpleDialog* parent, int dx, int dy, int fileID, int spriteID, uint8_t nation = 0);
     GP_Button* addGP_Button(SimpleDialog* parent, int dx, int dy, int gpFile, int activeFrame, int passiveFrame, uint8_t nation = 0);
     TextButton* addTextButton(SimpleDialog* parent, int dx, int dy, const char* text);
+    InputBox* addInputBox(SimpleDialog* parent, int dx, int dy, const char* buf,
+                          int maxChars, int Lx, int Ly, RLCFont* AFont, RLCFont* PFont);
     VScrollBar* addGP_ScrollBar(SimpleDialog* parent, int dx, int dy,
                                 int maxPos, int pos, int gpFile,
                                 int scrIndex, int lineIndex, int scrDx, int scrDy);
+    // Legacy long variant (explicit line length and marker size)
+    VScrollBar* addGP_ScrollBarL(SimpleDialog* parent, int dx, int dy,
+                                 int maxPos, int pos, int gpFile,
+                                 int scrIndex, int lineLx, int lineLy, int scrDx, int scrDy);
     ListBox* addListBox(SimpleDialog* parent, int dx, int dy, int Lx, int Ly, int Ny,
                         RLCFont* AFont, RLCFont* PFont, VScrollBar* VS);
+    ComboBox* addGP_ComboBox(SimpleDialog* parent, int dx, int dy, int gpFile,
+                             int upPart, int center, int downPart,
+                             RLCFont* ActiveFont, RLCFont* PassiveFont,
+                             char* Contence);
 
     void ProcessDialogs(); // handles input and updates widgets state
     void MarkToDraw();

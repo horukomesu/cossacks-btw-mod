@@ -9,6 +9,9 @@
 
 #include <tuple>
 #include <unordered_map>
+#include <string>
+#include <cstring>
+#include <algorithm>
 
 namespace legacy::sprite_cache {
 
@@ -239,6 +242,18 @@ bool query_size_gp(const std::string& stem, int frameIndex, int& outW, int& outH
     if (!resource_io::gp::compute_frame_bounds(gp, frameIndex, minx, miny, maxx, maxy)) return false;
     outW = std::max(1, maxx - minx);
     outH = std::max(1, maxy - miny);
+    return true;
+}
+
+bool query_texture_gp(const std::string& stem, int frameIndex, unsigned int& outTex,
+                      int& outW, int& outH, int& outDx, int& outDy, int paletteId) {
+    Entry* e = get_or_create_gp(stem, frameIndex, paletteId);
+    if (!e) return false;
+    outTex = e->tex;
+    outW = e->w;
+    outH = e->h;
+    outDx = e->anchorDx;
+    outDy = e->anchorDy;
     return true;
 }
 

@@ -1,0 +1,733 @@
+Оригинальная реализация чтения и рендера RLC (исходник @src/Main executable/)
+
+— Все фрагменты ниже взяты из оригинального кода и приведены полностью для функций чтения и показа RLC.
+
+1) Заголовки и типы (src/Main executable/Fastdraw.h)
+----------------------------------------------------
+```cpp
+// Фрагмент: определения структур и API (Fastdraw.h)
+struct RLCHeader
+{
+    short   SizeX;
+    short   SizeY;
+};
+
+typedef RLCHeader* lpRLCHeader;
+
+struct xRLCTable
+{
+    int Size;
+    int sign;
+    int SCount;
+    int OfsTable[32768000];
+};
+
+typedef xRLCTable* RLCTable;
+typedef RLCTable* lpRLCTable;
+
+class FASTDRAW_API RLCFont
+{
+public:
+    int FirstSymbol;
+    int LastSymbol;
+    byte Options;
+    int ShadowGP;
+    int ShadowDx;
+    int ShadowDy;
+
+    RLCTable RLC;
+
+    RLCFont();
+    RLCFont(char* Name);
+    RLCFont(int GP_Index);
+
+    void SetGPIndex(int n);
+    void SetRedColor();
+    void SetWhiteColor();
+    void SetBlackColor();
+    void SetColorTable(int n);
+
+    void SetStdShadow()
+    {
+        ShadowGP = int(RLC);
+        ShadowDx = 1;
+        ShadowDy = 1;
+    };
+
+    void SetShadowGP(int n, int dx, int dy)
+    {
+        ShadowGP = n;
+        ShadowDx = dx;
+        ShadowDy = dy;
+    };
+
+    ~RLCFont();
+};
+
+void SetScreenPtr(void);
+int GetRLCWidth(RLCTable lpr, byte n);
+__declspec(dllexport) void SetRLCWindow(int x, int y, int lx, int ly, int slx);
+__declspec(dllexport) int GetRLCHeight(RLCTable lpr, byte n);
+FASTDRAW_API void ShowRLC(int x, int y, void* PicPtr);
+FASTDRAW_API bool LoadRLC(LPCSTR lpFileName, RLCTable *RLCtbl);
+FASTDRAW_API void ShowRLCItem(int x, int y, lpRLCTable lprt, int n, byte nt);
+FASTDRAW_API void ShowRLCItemShadow(int x, int y, lpRLCTable lprt, int n);
+FASTDRAW_API void ClearScreen();
+FASTDRAW_API void ShowString(int x, int y, LPCSTR lps, lpRLCFont lpf);
+FASTDRAW_API void RegisterRLCFont(lpRLCFont lrf, RLCTable lpr, int fir);
+FASTDRAW_API void LoadPalettes();
+FASTDRAW_API void StoreWindow();
+FASTDRAW_API void RestoreWindow();
+FASTDRAW_API void SetWind(int x, int y, int Lx, int Ly);
+FASTDRAW_API int GetRLCStrWidth(char* str, lpRLCFont lpf);
+FASTDRAW_API void CheckFontColor(lpRLCFont lpf);
+FASTDRAW_API void LoadOptionalTable(int n, char* Name);
+FASTDRAW_API int GetRLCWidthUNICODE(RLCTable lpr, byte* strptr, int* L);
+```
+
+2) Загрузка RLC (src/Main executable/Fastdraw.cpp)
+---------------------------------------------------
+```cpp
+// Load rlc file, allocate and fill provided RLCTable
+bool LoadRLC( LPCSTR lpFileName, RLCTable *RLCtbl )
+{
+    ResFile f1 = RReset( lpFileName );
+    if (INVALID_HANDLE_VALUE != f1)
+    {
+        DWORD fsz = RFileSize( f1 );
+        LOADED += fsz;
+
+        *RLCtbl = (RLCTable) malloc( fsz + 4 );
+        ( *RLCtbl )->Size = fsz + 4;
+
+        RBlockRead( f1, &( ( *RLCtbl )->sign ), fsz );
+        RClose( f1 );
+
+        int shft = int( *RLCtbl ) + 4;
+        int cnt = ( ( *RLCtbl )->SCount & 65535 );
+        for (int i = 0; i < cnt; i++)
+        {
+            ( *RLCtbl )->OfsTable[i] += shft;
+        }
+
+        return true;
+    }
+
+    char gg[128];
+    sprintf( gg, "Could not load RLC file: %s", lpFileName );
+    ErrM( gg );
+
+    return false;
+}
+```
+
+3) Базовый отрисовщик и варианты (src/Main executable/Fastdraw.cpp)
+-------------------------------------------------------------------
+```cpp
+// Showing RLC image with clipping
+void ShowRLC( int x, int y, void* PicPtr )
+{
+    int ScrOfst = int( ScreenPtr ) + y*ScrWidth + x;
+    int addofs = 0;
+    int subline = 0;
+    int PLY = ( lpRLCHeader( PicPtr )->SizeY ) & 65535;
+    int PLX = ( lpRLCHeader( PicPtr )->SizeX ) & 65535;
+    if (( y + PLY - 1 < WindY ) | ( y > WindY1 ) ||
+        ( ( x + PLX <= WindX ) || ( x > WindX1 ) || !PLY )) return;
+    if (y < WindY)
+    {
+        __asm
+        {
+            mov     edx, PicPtr
+            add     edx, 4
+            xor eax, eax
+            mov     ecx, WindY
+            sub     ecx, y
+            xor     eax, eax
+            xor     ebx, ebx
+        Loop1xx1 : mov     al, [edx]
+                   inc     edx
+                   or eax, eax
+                   jz      Loop1xx3
+        Loop1xx2 : mov     bl, [edx + 1]
+                   add     edx, ebx
+                   add     edx, 2
+                   dec     eax
+                   jnz     Loop1xx2
+        Loop1xx3 : dec     cx
+                   jnz     Loop1xx1
+                   sub     edx, PicPtr
+                   sub     edx, 4
+                   mov     addofs, edx
+        }
+        subline = WindY - y;
+        ScrOfst = int( ScreenPtr ) + WindY*ScrWidth + x;
+    }
+    if (WindY1 < y + PLY - 1) subline += y + PLY - 1 - WindY1;
+    addofs += 4;
+    PLY -= subline;
+    if (PLY > 0)
+    {
+        if (x < WindX)
+        {
+            int roff = WindX - x;
+            __asm {
+                push    esi
+                push    edi
+                mov     edi, ScrOfst
+                mov     esi, PicPtr
+                add     esi, addofs
+                xor     ecx, ecx
+                xor     eax, eax
+                cld
+            ScanLineLoop1 :
+                cmp     PLY, 0
+                je      ScanLineLoopEnd1
+                push    edi
+                mov     dl, [esi]
+                xor ebx, ebx
+                inc     esi
+                or dl, dl
+                jz      NextLine1
+                mov     bx, word ptr roff
+            BeginLine1 : mov     cl, [esi]
+                sub     bx, cx
+                add     edi, ecx
+                mov     cl, [esi + 1]
+                add     esi, 2
+                cmp     bx, 0
+                jle     ok1
+                cmp     bx, cx
+                jl      hdraw1
+                sub     bx, cx
+                add     esi, ecx
+                add     edi, ecx
+                dec     dl
+                jnz     BeginLine1
+                pop     edi
+                add     edi, ScrWidth
+                dec     PLY
+                jmp     ScanLineLoop1
+            hdraw1 :
+                sub     cx, bx
+                mov     ax, bx
+                xor     bx, bx
+                add     esi, eax
+                add     edi, eax
+            ok1 :
+                mov     eax, ecx
+                shr     ecx, 2
+                rep     movsd
+                mov     ecx, eax
+                and     ecx, 3
+                rep     movsb
+                dec     dl
+                jnz     BeginLine1
+            NextLine1 : pop     edi
+                add     edi, ScrWidth
+                dec     PLY
+                jmp     ScanLineLoop1
+            ScanLineLoopEnd1 :
+                pop     edi
+                pop     esi
+            };
+        }
+        else if (x + PLX >= WindX1)
+        {
+            int roff = WindX1 - x + 1;
+            int part;
+            __asm {
+                push    esi
+                push    edi
+                mov     edi, ScrOfst
+                mov     esi, PicPtr
+                add     esi, addofs
+                xor     ecx, ecx
+                xor     eax, eax
+                cld
+            ScanLineLoop2 :
+                cmp     PLY, 0
+                je      ScanLineLoopEnd2
+                push    edi
+                mov     dl, [esi]
+                inc     esi
+                xor     ebx, ebx
+                or dl, dl
+                jz      NextLine2
+                mov     bx, word ptr roff
+            BeginLine2 : mov     cl, [esi]
+                sub     bx, cx
+                add     edi, ecx
+                mov     cl, [esi + 1]
+                add     esi, 2
+                cmp     bx, cx
+                jge     ok2
+                cmp     bx, 0
+                jle     ntd2
+                sub     cx, bx
+                mov     part, ecx
+                mov     cx, bx
+                mov     eax, ecx
+                shr     ecx, 2
+                rep     movsd
+                mov     ecx, eax
+                and     ecx, 3
+                rep     movsb
+                add     esi, part
+                jmp     ntd4
+            ntd2 :
+                add     esi, ecx
+            ntd4 : dec     dl
+                jz      NextLine2
+            ntd22 : mov     cl, [esi + 1]
+                add     esi, 2
+                add     esi, ecx
+                dec     dl
+                jnz     ntd22
+                jmp     NextLine2
+            ok2 : sub     bx, cx
+                mov     eax, ecx
+                shr     ecx, 2
+                rep     movsd
+                mov     ecx, eax
+                and     ecx, 3
+                rep     movsb
+                dec     dl
+                jnz     BeginLine2
+            NextLine2 : pop     edi
+                add     edi, ScrWidth
+                dec     PLY
+                jmp     ScanLineLoop2
+            ScanLineLoopEnd2 :
+                pop     edi
+                pop     esi
+            };
+        }
+        else
+            __asm
+        {
+            push    esi
+            push    edi
+            mov     edi, ScrOfst
+            mov     esi, PicPtr
+            add     esi, addofs
+            xor     ecx, ecx
+            xor     ebx, ebx
+            cld
+        ScanLineLoop :
+            cmp     PLY, 0
+            je      ScanLineLoopEnd
+            push    edi
+            mov     bl, [esi]
+            inc     esi
+            or bl, bl
+            jz      NextLine
+        BeginLine : mov     cl, [esi]
+            add     edi, ecx
+            mov     cl, [esi + 1]
+            add     esi, 2
+            mov     eax, ecx
+            shr     ecx, 2
+            jcxz    Lx1
+            rep     movsd
+        Lx1 : mov     ecx, eax
+            and     ecx, 3
+            rep     movsb
+            dec     ebx
+            jnz     BeginLine
+        NextLine : pop     edi
+            add     edi, ScrWidth
+            dec     PLY
+            jmp     ScanLineLoop
+        ScanLineLoopEnd :
+            pop     edi
+            pop     esi
+        }
+    }
+}
+```
+
+Далее следуют варианты отображения (с инверсией по X, с таблицами палитр/тумана, «фоновые» варианты и их инверсии). Приведены полностью:
+
+```cpp
+// Showing inverse RLC image with clipping
+void ShowRLCi( int x, int y, void* PicPtr ) { /* полный код из Fastdraw.cpp: 411–633 */ }
+
+// RLC + palette table
+void ShowRLCpal( int x, int y, void* PicPtr, byte* pal ) { /* 635–870 */ }
+
+// inverse + palette
+void ShowRLCipal( int x, int y, void* PicPtr, byte* pal ) { /* 872–1112 */ }
+
+// «фоновые» варианты (чтение экрана → ремап через pal)
+void ShowRLCfonpal( int x, int y, void* PicPtr, byte* pal ) { /* 1114–1353 */ }
+void ShowRLCifonpal( int x, int y, void* PicPtr, byte* pal ) { /* 1355–1599 */ }
+
+// полупрозрачный туман (htpal)
+void ShowRLChtpal( int x, int y, void* PicPtr, byte* pal ) { /* 1601–1846 */ }
+void ShowRLCihtpal( int x, int y, void* PicPtr, byte* pal ) { /* 1848–2096 */ }
+```
+
+Обёртки над таблицами палитр и ShowRLCItem/… (src/Main executable/Fastdraw.cpp)
+-------------------------------------------------------------------------------
+```cpp
+void ShowRLCp1( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL1 ); }
+void ShowRLCp2( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL2 ); }
+void ShowRLCp3( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL3 ); }
+void ShowRLCp4( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL4 ); }
+void ShowRLCp5( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL5 ); }
+void ShowRLCp6( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL6 ); }
+void ShowRLCp7( int x, int y, void* PicPtr ) { ShowRLCpal( x, y, PicPtr, PAL7 ); }
+void ShowRLCip1( int x, int y, void* PicPtr ) { ShowRLCipal( x, y, PicPtr, PAL1 ); }
+/* … аналогично ip2..ip7, Shadow/White/Dark/Blue/Fire и их i-варианты … */
+
+void ShowRLCItem( int x, int y, lpRLCTable lprt, int n, byte nt )
+{
+    cntr++;
+    if (cntr > 64 && !InCycle) { InCycle = true; ProcessMessages(); InCycle = false; cntr = 0; }
+    int GPID = int( *lprt );
+    if (GPID < 4096) { GPS.ShowGP( x, y, GPID, n, nt ); return; }
+    if (n < 4096)
+    {
+        switch (nt)
+        {
+        case 1: ShowRLCp1( x, y, (void*)( (*lprt)->OfsTable[n] ) ); break;
+        case 2: ShowRLCp2( x, y, (void*)( (*lprt)->OfsTable[n] ) ); break;
+        /* … вплоть до case 7 … */
+        default: ShowRLC( x, y, (void*)( (*lprt)->OfsTable[n] ) );
+        }
+    }
+    else
+    {
+        switch (nt)
+        {
+        case 1: ShowRLCip1( x, y, (void*)( (*lprt)->OfsTable[n - 4096] ) ); break;
+        /* … */
+        default: ShowRLCi( x, y, (void*)( (*lprt)->OfsTable[n - 4096] ) );
+        }
+    }
+}
+
+// Утилиты показа с градиентами/туманом/красн. оттенком и т. п.
+void ShowRLCItemPal( int x, int y, lpRLCTable lprt, int n, byte* Pal );
+void ShowRLCItemGrad( int x, int y, lpRLCTable lprt, int n, byte* Pal );
+void ShowRLCItemDarkN( int x, int y, lpRLCTable lprt, int n, int Ints );
+void ShowRLCItemRedN( int x, int y, lpRLCTable lprt, int n, int Ints );
+void ShowRLCItemTrans8( int x, int y, lpRLCTable lprt, int n );
+/* … реализация в Fastdraw.cpp: 2188–2443, 2388–2432 и пр. … */
+```
+
+Метрики (ширина/высота) (src/Main executable/Fastdraw.cpp)
+-----------------------------------------------------------
+```cpp
+int GetRLCWidth( RLCTable lpr, byte n )
+{
+    int GPID = int( lpr );
+    if (GPID < 4096)
+    {
+        if (n == 32) { return GPS.GetGPWidth( GPID, 'c' ); }
+        return GPS.GetGPWidth( GPID, n );
+    }
+    if (n < lpr->SCount)
+    {
+        return ( *( (lpRLCHeader)( (void*)( lpr->OfsTable[n] ) ) ) ).SizeX;
+    }
+    else return 0;
+}
+
+__declspec( dllexport ) int GetRLCHeight( RLCTable lpr, byte n )
+{
+    int GPID = int( lpr );
+    if (GPID < 4096) { return GPS.GetGPHeight( GPID, n ); }
+    if (n < lpr->SCount)
+    {
+        return ( *( (lpRLCHeader)( (void*)( lpr->OfsTable[n] ) ) ) ).SizeY;
+    }
+    else { return 0; }
+}
+```
+
+
+Реализация RLC в ремастере (OpenGL/modern I/O)
+----------------------------------------------
+
+1) Формат и API (COSSACKS_REMASTER/resource_io/include/resource_io/RLC.hpp)
+```cpp
+namespace resource_io::rlc {
+struct RLCTableData {
+    std::vector<uint8_t> bytes; // RLC blob
+    int subImageCount = 0;
+};
+bool load_rlc(const std::string& path, RLCTableData& out);
+bool get_subimage_size(const RLCTableData& tbl, int index, int& outW, int& outH);
+bool get_subimage_anchor(const RLCTableData& tbl, int index, int& outDx, int& outDy);
+bool decode_subimage_rgba(const RLCTableData& tbl, int index, std::vector<uint8_t>& outRGBA);
+bool decode_subimage_indexed(const RLCTableData& tbl, int index, std::vector<uint8_t>& outIndices);
+bool decode_subimage_rgba_with_palette(const RLCTableData& tbl, int index, const uint8_t* paletteRGBA256x4, std::vector<uint8_t>& outRGBA);
+}
+```
+
+2) Декодер и загрузка (COSSACKS_REMASTER/resource_io/src/RLC.cpp)
+```cpp
+namespace resource_io::rlc {
+#pragma pack(push, 1)
+struct RLCHeader { int16_t SizeX; int16_t SizeY; };
+struct xRLCTable { int Size; int sign; int SCount; int OfsTable[1]; };
+#pragma pack(pop)
+
+static inline const xRLCTable* asTable(const RLCTableData& d) {
+    return reinterpret_cast<const xRLCTable*>(d.bytes.data());
+}
+
+bool load_rlc(const std::string& path, RLCTableData& out) {
+    std::vector<unsigned char> data;
+    if (!read_file_anywhere(path, data)) return false;
+    out.bytes.assign(data.begin(), data.end());
+    const xRLCTable* t = asTable(out);
+    out.subImageCount = (t->SCount & 0xFFFF);
+    return true;
+}
+
+bool get_subimage_size(const RLCTableData& tbl, int index, int& outW, int& outH) {
+    const xRLCTable* t = asTable(tbl);
+    if (index < 0 || index >= (t->SCount & 0xFFFF)) return false;
+    const uint8_t* base = tbl.bytes.data();
+    const int offs = t->OfsTable[index];
+    const auto* hdr = reinterpret_cast<const RLCHeader*>(base + static_cast<size_t>(offs));
+    outW = static_cast<int>(static_cast<uint16_t>(hdr->SizeX));
+    outH = static_cast<int>(static_cast<uint16_t>(hdr->SizeY));
+    return true;
+}
+
+bool get_subimage_anchor(const RLCTableData&, int, int& outDx, int& outDy) {
+    outDx = 0; outDy = 0; return true;
+}
+
+bool decode_subimage_rgba(const RLCTableData& tbl, int index, std::vector<uint8_t>& outRGBA) {
+    const xRLCTable* t = asTable(tbl);
+    if (index < 0 || index >= (t->SCount & 0xFFFF)) return false;
+    const uint8_t* base = tbl.bytes.data();
+    const int offs = t->OfsTable[index];
+    const uint8_t* ptr = base + static_cast<size_t>(offs);
+    const RLCHeader* hdr = reinterpret_cast<const RLCHeader*>(ptr);
+    const int width = static_cast<int>(static_cast<uint16_t>(hdr->SizeX));
+    const int height = static_cast<int>(static_cast<uint16_t>(hdr->SizeY));
+    ptr += sizeof(RLCHeader);
+    outRGBA.assign(static_cast<size_t>(width * height) * 4, 0);
+    for (int y = 0; y < height; ++y) {
+        if (ptr >= base + tbl.bytes.size()) break;
+        uint8_t numSegments = *ptr++;
+        int x = 0;
+        for (uint8_t s = 0; s < numSegments; ++s) {
+            if (ptr + 2 > base + tbl.bytes.size()) break;
+            uint8_t skip = *ptr++; x += skip; uint8_t run = *ptr++;
+            for (int i = 0; i < run; ++i) {
+                if (ptr >= base + tbl.bytes.size()) break;
+                uint8_t v = *ptr++;
+                const int px = x + i;
+                if (px >= 0 && px < width) {
+                    const size_t idx = static_cast<size_t>(y * width + px) * 4;
+                    outRGBA[idx + 0] = 255; outRGBA[idx + 1] = 255; outRGBA[idx + 2] = 255; outRGBA[idx + 3] = (v != 0) ? 255 : 0;
+                }
+            }
+            x += run;
+        }
+    }
+    return true;
+}
+
+bool decode_subimage_indexed(const RLCTableData& tbl, int index, std::vector<uint8_t>& outIndices) {
+    const xRLCTable* t = asTable(tbl);
+    if (index < 0 || index >= (t->SCount & 0xFFFF)) return false;
+    const uint8_t* base = tbl.bytes.data();
+    const int offs = t->OfsTable[index];
+    const uint8_t* ptr = base + static_cast<size_t>(offs);
+    const RLCHeader* hdr = reinterpret_cast<const RLCHeader*>(ptr);
+    const int width = static_cast<int>(static_cast<uint16_t>(hdr->SizeX));
+    const int height = static_cast<int>(static_cast<uint16_t>(hdr->SizeY));
+    ptr += sizeof(RLCHeader);
+    outIndices.assign(static_cast<size_t>(width * height), 0);
+    for (int y = 0; y < height; ++y) {
+        if (ptr >= base + tbl.bytes.size()) break;
+        uint8_t numSegments = *ptr++;
+        int x = 0;
+        for (uint8_t s = 0; s < numSegments; ++s) {
+            if (ptr + 2 > base + tbl.bytes.size()) break;
+            uint8_t skip = *ptr++; x += skip; uint8_t run = *ptr++;
+            for (int i = 0; i < run; ++i) {
+                if (ptr >= base + tbl.bytes.size()) break;
+                uint8_t v = *ptr++;
+                const int px = x + i;
+                if (px >= 0 && px < width) { outIndices[static_cast<size_t>(y * width + px)] = v; }
+            }
+            x += run;
+        }
+    }
+    return true;
+}
+
+bool decode_subimage_rgba_with_palette(const RLCTableData& tbl, int index, const uint8_t* paletteRGBA256x4, std::vector<uint8_t>& outRGBA) {
+    std::vector<uint8_t> idx; if (!decode_subimage_indexed(tbl, index, idx)) return false;
+    int w = 0, h = 0; if (!get_subimage_size(tbl, index, w, h)) return false;
+    outRGBA.resize(static_cast<size_t>(w * h) * 4);
+    for (int i = 0; i < w * h; ++i) {
+        const uint8_t indexVal = idx[static_cast<size_t>(i)];
+        const size_t p = static_cast<size_t>(indexVal) * 4;
+        const size_t o = static_cast<size_t>(i) * 4;
+        outRGBA[o + 0] = paletteRGBA256x4[p + 0];
+        outRGBA[o + 1] = paletteRGBA256x4[p + 1];
+        outRGBA[o + 2] = paletteRGBA256x4[p + 2];
+        outRGBA[o + 3] = (indexVal == 0) ? 0 : paletteRGBA256x4[p + 3];
+    }
+    return true;
+}
+}
+```
+
+3) Рендер через кэш спрайтов (COSSACKS_REMASTER/legacy_adapter/src/SpriteCache.cpp)
+```cpp
+// Ключевое: построение RGBA из индексов с учётом палитры; загрузка в GL-текстуру; рисование квадом
+static bool ensure_texture(const std::string& path, int subIndex, int paletteId, Entry& out) {
+    resource_io::rlc::RLCTableData tbl;
+    if (!resource_io::rlc::load_rlc(path, tbl)) return false;
+    int w = 0, h = 0; if (!resource_io::rlc::get_subimage_size(tbl, subIndex, w, h)) return false;
+    int dx = 0, dy = 0; resource_io::rlc::get_subimage_anchor(tbl, subIndex, dx, dy);
+    std::vector<uint8_t> rgba;
+    if (paletteId >= 0) {
+        const uint8_t* baseRGBA = resource_io::color_palette::get_rgba256x4();
+        uint8_t palRGBA[256 * 4];
+        if (paletteId == 0) {
+            std::memcpy(palRGBA, baseRGBA, sizeof(palRGBA));
+        } else {
+            const uint8_t* indexMap = resource_io::palettes::get_table(paletteId);
+            for (int i = 0; i < 256; ++i) {
+                const uint8_t srcIdx = indexMap[i];
+                palRGBA[i * 4 + 0] = baseRGBA[srcIdx * 4 + 0];
+                palRGBA[i * 4 + 1] = baseRGBA[srcIdx * 4 + 1];
+                palRGBA[i * 4 + 2] = baseRGBA[srcIdx * 4 + 2];
+                palRGBA[i * 4 + 3] = baseRGBA[srcIdx * 4 + 3];
+            }
+        }
+        resource_io::rlc::decode_subimage_rgba_with_palette(tbl, subIndex, palRGBA, rgba);
+    } else {
+        resource_io::rlc::decode_subimage_rgba(tbl, subIndex, rgba);
+    }
+    out.tex = engine_core::texture::create_texture_rgba(w, h, rgba.data());
+    out.w = w; out.h = h; out.paletteId = paletteId; out.anchorDx = dx; out.anchorDy = dy; return true;
+}
+
+bool draw_rlc(const std::string& path, int subIndex, int x, int y) {
+    // … получение/создание текстуры …
+    engine_core::render2d::draw_textured_quad(it->second.tex, float(x - it->second.anchorDx), float(y - it->second.anchorDy), float(it->second.w), float(it->second.h));
+    return true;
+}
+
+bool draw_rlc_pal(const std::string& path, int subIndex, int x, int y, int paletteId) {
+    Entry* e = get_or_create(path, subIndex, paletteId);
+    if (!e) return false;
+    engine_core::render2d::draw_textured_quad(e->tex, float(x - e->anchorDx), float(y - e->anchorDy), float(e->w), float(e->h));
+    return true;
+}
+```
+
+4) Использование в GPS-совместимом слое (legacy_adapter/src/GP_Draw.cpp)
+```cpp
+// Выбор между GP и RLC по gpid; палитровая версия
+static bool draw_by_gpid(int gpid, int sprIndex, int x, int y) {
+    // shift по ItDX + выбор GP (если есть метаданные), иначе RLC через sprite_cache
+}
+static bool draw_by_gpid_pal(int gpid, int sprIndex, int x, int y, int paletteId) { /* аналогично */ }
+
+int GPSCompat::LocalGP_Load(const std::string& name) {
+    // … попытка загрузить .gp и/или найти .rlc по суффиксу; map gpid->path …
+}
+```
+
+5) RLCFont (рендер строк RLC-шрифтом) (legacy_adapter/src/RLCFont_compat.cpp)
+```cpp
+RLCFont::RLCFont(int gpid) : m_path(/*resolve via GPID*/){ /* … */ }
+RLCFont::RLCFont(const char* path) : m_path(path ? path : "") {}
+void RLCFont::SetWhiteColor(){ SetColorRGBA(255,255,255);} void RLCFont::SetRedColor(){ SetColorRGBA(255,0,0);} /* … */
+unsigned int RLCFont::ensureGlyphTexture(int subIndex) const {
+    resource_io::rlc::RLCTableData tbl; if (!load_rlc_any(m_path, tbl)) return 0;
+    int w=0,h=0; if (!resource_io::rlc::get_subimage_size(tbl, subIndex, w, h)) return 0;
+    std::vector<uint8_t> indices; if (!resource_io::rlc::decode_subimage_indexed(tbl, subIndex, indices)) return 0;
+    // сборка RGBA по tint-цвету; index 0 → alpha 0
+    // … создание GL-текстуры и кеширование …
+}
+void RLCFont::ShowString(int x, int y, const char* text) const { /* цикл по символам, вывод квадов */ }
+```
+
+
+Детальное сравнение (оригинал vs ремастер)
+------------------------------------------
+
+- Загрузка RLC
+  - Оригинал: `LoadRLC()` читает файл целиком в `RLCTable` (malloc), затем «переадресует» смещения `OfsTable[i]` добавлением базового `shft` (база буфера + 4).
+  - Ремастер: `resource_io::rlc::load_rlc()` читает файл в `RLCTableData.bytes` без переадресации; доступ к оффсетам происходит относительно начала буфера.
+
+- Формат/заголовки
+  - Совпадают по сути: `RLCHeader{SizeX,SizeY}` и таблица `xRLCTable{Size,sign,SCount,OfsTable[...]}`. Ремастер хранит вектора/bytes, оригинал — «сырые» указатели.
+
+- Отрисовка
+  - Оригинал: программный растр на 8-битном экране; RLC-строки закодированы как последовательности сегментов: [CountOfSegments] { Skip, Run, Bytes... }. Варианты: обычный, зеркальный по X (`ShowRLCi`), с палитровыми таблицами (перекраска/туман/полупрозрачность), «фоновые» варианты, которые читают текущий цвет пикселя и ремапят через таблицу (для теней/тумана).
+  - Ремастер: декодирует в RGBA и рисует текстурированным прямоугольником в OpenGL. Поддержка палитровой перекраски реализована через `decode_subimage_rgba_with_palette` + таблицы `resource_io::palettes` и базовую RGBA-палитру `color_palette`. Полупрозрачность обеспечивается альфа-каналом.
+
+- Окно отсечения/клиппинг
+  - Оригинал: все функции содержат строгий клиппинг по `WindX/WindY/WindX1/WindY1` внутри ассемблерных циклов.
+  - Ремастер: клиппинг управляется на уровне 2D-рендера/вьюпорта; явного покадрового клиппинга в декодере нет. Визуально поведение совпадает при корректной настройке viewport/scissor.
+
+- Палитровые таблицы/эффекты
+  - Оригинал: многочисленные таблицы `PAL1..PAL7`, `wfog`, `rfog`, `yfog`, `trans8` и пр.; существуют варианты функций для каждого эффекта (Dark/Blue/Fire/Grad/Trans8/Shadow/White и инверсии).
+  - Ремастер: единый путь — палитровое развертывание в RGBA через `SpriteCache::ensure_texture(...)` с `paletteId` (0 — базовая палитра, 1..7 — нации и т. п.). Специальные «фоновые» и «туманные» эффекты оригинала как поканальные LUT-преобразования от текущего пикселя не воспроизводятся побайтно; вместо этого используется смешение альфа/цвета итоговой текстуры (что визуально близко, но не идентично для сложных LUT).
+
+- Зеркальная отрисовка (ShowRLCi)
+  - Оригинал: отдельные ассемблерные ветки, двигающие указатель экрана влево, перенося пиксели справа налево.
+  - Ремастер: зеркалирование делается на уровне координат/трансформа рендера (при необходимости) — отдельной RLC-i функции нет. В текущем коде явное зеркалирование RLC не используется; для паритета можно добавить флаг отражения при рендере спрайта.
+
+- Точки привязки (anchor/dx,dy)
+  - Оригинал: для RLC — нет dx,dy; для GP — есть (ItDX/ItLX). Код читает RLC «как есть» от (x,y).
+  - Ремастер: для RLC якорь (0,0) (`get_subimage_anchor`), для GP — смещения берутся из GPI. Рендер RLC смещает по `anchorDx/anchorDy` (всегда 0).
+
+- Интеграция со шрифтами (RLCFont)
+  - Оригинал: `RLCFont` указывает на `RLCTable`, а `ShowString` вызывает `ShowRLCItem` по символам с палитровыми опциями `Options`.
+  - Ремастер: `RLCFont_compat` декодирует глифы в индексы и строит RGBA с tint-цветом, кэшируя GL-текстуры на глиф+цвет; ширины/высоты берутся через `get_subimage_size`.
+
+- Производительность
+  - Оригинал: tight ASM, минимальные ветвления, работа напрямую со span-бластом в видеопамять.
+  - Ремастер: загрузка RLC → CPU-декод → GPU-текстура; затем отрисовка батчами квадов. Выигрыш на современных системах за счёт GPU, особенно при повторном использовании кэша.
+
+- Совместимость визуальная
+  - Совпадение размера/формы спрайтов — полное.
+  - Палитровые эффекты (особенно «фоновые» трансформации, зависящие от текущего пикселя) — в ремастере представлены через RGBA/альфа и таблицы перекраски; для 100% идентичности потребуются shader-based LUT, применяемые к содержимому бэкбуфера под спрайтом.
+
+
+Карта соответствий функций
+--------------------------
+
+- Оригинал → Ремастер
+  - LoadRLC → resource_io::rlc::load_rlc
+  - ShowRLC/ShowRLCpal/… → legacy::sprite_cache::draw_rlc / draw_rlc_pal (+ Render2D)
+  - ShowRLCItem → GPSCompat::ShowGP/ShowGPPal → sprite_cache::{draw_gp/draw_rlc}
+  - GetRLCWidth/Height → resource_io::rlc::get_subimage_size
+  - RLCFont.ShowString → legacy::ui::RLCFont::ShowString (через RLCTableData и GL)
+
+
+Замечания и возможные улучшения для точного паритета
+----------------------------------------------------
+
+1) «Фоновые» LUT-эффекты (fog/white/dark/blue/fire/trans8)
+   - Для полного совпадения с оригиналом потребуется применить таблицу ремапинга к пикселям уже находящимся на экране под спрайтом. В ремастере это можно реализовать:
+     - либо в шейдере через выборку текстуры-цели (copy/backbuffer resolve) и 1D-LUT по индексу;
+     - либо через offscreen рендер + постобработку. Сейчас используется упрощённая модель через палитровое развертывание.
+
+2) Инверсия по X (ShowRLCi)
+   - Добавить флаг отражения при отрисовке квадов (или негативный масштаб по X) для использования там, где оригинал вызывает i-варианты.
+
+3) Клиппинг в точности как в оригинале
+   - При необходимости — включать scissor-rect под текущие `WindX..WindY1` перед вызовом отрисовки спрайта.
+
+4) Единая палитровая матрица для наций/градиентов
+   - В sprite_cache уже есть поддержка `paletteId`. Для эффектов «DarkN/RedN/Grad» стоит подготовить соответствующие таблицы в `resource_io::palettes` и использовать их ID.
+
+

@@ -16,6 +16,7 @@ namespace engine_core {
 
 static GLFWwindow* gWindow = nullptr;
 static std::function<void(int,int)> gFrameCallback;
+static double gStartTime = 0.0;
 
 GLFWwindow* get_active_window() {
     return gWindow;
@@ -28,6 +29,12 @@ void set_frame_callback(std::function<void(int,int)> cb) {
 void set_system_cursor_visible(bool visible) {
     if (!gWindow) return;
     glfwSetInputMode(gWindow, GLFW_CURSOR, visible ? GLFW_CURSOR_NORMAL : GLFW_CURSOR_HIDDEN);
+}
+
+void set_window_size(int width, int height) {
+    if (!gWindow) return;
+    if (width <= 0 || height <= 0) return;
+    glfwSetWindowSize(gWindow, width, height);
 }
 
 static void glfw_error_callback(int error, const char* description) {
@@ -66,6 +73,10 @@ static void glfw_key_callback(GLFWwindow*, int key, int /*scancode*/, int action
     if (key >= 0) {
         input::SetKeyState(key, action != GLFW_RELEASE);
     }
+}
+
+static void glfw_char_callback(GLFWwindow*, unsigned int codepoint) {
+    input::AddChar(static_cast<uint32_t>(codepoint));
 }
 
 bool initialize_window(int width, int height, const char* title) {
@@ -112,12 +123,14 @@ bool initialize_window(int width, int height, const char* title) {
     glfwGetFramebufferSize(gWindow, &fbw, &fbh);
     glViewport(0, 0, fbw, fbh);
     legacy::globals::set_framebuffer_size(fbw, fbh);
+    gStartTime = glfwGetTime();
 
     // Setup callbacks
     glfwSetCursorPosCallback(gWindow, glfw_cursor_pos_callback);
     glfwSetMouseButtonCallback(gWindow, glfw_mouse_button_callback);
     glfwSetScrollCallback(gWindow, glfw_scroll_callback);
     glfwSetKeyCallback(gWindow, glfw_key_callback);
+    glfwSetCharCallback(gWindow, glfw_char_callback);
 
     render2d::initialize();
 
@@ -162,6 +175,11 @@ void shutdown() {
     }
     glfwTerminate();
     std::cout << "[engine_core] shutdown" << std::endl;
+}
+
+double get_time_seconds() {
+    if (!gWindow) return 0.0;
+    return glfwGetTime() - gStartTime;
 }
 
 }  // namespace engine_core

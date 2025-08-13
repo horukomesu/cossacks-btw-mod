@@ -21,6 +21,10 @@ unsigned int get_buffer_for_file(const std::string& relPath);
 // Play a specific WAV file (via caching). Returns true if played.
 bool play_file(const std::string& relPath, float gain = 1.0f, float panX = 0.0f);
 
+// Global SFX gain control (percent 0..100) used by Options menu
+void set_sfx_volume_percent(int vol01to100);
+int get_sfx_volume_percent();
+
 } } // namespace legacy::sound_compat
 
 

@@ -26,6 +26,7 @@ add_subdirectory(resource_io)
 add_subdirectory(game_logic)
 add_subdirectory(legacy_adapter)
 add_subdirectory(audio_core)
+add_subdirectory(world_render)
 
 add_executable(cossacks_remaster src/main.cpp)
 
@@ -40,7 +41,7 @@ set_target_properties(cossacks_remaster PROPERTIES
 set_property(TARGET cossacks_remaster PROPERTY VS_DEBUGGER_WORKING_DIRECTORY "${CMAKE_SOURCE_DIR}/BUILD")
 
 
-target_link_libraries(cossacks_remaster PRIVATE engine_core resource_io game_logic legacy_adapter audio_core)
+target_link_libraries(cossacks_remaster PRIVATE engine_core resource_io game_logic legacy_adapter audio_core world_render)
 
 if(MSVC)
   target_compile_options(cossacks_remaster PRIVATE /permissive- /W4 /Zc:__cplusplus)

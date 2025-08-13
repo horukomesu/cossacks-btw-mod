@@ -2721,7 +2721,7 @@ void RLCFont::SetRedColor()
 	//SetStdShadow();
 }
 
-void RLCFont::SetWhiteColor()
+void RLCFont::SetWhiteColor() 
 {
 	Options = 16;
 	//SetStdShadow();

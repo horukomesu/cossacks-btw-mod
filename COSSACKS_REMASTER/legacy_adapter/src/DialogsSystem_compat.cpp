@@ -10,6 +10,7 @@
 #include <algorithm>
 #include <string>
 #include <iostream>
+#include <vector>
 
 namespace legacy { namespace ui {
 
@@ -22,6 +23,7 @@ namespace {
         if (dynamic_cast<GPPicture*>(d))   return "GPPicture";
         if (dynamic_cast<Picture*>(d))     return "Picture";
         if (dynamic_cast<TextButton*>(d))  return "TextButton";
+        if (dynamic_cast<InputBox*>(d))    return "InputBox";
         if (dynamic_cast<VScrollBar*>(d))  return "VScrollBar";
         if (dynamic_cast<ListBox*>(d))     return "ListBox";
         return "SimpleDialog";
@@ -102,10 +104,18 @@ void GP_Button::draw() {
 void TextButton::draw() {
     if (!Visible) return;
     if (Message) {
-        const int w = legacy::ui::GetStringWidth(Message);
-        const int h = legacy::ui::GetStringHeight();
-        if (x1 <= x || y1 <= y) { x1 = x + w; y1 = y + h; }
-        legacy::ui::ShowString(x, y, Message, 0xFFFFFFFF);
+        int w = 0, h = 0;
+        if (Font) {
+            w = Font->GetRLCStrWidth(Message);
+            h = Font->GetCharHeight();
+            if (x1 <= x || y1 <= y) { x1 = x + w; y1 = y + h; }
+            Font->ShowString(x, y, Message);
+        } else {
+            w = legacy::ui::GetStringWidth(Message);
+            h = legacy::ui::GetStringHeight();
+            if (x1 <= x || y1 <= y) { x1 = x + w; y1 = y + h; }
+            legacy::ui::ShowString(x, y, Message, 0xFFFFFFFF);
+        }
     }
     if (kDebugUI) {
         std::cout << "[ui] TextButton draw: \"" << (Message ? Message : "") << "\" pos=("
@@ -113,16 +123,36 @@ void TextButton::draw() {
     }
 }
 
+void InputBox::draw() {
+    if (!Visible) return;
+    // Background rectangle
+    engine_core::render2d::draw_rect(static_cast<float>(x), static_cast<float>(y),
+                                     static_cast<float>(x1 - x + 1), static_cast<float>(y1 - y + 1),
+                                     Active ? 0.15f : 0.07f, 0.07f, 0.07f, 0.6f);
+    const char* cstr = Text.c_str();
+    if (AFont) AFont->ShowString(x + 4, y + 4, cstr);
+    else legacy::ui::ShowString(x + 4, y + 4, cstr, 0xFFFFFFFF);
+}
+
 void VScrollBar::draw() {
     if (!Visible) return;
-    // Draw line background
-    if (GP_File >= 0) {
-        legacy::gp::GPS.ShowGP(x, y, GP_File, LineIndex, 0);
-        // Draw marker at position
-        const int markerX = x + ScrDx + SPos;
-        const int markerY = y + ScrDy;
-        legacy::gp::GPS.ShowGP(markerX, markerY, GP_File, ScrIndex, 0);
+    if (!SMaxPos) return;
+    // Draw track line: use a solid bar instead of parchment when Index<0 or to emulate line
+    const bool horizontal = (LineLx > LineLy);
+    // По требованию: удалить фоновые полосы (не рисуем трек вообще)
+    // Compute marker position (support horizontal or vertical depending on geometry)
+    int scx = x, scy = y;
+    if (horizontal) {
+        scx = x + (SPos * std::max(0, LineLx - ScrLx)) / SMaxPos + ScrDx;
+        scy = y + ScrDy;
+    } else {
+        scx = x + ScrDx;
+        const int trackLy = (LineIndex >= 0 ? LineLy : (y1 - y + 1));
+        const int markerLy = (ScrLy > 0 ? ScrLy : legacy::gp::GPS.GetGPHeight(GP_File, ScrIndex));
+        scy = y + ScrDy + (SPos * std::max(0, trackLy - markerLy)) / SMaxPos;
     }
+    // Draw marker
+    legacy::gp::GPS.ShowGP(scx, scy, GP_File, (StartGP_Spr ? StartGP_Spr + 4 : ScrIndex), 0);
 }
 
 void ListBox::AddItem(const char* str) {
@@ -159,6 +189,53 @@ void ListBox::draw() {
         }
         // TODO(step 4): draw text with RLCFont; placeholder marker
         engine_core::render2d::draw_rect(static_cast<float>(x + 4), static_cast<float>(py + 4), 6.0f, 6.0f, 1.0f, 1.0f, 1.0f, 0.7f);
+    }
+}
+
+// GP-based ComboBox: closed + active dropdown with scroll
+void ComboBox::draw() {
+    if (!Visible) return;
+    // Draw closed panel from GP if provided
+    if (GP_File >= 0) {
+        legacy::gp::GPS.ShowGP(x, y, GP_File, UpPart + 1 - (MouseOver || IsActive), 0);
+    }
+    // Draw current line text
+    if (!Lines.empty()) {
+        const char* txt = Lines[std::max(0, std::min(static_cast<int>(Lines.size()) - 1, CurLine))].c_str();
+        if (IsActive && ActiveFont) ActiveFont->ShowString(x + OneDx, y + OneDy, txt);
+        else if (PassiveFont) PassiveFont->ShowString(x + OneDx, y + OneDy, txt);
+        else legacy::ui::ShowString(x + OneDx, y + OneDy, txt, 0xFFFFFFFF);
+    }
+    // Active dropdown
+    if (IsActive && !Lines.empty()) {
+        const int XI = (x + x1) >> 1;
+        const int upLy = legacy::gp::GPS.GetGPHeight(GP_File, UpPart);
+        const int dropX = x + Center;
+        const int dropY = y + (y1 - y + 1);
+        const int itemLy = (OneLy > 0 ? OneLy : 18);
+        const int maxLines = std::max(1, MaxVisible);
+        const int last = std::min(static_cast<int>(Lines.size()), FirstItem + maxLines);
+        // top cap
+        legacy::gp::GPS.ShowGP(dropX, dropY, GP_File, UpPart + 2, 0);
+        int y0 = dropY + upLy;
+        for (int i = FirstItem; i < last; ++i) {
+            // alternating center sprites (+5/+6)
+            const int spr = UpPart + ( (i & 1) ? 6 : 5 );
+            legacy::gp::GPS.ShowGP(dropX, y0, GP_File, spr, 0);
+            if (i == CurLine || i == LightIndex) {
+                // selected highlight (+3)
+                legacy::gp::GPS.ShowGP(dropX, y0, GP_File, UpPart + 3, 0);
+                if (ActiveFont) ActiveFont->ShowString(x + 2, y0 + 2, Lines[i].c_str());
+                else legacy::ui::ShowString(x + 2, y0 + 2, Lines[i].c_str(), 0xFFFFFFFF);
+            } else {
+                if (PassiveFont) PassiveFont->ShowString(x + 2, y0 + 2, Lines[i].c_str());
+                else legacy::ui::ShowString(x + 2, y0 + 2, Lines[i].c_str(), 0xFFFFFFFF);
+            }
+            y0 += itemLy;
+        }
+        // bottom cap
+        legacy::gp::GPS.ShowGP(dropX, y0, GP_File, UpPart + 7, 0);
+        // On click inside dropdown commit handled in ProcessDialogs()
     }
 }
 
@@ -233,28 +310,100 @@ TextButton* DialogsSystem::addTextButton(SimpleDialog* /*parent*/, int dx, int d
     return ret;
 }
 
-VScrollBar* DialogsSystem::addGP_ScrollBar(SimpleDialog* /*parent*/, int dx, int dy,
+InputBox* DialogsSystem::addInputBox(SimpleDialog* /*parent*/, int dx, int dy, const char* buf,
+                                     int maxChars, int Lx, int Ly, RLCFont* AFont, RLCFont* PFont) {
+    auto obj = std::make_unique<InputBox>();
+    obj->x = BaseX + dx;
+    obj->y = BaseY + dy;
+    obj->x1 = obj->x + std::max(10, Lx) - 1;
+    obj->y1 = obj->y + std::max(10, Ly) - 1;
+    obj->Text = buf ? buf : "";
+    obj->MaxLen = std::max(1, maxChars);
+    obj->AFont = AFont;
+    obj->PFont = PFont;
+    InputBox* ret = obj.get();
+    m_dialogs.emplace_back(std::move(obj));
+    return ret;
+}
+
+    VScrollBar* DialogsSystem::addGP_ScrollBar(SimpleDialog* /*parent*/, int dx, int dy,
                                            int maxPos, int pos, int gpFile,
                                            int scrIndex, int lineIndex, int scrDx, int scrDy) {
     auto obj = std::make_unique<VScrollBar>();
     obj->x = BaseX + dx;
     obj->y = BaseY + dy;
-    // approximate size from line sprite
-    const int w = legacy::gp::GPS.GetGPWidth(gpFile, lineIndex);
-    const int h = legacy::gp::GPS.GetGPHeight(gpFile, lineIndex);
-    obj->x1 = obj->x + (w > 0 ? w : 120) - 1;
-    obj->y1 = obj->y + (h > 0 ? h : 16) - 1;
-    obj->SMaxPos = maxPos;
-    obj->SPos = pos;
-    obj->GP_File = gpFile;
-    obj->ScrIndex = scrIndex;
-    obj->LineIndex = lineIndex;
-    obj->ScrDx = scrDx;
-    obj->ScrDy = scrDy;
+        // size from line sprite
+        const int w = legacy::gp::GPS.GetGPWidth(gpFile, lineIndex);
+        const int h = legacy::gp::GPS.GetGPHeight(gpFile, lineIndex);
+        obj->x1 = obj->x + (w > 0 ? w : 120) - 1;
+        obj->y1 = obj->y + (h > 0 ? h : 16) - 1;
+        obj->SMaxPos = maxPos;
+        obj->SPos = pos;
+        obj->GP_File = gpFile;
+        obj->ScrIndex = scrIndex;
+        obj->LineIndex = lineIndex;
+        obj->LineLx = w;
+        obj->LineLy = h;
+        obj->ScrLx = legacy::gp::GPS.GetGPWidth(gpFile, scrIndex);
+        obj->ScrLy = legacy::gp::GPS.GetGPHeight(gpFile, scrIndex);
+        obj->ScrDx = scrDx;
+        obj->ScrDy = scrDy;
+        if (obj->LineLx > obj->LineLy) obj->ScrDy -= obj->ScrLy >> 1; else obj->ScrDx -= obj->ScrLx >> 1;
     VScrollBar* ret = obj.get();
     m_dialogs.emplace_back(std::move(obj));
     return ret;
 }
+
+    VScrollBar* DialogsSystem::addGP_ScrollBarL(SimpleDialog* /*parent*/, int dx, int dy,
+                                                int maxPos, int pos, int gpFile,
+                                                int scrIndex, int lineLx, int lineLy, int scrDx, int scrDy) {
+        auto obj = std::make_unique<VScrollBar>();
+        obj->x = BaseX + dx;
+        obj->y = BaseY + dy;
+        obj->x1 = obj->x + lineLx - 1;
+        obj->y1 = obj->y + lineLy - 1;
+        obj->LineLx = lineLx;
+        obj->LineLy = lineLy;
+        obj->SMaxPos = maxPos;
+        obj->SPos = pos;
+        obj->GP_File = gpFile;
+        obj->ScrollIndex = scrIndex;
+        obj->ScrIndex = scrIndex;
+        obj->ScrLx = legacy::gp::GPS.GetGPWidth(gpFile, scrIndex);
+        obj->ScrLy = legacy::gp::GPS.GetGPHeight(gpFile, scrIndex);
+        obj->ScrDx = scrDx;
+        obj->ScrDy = scrDy;
+        if (obj->LineLx > obj->LineLy) obj->ScrDy -= obj->ScrLy >> 1; else obj->ScrDx -= obj->ScrLx >> 1;
+        VScrollBar* ret = obj.get();
+        m_dialogs.emplace_back(std::move(obj));
+        return ret;
+    }
+
+    ComboBox* DialogsSystem::addGP_ComboBox(SimpleDialog* /*parent*/, int dx, int dy, int gpFile,
+                                            int upPart, int center, int downPart,
+                                            RLCFont* AFont, RLCFont* PFont,
+                                            char* /*Contence*/) {
+        auto obj = std::make_unique<ComboBox>();
+        obj->x = BaseX + dx;
+        obj->y = BaseY + dy;
+        obj->GP_File = gpFile;
+        obj->UpPart = upPart;
+        obj->Center = center;
+        obj->DownPart = downPart;
+        obj->OneLx = legacy::gp::GPS.GetGPWidth(gpFile, upPart);
+        obj->OneLy = legacy::gp::GPS.GetGPHeight(gpFile, upPart + 5);
+        const int Lx = obj->OneLx;
+        const int Ly = legacy::gp::GPS.GetGPHeight(gpFile, upPart) + 1;
+        obj->x1 = obj->x + (Lx > 0 ? Lx : 120) - 1;
+        obj->y1 = obj->y + (Ly > 0 ? Ly : 16) - 1;
+        obj->ActiveFont = AFont;
+        obj->PassiveFont = PFont;
+        obj->IsActive = false;
+        obj->CurLine = 0;
+        ComboBox* ret = obj.get();
+        m_dialogs.emplace_back(std::move(obj));
+        return ret;
+    }
 
 ListBox* DialogsSystem::addListBox(SimpleDialog* /*parent*/, int dx, int dy, int Lx, int Ly, int Ny,
                                    RLCFont* AFont, RLCFont* PFont, VScrollBar* VS) {
@@ -306,6 +455,17 @@ void DialogsSystem::ProcessDialogs() {
                     }
                     if (d->OnUserClick) d->OnUserClick(d.get());
                     d->handleClick(ev.x, ev.y);
+                    // Toggle ComboBox open/close
+                    if (auto cb = dynamic_cast<ComboBox*>(d.get())) {
+                        // If open and clicking inside dropdown, commit selection
+                        if (cb->IsActive && cb->LightIndex >= 0 && cb->LightIndex < static_cast<int>(cb->Lines.size())) {
+                            cb->CurLine = cb->LightIndex;
+                            cb->IsActive = false;
+                        } else {
+                            cb->IsActive = !cb->IsActive;
+                        }
+                        cb->NeedToDraw = true;
+                    }
                     // ListBox selection by click
                     if (auto lb = dynamic_cast<ListBox*>(d.get())) {
                         const int row = (ev.y - lb->y) / lb->OneLy;
@@ -318,14 +478,42 @@ void DialogsSystem::ProcessDialogs() {
                             }
                         }
                     }
-                    // Scrollbar dragging start
-                    if (auto vs = dynamic_cast<VScrollBar*>(d.get())) {
-                        vs->Drag = true;
-                        vs->NeedToDraw = true;
-                        if (kDebugUI) {
-                            std::cout << "[ui] VScrollBar drag start at pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
+                    // Activate InputBox on click; deactivate others
+                    if (auto ib = dynamic_cast<InputBox*>(d.get())) {
+                        for (auto& d2 : m_dialogs) {
+                            if (auto ib2 = dynamic_cast<InputBox*>(d2.get())) ib2->Active = false;
                         }
+                        ib->Active = true;
+                        ib->NeedToDraw = true;
                     }
+                    // Activate InputBox on click; deactivate others
+                    if (auto ib = dynamic_cast<InputBox*>(d.get())) {
+                        for (auto& d2 : m_dialogs) {
+                            if (auto ib2 = dynamic_cast<InputBox*>(d2.get())) ib2->Active = false;
+                        }
+                        ib->Active = true;
+                        ib->NeedToDraw = true;
+                    }
+                    // Scrollbar dragging start
+        if (auto vs = dynamic_cast<VScrollBar*>(d.get())) {
+            // legacy grab only when clicking on marker region
+            const bool horizontal = (vs->LineLx > vs->LineLy);
+            int scx = vs->x + (horizontal ? (vs->SPos * std::max(0, vs->LineLx - vs->ScrLx)) / std::max(1, vs->SMaxPos) + vs->ScrDx : vs->ScrDx);
+            int scy = vs->y + (horizontal ? vs->ScrDy : vs->ScrDy + (vs->SPos * std::max(0, (vs->LineLy > 0 ? vs->LineLy : (vs->y1 - vs->y + 1)) - vs->ScrLy)) / std::max(1, vs->SMaxPos));
+            const int mw = (vs->ScrLx > 0 ? vs->ScrLx : legacy::gp::GPS.GetGPWidth(vs->GP_File, vs->ScrIndex));
+            const int mh = (vs->ScrLy > 0 ? vs->ScrLy : legacy::gp::GPS.GetGPHeight(vs->GP_File, vs->ScrIndex));
+            if (ev.x > scx && ev.x < scx + mw && ev.y > scy && ev.y < scy + mh) {
+                vs->Drag = true;
+                vs->Zaxvat = true;
+                vs->sbx = ev.x;
+                vs->sby = ev.y;
+                vs->sblx = vs->SPos;
+                vs->NeedToDraw = true;
+            }
+            if (kDebugUI) {
+                std::cout << "[ui] VScrollBar drag start at pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
+            }
+        }
                 }
             }
         }
@@ -333,6 +521,7 @@ void DialogsSystem::ProcessDialogs() {
             for (auto& d : m_dialogs) {
                 if (auto vs = dynamic_cast<VScrollBar*>(d.get())) {
                     vs->Drag = false;
+                    vs->Zaxvat = false;
                     if (kDebugUI) {
                         std::cout << "[ui] VScrollBar drag stop at pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
                     }
@@ -342,11 +531,32 @@ void DialogsSystem::ProcessDialogs() {
         if (ev.type == engine_core::input::MouseEventType::Move) {
             for (auto& d : m_dialogs) {
                 if (auto vs = dynamic_cast<VScrollBar*>(d.get()); vs && vs->Drag) {
-                    // simple horizontal movement mapping to SPos (no bounds yet)
-                    const int newPos = std::max(0, std::min(vs->SMaxPos, ev.x - (vs->x + vs->ScrDx)));
-                    if (newPos != vs->SPos) { vs->SPos = newPos; vs->NeedToDraw = true; }
+                    const bool horizontal = (vs->LineLx > vs->LineLy);
+                    if (horizontal) {
+                        const int denom = std::max(1, vs->LineLx - vs->ScrLx);
+                        const int delta = (ev.x - vs->sbx) * (vs->SMaxPos + 1) / denom;
+                        const int newPos = std::max(0, std::min(vs->SMaxPos, vs->sblx + delta));
+                        if (newPos != vs->SPos) { vs->SPos = newPos; vs->NeedToDraw = true; }
+                    } else {
+                        const int trackLy = (vs->LineLy > 0 ? vs->LineLy : (vs->y1 - vs->y + 1));
+                        const int denom = std::max(1, trackLy - vs->ScrLy);
+                        const int delta = (ev.y - vs->sby) * (vs->SMaxPos + 1) / denom;
+                        const int newPos = std::max(0, std::min(vs->SMaxPos, vs->sblx + delta));
+                        if (newPos != vs->SPos) { vs->SPos = newPos; vs->NeedToDraw = true; }
+                    }
                     if (kDebugUI) {
                         std::cout << "[ui] VScrollBar drag move -> pos=" << vs->SPos << "/" << vs->SMaxPos << "\n";
+                    }
+                }
+                if (auto cb = dynamic_cast<ComboBox*>(d.get()); cb && cb->IsActive) {
+                    // Update highlight line on move
+                    const int itemLy = (cb->OneLy > 0 ? cb->OneLy : 18);
+                    const int dropY = cb->y + (cb->y1 - cb->y + 1) + legacy::gp::GPS.GetGPHeight(cb->GP_File, cb->UpPart);
+                    const int rel = ev.y - dropY;
+                    if (rel >= 0) {
+                        const int idx = cb->FirstItem + rel / itemLy;
+                        cb->LightIndex = std::max(0, std::min(static_cast<int>(cb->Lines.size()) - 1, idx));
+                        cb->NeedToDraw = true;
                     }
                 }
             }
@@ -367,6 +577,26 @@ void DialogsSystem::ProcessDialogs() {
         }
     }
 
+    // Process text input for active InputBox using char queue
+    uint32_t cp = 0;
+    while (engine_core::input::ReadChar(cp)) {
+        // Find active input box
+        for (auto& d : m_dialogs) {
+            auto ib = dynamic_cast<InputBox*>(d.get());
+            if (!ib || !ib->Active) continue;
+            bool changed = false;
+            if (cp == 8 /*backspace*/ || cp == 127 /*del*/) {
+                if (!ib->Text.empty()) { ib->Text.pop_back(); changed = true; }
+            } else if (cp >= 32 && cp < 128) {
+                if (static_cast<int>(ib->Text.size()) < ib->MaxLen) {
+                    ib->Text.push_back(static_cast<char>(cp));
+                    changed = true;
+                }
+            }
+            if (changed) ib->NeedToDraw = true;
+        }
+    }
+
     // Robust hover update even if no move events were queued this frame
     int mx = 0, my = 0;
     engine_core::input::GetPointer(mx, my);
@@ -379,14 +609,14 @@ void DialogsSystem::ProcessDialogs() {
         }
     }
 
-    // Synchronize ListBox with attached scrollbars (map SPos -> FirstItem)
+    // Synchronize ListBox with attached scrollbars (map SPos -> FirstItem, legacy step=10)
     for (auto& d : m_dialogs) {
         if (auto lb = dynamic_cast<ListBox*>(d.get())) {
             if (lb->VS && lb->Items.size() > 0) {
                 const int maxFirst = std::max(0, static_cast<int>(lb->Items.size()) - std::max(1, lb->Ny));
                 if (lb->VS->SMaxPos > 0) {
-                    const float t = static_cast<float>(lb->VS->SPos) / static_cast<float>(lb->VS->SMaxPos);
-                    const int first = std::max(0, std::min(maxFirst, static_cast<int>(t * maxFirst + 0.5f)));
+                    // Legacy maps SPos/10 -> FirstItem for list boxes (see ComplexBox code)
+                    const int first = std::max(0, std::min(maxFirst, lb->VS->SPos / 10));
                     if (first != lb->FirstItem) { lb->FirstItem = first; lb->NeedToDraw = true; }
                 } else {
                     if (lb->FirstItem != 0) { lb->FirstItem = 0; lb->NeedToDraw = true; }
@@ -419,7 +649,13 @@ void DialogsSystem::MarkToDraw() {
 }
 
 void DialogsSystem::RefreshView() {
+    // First pass: draw everything except open ComboBox dropdowns
+    std::vector<ComboBox*> openCombos;
     for (auto& d : m_dialogs) {
+        if (auto cb = dynamic_cast<ComboBox*>(d.get()); cb && cb->IsActive) {
+            openCombos.push_back(cb);
+            continue;
+        }
         if (d->NeedToDraw && d->Visible) {
             if (kDebugUI) {
                 std::cout << "[ui] draw: " << dialog_type_name(d.get())
@@ -429,11 +665,19 @@ void DialogsSystem::RefreshView() {
             d->NeedToDraw = false;
         }
     }
+    // Second pass: draw open ComboBox dropdowns on top
+    for (auto* cb : openCombos) {
+        cb->draw();
+        cb->NeedToDraw = false;
+    }
     // Draw hint if any hovered dialog has one
     for (auto& d : m_dialogs) {
-        if (d->Visible && d->MouseOver && d->Hint && HintFont) {
-            // Simple placement per legacy values
-            legacy::ui::ShowString(HintX, HintY, d->Hint, 0xFFFFFFFF);
+        if (d->Visible && d->MouseOver && d->Hint) {
+            if (HintFont) {
+                HintFont->ShowString(HintX, HintY, d->Hint);
+            } else {
+                legacy::ui::ShowString(HintX, HintY, d->Hint, 0xFFFFFFFF);
+            }
             break;
         }
     }

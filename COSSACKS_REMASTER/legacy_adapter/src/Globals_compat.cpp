@@ -14,6 +14,10 @@ int COPYSizeX = 1280;
 int menu_x_off = 0;
 int menu_y_off = 0;
 int window_mode = 0;
+int cam_tile_x = 0;
+int cam_tile_y = 0;
+int cam_pix_x = 0;
+int cam_pix_y = 0;
 
 static std::vector<uint8_t> g_backbuffer8;
 static std::vector<uint8_t> g_frontbuffer8;

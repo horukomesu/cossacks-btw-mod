@@ -27,4 +27,10 @@ bool draw_gp_pal(const std::string& stem, int frameIndex, int x, int y, int pale
 // Query the size of a decoded GP frame (aggregate over sub-chunks)
 bool query_size_gp(const std::string& stem, int frameIndex, int& outW, int& outH);
 
+// Query GL texture and geometry for a GP frame to allow custom rendering (tinting, shadows).
+// Returns false if asset is missing. Outputs texture id and frame size in pixels, plus anchor shift (dx, dy)
+// that should be subtracted from (x,y) when drawing.
+bool query_texture_gp(const std::string& stem, int frameIndex, unsigned int& outTex,
+                      int& outW, int& outH, int& outDx, int& outDy, int paletteId = 0);
+
 } // namespace legacy::sprite_cache

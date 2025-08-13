@@ -13,6 +13,12 @@ extern int menu_x_off;
 extern int menu_y_off;
 extern int window_mode; // 0 windowed, 1 fullscreen (placeholder)
 
+// Camera offsets for world rendering compatibility (tile and pixel offsets)
+extern int cam_tile_x;
+extern int cam_tile_y;
+extern int cam_pix_x;
+extern int cam_pix_y;
+
 // Hook for engine to update sizes
 void set_framebuffer_size(int width, int height);
 

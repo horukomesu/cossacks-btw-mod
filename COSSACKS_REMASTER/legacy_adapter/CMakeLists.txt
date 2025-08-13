@@ -1,6 +1,7 @@
 add_library(legacy_adapter STATIC
     src/Fastdraw.cpp
     src/GP_Draw.cpp
+    src/RLC_compat.cpp
     src/Ddini.cpp
     src/Time_compat.cpp
     src/gfile_compat.cpp
@@ -18,6 +19,12 @@ add_library(legacy_adapter STATIC
     src/Palette_compat.cpp
     src/Fog_compat.cpp
     src/Sound_compat.cpp
+    src/UnitAssets_compat.cpp
+    src/UnitNewmon_compat.cpp
+    src/Path_compat.cpp
+    src/MapState_compat.cpp
+    src/Water_compat.cpp
+    src/ScenePostInit_compat.cpp
 )
 
 target_include_directories(legacy_adapter
@@ -27,6 +34,7 @@ target_include_directories(legacy_adapter
         ${CMAKE_SOURCE_DIR}/resource_io/include
         ${CMAKE_SOURCE_DIR}/engine_core/include
         ${CMAKE_SOURCE_DIR}/audio_core/include
+        ${CMAKE_SOURCE_DIR}/world_render/include
 )
 
 find_package(glfw3 CONFIG REQUIRED)
@@ -34,11 +42,11 @@ find_package(glfw3 CONFIG REQUIRED)
 # Link against engine_core (for window accessor) and OpenGL deps for headers
 if (WIN32)
     target_link_libraries(legacy_adapter PRIVATE
-        engine_core audio_core glfw glad_gl_core_33
+        engine_core resource_io audio_core world_render game_logic glfw glad_gl_core_33
         opengl32)
 else()
     find_package(OpenGL REQUIRED)
-    target_link_libraries(legacy_adapter PRIVATE engine_core audio_core glfw glad_gl_core_33 OpenGL::GL)
+    target_link_libraries(legacy_adapter PRIVATE engine_core resource_io audio_core world_render game_logic glfw glad_gl_core_33 OpenGL::GL)
 endif()
 
 if(MSVC)
